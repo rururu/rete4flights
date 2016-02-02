@@ -1,4 +1,4 @@
-# rete4flight
+# rete4flights
 
 Air traffic control system - a test example for the rete4frames expert system shell.
 
