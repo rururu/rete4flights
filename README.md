@@ -1,10 +1,12 @@
 # rete4flight
 
-A ClojureScript app to ... well, that part is up to you.
+Air traffic control system - a test example for the rete4frames expert system shell.
 
-## Contents
+![screenshot](screenshot.jpg)
 
-* `resources` The assets
-* `src/cljs` The client-side code
-* `src/clj` The server-side code
+## Usage
+
+```
+lein run
+```
 # rete4flights
