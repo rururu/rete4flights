@@ -152,35 +152,6 @@
   ;;(println [:PIE val])
   (put! EVT-CHN val))
 
-(defn put-on-map [id sta]
-  (if-let [dat (get (:all @FRS) id)]
-    (let [[lat lon] (coord dat)]
-      (pump-in-evt {:event :create-mapob
-                    :id id
-                    :callsign (callsign dat)
-                    :lat lat
-                    :lon lon
-                    :crs (course dat)
-                    :spd (speed dat)
-                    :alt (altitude dat)
-                    :state sta}))))
-
-(defn put-off-map [id]
-  (pump-in-evt {:event :delete-mapob :id id}))
-
-(defn pom-and-link [id1 id2 dmin tmin]
-  (let [cs1 (callsign id1)
-        cs2 (callsign id2)]
-    (put-on-map id1 "INTERSECT")
-    (put-on-map id2 "INTERSECT")
-    (pump-in-evt {:event :add-link
-                  :ids [id1 id2]
-                  :options {:weight 4
-                            :title (str cs1 " - " cs2)
-                            :color "red"
-                            :dmin dmin
-                            :tmin tmin}})))
-
 (defn repeater [task timo]
   "Channel that repeats task (function call) forever"
   (go (while true
@@ -209,7 +180,7 @@
 
 (defn watch-all []
   (let [his (ngen)
-        [n s w e] @BBX
+        [n s w e c] @BBX
         nf (assert-visible n s w e his)]
     (println (str " - Flights in BBX: " nf))
     (rete/assert-frame ['History
@@ -223,8 +194,9 @@
         s (params :s)
         w (params :w)
         e (params :e)
+        c (params :c)
         obbx @BBX]
-    (reset! BBX [n s w e])
+    (reset! BBX [n s w e c])
     (println "Clear all data.")
     (clear)
     (println (str "Start expert system from file: " ES-FILE))
@@ -309,6 +281,12 @@
                     :time 30000}))
     ""))
 
+(defn follow-id [params]
+  (println (str "Follow: " params)))
+
+(defn stopfollow-id [params]
+  (println (str "StopFollow: " params)))
+
 (defroutes app-routes
   (GET "/" [] (index-page))
   (GET "/events/" [] (events))
@@ -317,6 +295,8 @@
   (GET "/intersect/" [] (intersect))
   (GET "/info/" [& params] (info-id params))
   (GET "/trail/" [& params] (trail-id params))
+  (GET "/follow/" [& params] (follow-id params))
+  (GET "/stopfollow/" [& params] (stopfollow-id params))
   (route/files "/" (do (println [:ROOT-FILES ROOT]) {:root ROOT}))
   (route/resources "/")
   (route/not-found "Not Found"))

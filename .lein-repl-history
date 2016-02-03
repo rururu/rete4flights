@@ -1,0 +1,5 @@
+(start-server)
+(pump-in-evt {:event :set-map-view :lat 60.0 :lon 30.0})
+(pump-in-evt {:event :set-map-view :lat 50.0 :lon 8.0})
+(pump-in-evt {:event :set-map-view :lat 40.8 :lon -74.0})
+(start-server)

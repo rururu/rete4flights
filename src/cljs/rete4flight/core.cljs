@@ -1,7 +1,6 @@
 (ns rete4flight.core
   (:require
     [cljs.core.async :as async :refer [<! >! chan put! timeout close!]]
-    [rete4flight.geomath :as geo]
     [cognitect.transit :as t]
     [goog.string :as gstring]
     [goog.string.format]
@@ -12,6 +11,8 @@
 
 ;; ---------------------- General constants ------------------------------------
 
+(def pid180 (/ Math.PI 180)) ;; 1 degree in radians
+(def nmrad (/ Math.PI 10800)) ;; 1 nautical mile in radians
 (def chart (atom nil)) ;; chart object
 (def clock (atom 0.0)) ;; clock in hrs
 (def mapobs (atom {})) ;; map of all flights on chart
@@ -28,6 +29,8 @@
 (def URL-INT "http://localhost:3000/intersect/")
 (def URL-INF "http://localhost:3000/info/")
 (def URL-TRL "http://localhost:3000/trail/")
+(def URL-FLW "http://localhost:3000/follow/")
+(def URL-SFW "http://localhost:3000/stopfollow/")
 (def URL-OSM "http://{s}.tile.osm.org/{z}/{x}/{y}.png")
 (def URL-MQO "http://otile1.mqcdn.com/tiles/1.0.0/{type}/{z}/{x}/{y}.png")
 (def URL-ICO {"INTERSECT" "http://localhost:3000/img/redpln32.png"
@@ -79,6 +82,17 @@
         mk (-> js/L (.rotatedMarker pos opt))]
     mk))
 
+(defn spherical-between [phi1 lambda0 c az]
+  (let [cosphi1 (js/Math.cos phi1)
+        sinphi1 (js/Math.sin phi1)
+        cosaz (js/Math.cos az)
+        sinaz (js/Math.sin az)
+        sinc (js/Math.sin c)
+        cosc (js/Math.cos c)
+        phi2 (js/Math.asin (+ (* sinphi1 cosc) (* cosphi1 sinc cosaz)))
+        lam2 (+ (js/Math.atan2 (* sinc sinaz) (- (* cosphi1 cosc) (* sinphi1 sinc cosaz))) lambda0)]
+    [phi2 lam2]))
+
 (defn move [id]
   (if-let [mob (@mapobs id)]
     (let [rdh (mob :anc-rdh)]
@@ -89,9 +103,9 @@
               lam (mob :anc-lam)
               tim (- cur (mob :anc-clk))
               way (* rdh tim)
-              [phi2 lam2] (geo/spherica-between phi lam way dir)
-              lat (/ phi2 geo/pid180)
-              lon (/ lam2 geo/pid180)
+              [phi2 lam2] (spherical-between phi lam way dir)
+              lat (/ phi2 pid180)
+              lon (/ lam2 pid180)
               pos (js/L.LatLng. lat lon)
               mrk (mob :marker)]
           (.setLatLng mrk pos)
@@ -100,10 +114,10 @@
           (swap! mapobs assoc-in [id :anc-clk] cur))))))
 
 (defn set-anchor [id lat lon crs spd]
-  (swap! mapobs assoc-in [id :anc-phi] (* lat geo/pid180))
-  (swap! mapobs assoc-in [id :anc-lam] (* lon geo/pid180))
-  (swap! mapobs assoc-in [id :anc-dir] (* crs geo/pid180))
-  (swap! mapobs assoc-in [id :anc-rdh] (* spd geo/nmrad))
+  (swap! mapobs assoc-in [id :anc-phi] (* lat pid180))
+  (swap! mapobs assoc-in [id :anc-lam] (* lon pid180))
+  (swap! mapobs assoc-in [id :anc-dir] (* crs pid180))
+  (swap! mapobs assoc-in [id :anc-rdh] (* spd nmrad))
   (swap! mapobs assoc-in [id :anc-clk] @clock))
 
 (defn mapobPopup [id callsign alt lat lon crs spd sta]
@@ -116,10 +130,14 @@
        "<tr><td>course</td><td>" crs "</td></tr>"
        "<tr><td>speed</td><td>" spd "</td></tr>"
        "<tr><td>state</td><td>" sta "</td></tr>"
-       "<tr><td><input type='button' style='color:green' value='Info'
+       "<tr><td><input type='button' style='color:green' value='Inform'
                  onclick='rete4flight.core.info(\"" id "\")' ></td>
-            <td><input type='button' style='color:blue' value='Trail'
+            <td><input type='button' style='color:purple' value='Trail'
                  onclick='rete4flight.core.trail(\"" id "\")' ></td></tr>"
+       "<tr><td><input type='button' style='color:blue' value='Follow'
+                 onclick='rete4flight.core.follow(\"" id "\")' ></td>
+            <td><input type='button' style='color:red' value='Stop'
+                 onclick='rete4flight.core.stopfollow(\"" id "\")' ></td></tr>"
        "</table>"))
 
 (defn delete-mapob [id]
@@ -134,7 +152,7 @@
     (delete-mapob id))
   (let [mrk (create-marker lat lon sta)]
     (swap! mapobs assoc-in [id :marker] mrk)
-    (swap! mapobs assoc-in [id :radhrs] (* spd geo/nmrad))
+    (swap! mapobs assoc-in [id :radhrs] (* spd nmrad))
     (swap! mapobs assoc-in [id :altitude] alt)
     (.addTo mrk @chart)
     (set! (.. mrk -options -angle) crs)
@@ -146,6 +164,12 @@
 (defn clear-mapobs []
   (doseq [id (keys @mapobs)]
     (delete-mapob id)))
+
+(defn set-map-view [lat lon]
+  (let [cen (js/L.LatLng. lat lon)
+        zom (.getZoom @chart)]
+    (.setView @chart cen zom {})
+    (watch-visible)))
 
 ;;----------------------- Trail manipulation ------------------------
 
@@ -222,6 +246,10 @@
           lon (.-lng pos)]
       [lat lon])))
 
+(defn get-map-center []
+  (let [cen (.getCenter @chart)]
+    [(.-lat cen) (.-lng cen)]))
+
 (defn add-popup
   ([id html time]
     (let [[lat lon] (get-pos id)]
@@ -257,6 +285,8 @@
                     (and lat lon) (add-popup lat lon html time)))
       :add-trail (let [{:keys [id lla options time]} evt]
                    (add-trail id lla options time))
+      :set-map-view (let [{:keys [lat lon]} evt]
+                      (set-map-view lat lon))
       (println (str "Unknown event: " [event evt])))))
 
 (defn error-handler [{:keys [status status-text]}]
@@ -277,6 +307,16 @@
 
 (defn trail [id]
   (let [url (str URL-TRL "?id=" id)]
+    (GET url {:handler no-handler
+              :error-handler error-handler})))
+
+(defn follow [id]
+  (let [url (str URL-FLW "?id=" id)]
+    (GET url {:handler no-handler
+              :error-handler error-handler})))
+
+(defn stopfollow [id]
+  (let [url (str URL-SFW "?id=" id)]
     (GET url {:handler no-handler
               :error-handler error-handler})))
 
@@ -307,7 +347,8 @@
 
 (defn watch-visible []
   (let [[n s w e] (visible-map)
-        url (str URL-WVI "?n=" n "&s=" s "&w=" w "&e=" e)]
+        center (get-map-center)
+        url (str URL-WVI "?n=" n "&s=" s "&w=" w "&e=" e "&c=" center)]
     (clear-all)
     (GET url {:handler no-handler
               :error-handler error-handler})))
