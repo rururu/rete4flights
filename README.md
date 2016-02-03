@@ -4,9 +4,9 @@ Air traffic control system - a test example for the rete4frames expert system sh
 
 ![screenshot](screenshot.jpg)
 
-## Usage
+## Start
 
-1. Simplest start:
+1. Simple start:
 ```
 $ cd <..>/rete4flights
 $ lein run
@@ -30,7 +30,7 @@ And open address http://localhost:3000 in a browser.
 ## Usage
 
 First select in a "Commands" selector an item "Watch visible area". Then select an item "State of flights". This begins a process of collection and display information of flights in the visible area. Black icons means aircrafts on the ground, green ones - the descending aircrafts and blue -  the climbing. Subsequent changes or shifts of a window do not change of the area under control.
-To do this execute the "Watch visible area" command once more in needed place.
+To do this execute the "Watch visible area" command again in needed place.
 
 Command "Intersection" calculates aircrafts that intersect in 6 minutes on a distance less then 400 meters (altitude differense less than 10000 feet). If you click on a link between aircrafts you know accurate values.
 
