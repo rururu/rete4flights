@@ -7,7 +7,6 @@
             [compojure.route :as route]
             [cognitect.transit :as t]
             [clojure.core.async :as async :refer [chan alts!! put! <! go timeout]]
-            [rete4flight.calc :as calc]
             [org.httpkit.client :as client]
             [clj-json.core :as json]
             [rete.core :as rete])
