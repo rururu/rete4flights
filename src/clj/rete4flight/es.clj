@@ -2,7 +2,8 @@
   (Flight id latitude longitude course speed altitude N history state)
   (History moment memory)
   (Check status)
-  )
+  (Follow id))
+
  (rules
   (fl:MoveHistory
    1
@@ -44,6 +45,21 @@
    =>
    ;;(println [:DESCEND ?id])
    (modify ?fl state "DESCEND"))
+
+  (fl:FollowFlight
+   0
+   ?f (Follow id ?id)
+   (History moment ?now)
+   (Flight id ?id
+           latitude ?lat
+           longitude ?lon
+           history ?now)
+   =>
+   ;;(println [:FOLLOW ?id :CENTER ?lat ?lon])
+   (fl/set-map-view ?lat ?lon)
+   (fl/follow-flight ?id)
+   (retract ?f))
+
 
   (fl:CheckStateHere
    -1
@@ -224,6 +240,16 @@
                                    :title (str cs1 " - " cs2)
                                    :color "red"
                                    :dmin dmin
-                                   :tmin tmin}}))))
+                                   :tmin tmin}})))
+
+  (defn set-map-view [lat lon]
+    (core/pump-in-evt {:event :set-map-view
+                       :lat lat
+                       :lon lon}))
+
+  (defn follow-flight [id]
+    ;;(core/inform id)
+    (core/trail id)))
+
 
  (facts))

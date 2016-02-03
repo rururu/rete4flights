@@ -1,6 +1,7 @@
 # rete4flights
 
-Air traffic control system - a test example for the rete4frames expert system shell.
+Air traffic control system - a test example for the [rete4frames] (http://github.com/rururu/rete4frames) expert system shell.
+It uses [Flightradar24] (http://www.flightradar24.com) web service and [Leaflet] (http://leafletjs.com) JavaScript library.
 
 ![screenshot](screenshot.jpg)
 
@@ -29,12 +30,14 @@ And open address http://localhost:3000 in a browser.
 
 ## Usage
 
-First select in a "Commands" selector an item "Watch visible area". Then select an item "State of flights". This begins a process of collection and display information of flights in the visible area. Black icons means aircrafts on the ground, green ones - the descending aircrafts and blue -  the climbing. Subsequent changes or shifts of a window do not change of the area under control.
+First select in a "Commands" selector an item "Watch visible area". Then select an item "State of flights". This begins a process of collection and display information of flights in the visible area. Black icons means aircrafts on the ground, green ones are descending, blue ones are climbing and purple - on level flight. Subsequent changes or shifts of a window do not change of the area under control.
 To do this execute the "Watch visible area" command again in needed place.
 
 Command "Intersection" calculates aircrafts that intersect in 6 minutes on a distance less then 400 meters (altitude differense less than 10000 feet). If you click on a link between aircrafts you know accurate values.
 
-Click on an aircraft icon brings up a popup with general data of a flight and two buttons. Button "Inform" provides a popup with detailed information of the flight. Button "Trail" draws a current way of the aircraft.
+Click on an aircraft icon brings up a popup with general data of a flight and 4 buttons. Button "Inform" provides a popup with detailed information of the flight. Button "Trail" draws a current way of the aircraft. Button "Follow" starts moving of the visible area along this flight and periodically displays a trail of the flight. Button "Stop" ends up this moving.
+
+Expert system handling this process is in the file es.clj.
 
 Copyright and license
 ----

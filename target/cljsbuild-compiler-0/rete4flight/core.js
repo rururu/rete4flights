@@ -20,6 +20,7 @@ rete4flight.core.DLT_EVT = (1000);
 rete4flight.core.DLT_MOV = (200);
 rete4flight.core.DLT_LKS = (300);
 rete4flight.core.URL_EVT = "http://localhost:3000/events/";
+rete4flight.core.URL_NVI = "http://localhost:3000/new-visible/";
 rete4flight.core.URL_WVI = "http://localhost:3000/watch-visible/";
 rete4flight.core.URL_FLS = "http://localhost:3000/flight-states/";
 rete4flight.core.URL_INT = "http://localhost:3000/intersect/";
@@ -308,7 +309,7 @@ cljs.core.swap_BANG_.call(null,rete4flight.core.mapobs,cljs.core.assoc_in,new cl
 return cljs.core.swap_BANG_.call(null,rete4flight.core.mapobs,cljs.core.assoc_in,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [id,new cljs.core.Keyword(null,"anc-clk","anc-clk",-2031582930)], null),cljs.core.deref.call(null,rete4flight.core.clock));
 });
 rete4flight.core.mapobPopup = (function rete4flight$core$mapobPopup(id,callsign,alt,lat,lon,crs,spd,sta){
-return [cljs.core.str("<h3>"),cljs.core.str(callsign),cljs.core.str("</h3>"),cljs.core.str("<table>"),cljs.core.str("<tr><td>id</td><td>"),cljs.core.str(id),cljs.core.str("</td></tr>"),cljs.core.str("<tr><td>altitude</td><td>"),cljs.core.str(alt),cljs.core.str("</td></tr>"),cljs.core.str("<tr><td>latitude</td><td>"),cljs.core.str(lat),cljs.core.str("</td></tr>"),cljs.core.str("<tr><td>longitude</td><td>"),cljs.core.str(lon),cljs.core.str("</td></tr>"),cljs.core.str("<tr><td>course</td><td>"),cljs.core.str(crs),cljs.core.str("</td></tr>"),cljs.core.str("<tr><td>speed</td><td>"),cljs.core.str(spd),cljs.core.str("</td></tr>"),cljs.core.str("<tr><td>state</td><td>"),cljs.core.str(sta),cljs.core.str("</td></tr>"),cljs.core.str("<tr><td><input type='button' style='color:green' value='Inform'\n                 onclick='rete4flight.core.info(\""),cljs.core.str(id),cljs.core.str("\")' ></td>\n            <td><input type='button' style='color:purple' value='Trail'\n                 onclick='rete4flight.core.trail(\""),cljs.core.str(id),cljs.core.str("\")' ></td></tr>"),cljs.core.str("<tr><td><input type='button' style='color:blue' value='Follow'\n                 onclick='rete4flight.core.follow(\""),cljs.core.str(id),cljs.core.str("\")' ></td>\n            <td><input type='button' style='color:red' value='Stop'\n                 onclick='rete4flight.core.stopfollow(\""),cljs.core.str(id),cljs.core.str("\")' ></td></tr>"),cljs.core.str("</table>")].join('');
+return [cljs.core.str("<h3>"),cljs.core.str(callsign),cljs.core.str("</h3>"),cljs.core.str("<table>"),cljs.core.str("<tr><td>id</td><td>"),cljs.core.str(id),cljs.core.str("</td></tr>"),cljs.core.str("<tr><td>altitude</td><td>"),cljs.core.str(alt),cljs.core.str("</td></tr>"),cljs.core.str("<tr><td>latitude</td><td>"),cljs.core.str(lat),cljs.core.str("</td></tr>"),cljs.core.str("<tr><td>longitude</td><td>"),cljs.core.str(lon),cljs.core.str("</td></tr>"),cljs.core.str("<tr><td>course</td><td>"),cljs.core.str(crs),cljs.core.str("</td></tr>"),cljs.core.str("<tr><td>speed</td><td>"),cljs.core.str(spd),cljs.core.str("</td></tr>"),cljs.core.str("<tr><td>state</td><td>"),cljs.core.str(sta),cljs.core.str("</td></tr>"),cljs.core.str("<tr><td><input type='button' style='color:green' value='Inform'\n                 onclick='rete4flight.core.info(\""),cljs.core.str(id),cljs.core.str("\")' ></td>\n            <td><input type='button' style='color:purple' value='Trail'\n                 onclick='rete4flight.core.trail(\""),cljs.core.str(id),cljs.core.str("\")' ></td></tr>"),cljs.core.str("<tr><td><input type='button' style='color:blue' value='Follow'\n                 onclick='rete4flight.core.follow(\""),cljs.core.str(id),cljs.core.str("\")' ></td>\n            <td><input type='button' style='color:red' value='Stop'\n                 onclick='rete4flight.core.stopfollow()' ></td></tr>"),cljs.core.str("</table>")].join('');
 });
 rete4flight.core.delete_mapob = (function rete4flight$core$delete_mapob(id){
 var temp__4657__auto__ = cljs.core.deref.call(null,rete4flight.core.mapobs).call(null,id);
@@ -409,13 +410,6 @@ return null;
 }
 break;
 }
-});
-rete4flight.core.set_map_view = (function rete4flight$core$set_map_view(lat,lon){
-var cen = (new L.LatLng(lat,lon));
-var zom = cljs.core.deref.call(null,rete4flight.core.chart).getZoom();
-cljs.core.deref.call(null,rete4flight.core.chart).setView(cen,zom,cljs.core.PersistentArrayMap.EMPTY);
-
-return rete4flight.core.watch_visible.call(null);
 });
 rete4flight.core.add_trail = (function rete4flight$core$add_trail(id,lla,options,time){
 var ops = cljs.core.clj__GT_js.call(null,options);
@@ -824,10 +818,6 @@ return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMP
 return null;
 }
 });
-rete4flight.core.get_map_center = (function rete4flight$core$get_map_center(){
-var cen = cljs.core.deref.call(null,rete4flight.core.chart).getCenter();
-return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [cen.lat,cen.lng], null);
-});
 rete4flight.core.add_popup = (function rete4flight$core$add_popup(var_args){
 var args12483 = [];
 var len__7214__auto___12503 = arguments.length;
@@ -976,6 +966,13 @@ return null;
 });
 
 rete4flight.core.add_popup.cljs$lang$maxFixedArity = 4;
+rete4flight.core.set_map_view = (function rete4flight$core$set_map_view(lat,lon){
+var cen = (new L.LatLng(lat,lon));
+var zom = cljs.core.deref.call(null,rete4flight.core.chart).getZoom();
+cljs.core.deref.call(null,rete4flight.core.chart).setView(cen,zom,cljs.core.PersistentArrayMap.EMPTY);
+
+return rete4flight.core.new_visible.call(null);
+});
 rete4flight.core.event_handler = (function rete4flight$core$event_handler(response){
 var seq__12551 = cljs.core.seq.call(null,rete4flight.core.read_transit.call(null,response));
 var chunk__12552 = null;
@@ -1238,9 +1235,8 @@ rete4flight.core.follow = (function rete4flight$core$follow(id){
 var url = [cljs.core.str(rete4flight.core.URL_FLW),cljs.core.str("?id="),cljs.core.str(id)].join('');
 return ajax.core.GET.call(null,url,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
 });
-rete4flight.core.stopfollow = (function rete4flight$core$stopfollow(id){
-var url = [cljs.core.str(rete4flight.core.URL_SFW),cljs.core.str("?id="),cljs.core.str(id)].join('');
-return ajax.core.GET.call(null,url,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
+rete4flight.core.stopfollow = (function rete4flight$core$stopfollow(){
+return ajax.core.GET.call(null,rete4flight.core.URL_SFW,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
 });
 rete4flight.core.COMMANDS = "<select onchange='javascript:rete4flight.core.commands(this.value)'>\n  \t\t\t<option value='commands'>Commands</option>\n  \t\t\t<option value='watch-visible'>Watch visible area</option>\n  \t\t\t<option value='flight-states'>State of flights</option>\n  \t\t\t<option value='intersect'>Intersections</option>\n  \t\t\t<option value='clear'>Clear</option>\n\t\t</select>";
 rete4flight.core.PARAMETERS = "<input type='text' id='params' style='width:240px'>";
@@ -1253,12 +1249,26 @@ rete4flight.core.visible_map = (function rete4flight$core$visible_map(){
 var bnd = cljs.core.deref.call(null,rete4flight.core.chart).getBounds();
 return new cljs.core.PersistentVector(null, 4, 5, cljs.core.PersistentVector.EMPTY_NODE, [bnd.getNorth(),bnd.getSouth(),bnd.getWest(),bnd.getEast()], null);
 });
-rete4flight.core.watch_visible = (function rete4flight$core$watch_visible(){
+rete4flight.core.get_map_center = (function rete4flight$core$get_map_center(){
+var cen = cljs.core.deref.call(null,rete4flight.core.chart).getCenter();
+return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [cen.lat,cen.lng], null);
+});
+rete4flight.core.new_visible = (function rete4flight$core$new_visible(){
 var vec__12689 = rete4flight.core.visible_map.call(null);
 var n = cljs.core.nth.call(null,vec__12689,(0),null);
 var s = cljs.core.nth.call(null,vec__12689,(1),null);
 var w = cljs.core.nth.call(null,vec__12689,(2),null);
 var e = cljs.core.nth.call(null,vec__12689,(3),null);
+var center = rete4flight.core.get_map_center.call(null);
+var url = [cljs.core.str(rete4flight.core.URL_NVI),cljs.core.str("?n="),cljs.core.str(n),cljs.core.str("&s="),cljs.core.str(s),cljs.core.str("&w="),cljs.core.str(w),cljs.core.str("&e="),cljs.core.str(e),cljs.core.str("&c="),cljs.core.str(center)].join('');
+return ajax.core.GET.call(null,url,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
+});
+rete4flight.core.watch_visible = (function rete4flight$core$watch_visible(){
+var vec__12691 = rete4flight.core.visible_map.call(null);
+var n = cljs.core.nth.call(null,vec__12691,(0),null);
+var s = cljs.core.nth.call(null,vec__12691,(1),null);
+var w = cljs.core.nth.call(null,vec__12691,(2),null);
+var e = cljs.core.nth.call(null,vec__12691,(3),null);
 var center = rete4flight.core.get_map_center.call(null);
 var url = [cljs.core.str(rete4flight.core.URL_WVI),cljs.core.str("?n="),cljs.core.str(n),cljs.core.str("&s="),cljs.core.str(s),cljs.core.str("&w="),cljs.core.str(w),cljs.core.str("&e="),cljs.core.str(e),cljs.core.str("&c="),cljs.core.str(center)].join('');
 rete4flight.core.clear_all.call(null);
@@ -1272,21 +1282,21 @@ rete4flight.core.intersect = (function rete4flight$core$intersect(){
 return ajax.core.GET.call(null,rete4flight.core.URL_INT,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
 });
 rete4flight.core.commands = (function rete4flight$core$commands(func){
-var pred__12693_12696 = cljs.core._EQ_;
-var expr__12694_12697 = func;
-if(cljs.core.truth_(pred__12693_12696.call(null,"watch-visible",expr__12694_12697))){
+var pred__12695_12698 = cljs.core._EQ_;
+var expr__12696_12699 = func;
+if(cljs.core.truth_(pred__12695_12698.call(null,"watch-visible",expr__12696_12699))){
 rete4flight.core.watch_visible.call(null);
 } else {
-if(cljs.core.truth_(pred__12693_12696.call(null,"flight-states",expr__12694_12697))){
+if(cljs.core.truth_(pred__12695_12698.call(null,"flight-states",expr__12696_12699))){
 rete4flight.core.flight_states.call(null);
 } else {
-if(cljs.core.truth_(pred__12693_12696.call(null,"intersect",expr__12694_12697))){
+if(cljs.core.truth_(pred__12695_12698.call(null,"intersect",expr__12696_12699))){
 rete4flight.core.intersect.call(null);
 } else {
-if(cljs.core.truth_(pred__12693_12696.call(null,"clear",expr__12694_12697))){
+if(cljs.core.truth_(pred__12695_12698.call(null,"clear",expr__12696_12699))){
 rete4flight.core.clear_all.call(null);
 } else {
-throw (new Error([cljs.core.str("No matching clause: "),cljs.core.str(expr__12694_12697)].join('')));
+throw (new Error([cljs.core.str("No matching clause: "),cljs.core.str(expr__12696_12699)].join('')));
 }
 }
 }

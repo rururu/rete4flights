@@ -25,6 +25,8 @@
 (def POP-DEL 30000) ;; popup delay
 (def HIS-MEM 3) ;; number of remembered watching intervals (30 sec memory)
 (def REP-FLG-STA (atom nil)) ;; flight state checking repetition flag
+(def FOLLOW-ID (atom nil)) ;; id of followed flight
+(def FOLW-INTL 40000) ;; following interval (40 sec)
 
 (defonce FRS (atom {:balurl "http://www.flightradar24.com/balance.json"
                     :allpath "/zones/fcgi/feed.json"
@@ -188,6 +190,17 @@
                         'memory HIS-MEM])
     (rete/fire)))
 
+(defn new-visible [params]
+  (when @BBX
+    (println (str "New visible area: " params))
+    (let [n (params :n)
+          s (params :s)
+          w (params :w)
+          e (params :e)
+          c (params :c)]
+      (reset! BBX [n s w e c])))
+  "")
+
 (defn watch-visible [params]
   (println (str "Watch visible area: " params))
   (let [n (params :n)
@@ -237,66 +250,85 @@
         rows (apply str rows)]
     (str head itag "<table>" rows "</table>")))
 
+(defn inform [id]
+  (println (str "Info: " id))
+  (if-let [inf (info id)]
+    (let [cal (callsign id)
+          img (inf "image")
+          dat (dissoc inf
+                      "trail"
+                      "copyright_large"
+                      "imagesource"
+                      "image"
+                      "imagelink"
+                      "snapshot_id"
+                      "airline_url"
+                      "copyright"
+                      "imagelink_large"
+                      "first_timestamp"
+                      "image_large"
+                      "from_tz_code"
+                      "from_tz_offset"
+                      "from_tz_name"
+                      "to_tz_code"
+                      "to_tz_offset"
+                      "to_tz_name"
+                      )
+          html (make-info-html cal img dat)]
+      (pump-in-evt {:event :add-popup
+                    :id id
+                    :html html
+                    :time POP-DEL})))
+  "")
+
 (defn info-id [params]
-  (println (str "Info: " params))
-  (let [id (params :id)]
-    (if-let [inf (info id)]
-      (let [cal (callsign id)
-            img (inf "image")
-            dat (dissoc inf
-                        "trail"
-                        "copyright_large"
-                        "imagesource"
-                        "image"
-                        "imagelink"
-                        "snapshot_id"
-                        "airline_url"
-                        "copyright"
-                        "imagelink_large"
-                        "first_timestamp"
-                        "image_large"
-                        "from_tz_code"
-                        "from_tz_offset"
-                        "from_tz_name"
-                        "to_tz_code"
-                        "to_tz_offset"
-                        "to_tz_name"
-                        )
-            html (make-info-html cal img dat)]
-        (pump-in-evt {:event :add-popup
-                      :id id
-                      :html html
-                      :time POP-DEL})))
-    ""))
+  (inform (params :id)))
+
+
+(defn trail [id]
+  (println (str "Trail: " id))
+  (if-let [inf (info id)]
+    (pump-in-evt {:event :add-trail
+                  :id id
+                  :lla (inf "trail")
+                  :options {:weight 3
+                            :color "purple"}
+                  :time 30000}))
+  "")
 
 (defn trail-id [params]
-  (println (str "Trail: " params))
-  (let [id (params :id)]
-    (if-let [inf (info id)]
-      (pump-in-evt {:event :add-trail
-                    :id id
-                    :lla (inf "trail")
-                    :options {:weight 3
-                              :color "purple"}
-                    :time 30000}))
-    ""))
+  (trail (params :id)))
+
+(defn follow-flight []
+  (let [id @FOLLOW-ID]
+    (when (not= id "$$$$")
+      (rete/assert-frame ['Follow 'id id])
+      (rete/fire))))
 
 (defn follow-id [params]
-  (println (str "Follow: " params)))
+  (println (str "Follow: " params))
+  (let [ofid @FOLLOW-ID]
+    (reset! FOLLOW-ID (params :id))
+    (when (nil? ofid)
+      (println "Start (follow-flight)..")
+      (repeater #(follow-flight) FOLW-INTL)))
+    "")
 
-(defn stopfollow-id [params]
-  (println (str "StopFollow: " params)))
+(defn stopfollow []
+  (println "StopFollow.")
+  (reset! FOLLOW-ID "$$$$"))
 
 (defroutes app-routes
   (GET "/" [] (index-page))
   (GET "/events/" [] (events))
+  (GET "/new-visible/" [& params] (new-visible params))
   (GET "/watch-visible/" [& params] (watch-visible params))
   (GET "/flight-states/" [] (flight-states))
   (GET "/intersect/" [] (intersect))
   (GET "/info/" [& params] (info-id params))
   (GET "/trail/" [& params] (trail-id params))
   (GET "/follow/" [& params] (follow-id params))
-  (GET "/stopfollow/" [& params] (stopfollow-id params))
+  (GET "/stopfollow/" [] (stopfollow))
   (route/files "/" (do (println [:ROOT-FILES ROOT]) {:root ROOT}))
   (route/resources "/")
   (route/not-found "Not Found"))

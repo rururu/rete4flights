@@ -24,6 +24,7 @@
 (def DLT-MOV 200) ;; move flight every 200 msec (5 times per sec)
 (def DLT-LKS 300) ;; update links every 300 msec (3 times per sec)
 (def URL-EVT "http://localhost:3000/events/")
+(def URL-NVI "http://localhost:3000/new-visible/")
 (def URL-WVI "http://localhost:3000/watch-visible/")
 (def URL-FLS "http://localhost:3000/flight-states/")
 (def URL-INT "http://localhost:3000/intersect/")
@@ -137,7 +138,7 @@
        "<tr><td><input type='button' style='color:blue' value='Follow'
                  onclick='rete4flight.core.follow(\"" id "\")' ></td>
             <td><input type='button' style='color:red' value='Stop'
-                 onclick='rete4flight.core.stopfollow(\"" id "\")' ></td></tr>"
+                 onclick='rete4flight.core.stopfollow()' ></td></tr>"
        "</table>"))
 
 (defn delete-mapob [id]
@@ -164,12 +165,6 @@
 (defn clear-mapobs []
   (doseq [id (keys @mapobs)]
     (delete-mapob id)))
-
-(defn set-map-view [lat lon]
-  (let [cen (js/L.LatLng. lat lon)
-        zom (.getZoom @chart)]
-    (.setView @chart cen zom {})
-    (watch-visible)))
 
 ;;----------------------- Trail manipulation ------------------------
 
@@ -246,10 +241,6 @@
           lon (.-lng pos)]
       [lat lon])))
 
-(defn get-map-center []
-  (let [cen (.getCenter @chart)]
-    [(.-lat cen) (.-lng cen)]))
-
 (defn add-popup
   ([id html time]
     (let [[lat lon] (get-pos id)]
@@ -262,6 +253,14 @@
       (if (> time 0)
         (go (<! (timeout time))
             (.removeLayer @chart pop))))))
+
+(declare new-visible)
+
+(defn set-map-view [lat lon]
+  (let [cen (js/L.LatLng. lat lon)
+        zom (.getZoom @chart)]
+    (.setView @chart cen zom {})
+    (new-visible)))
 
 ;; ------------------------ Event handler ---------------------------
 
@@ -315,10 +314,9 @@
     (GET url {:handler no-handler
               :error-handler error-handler})))
 
-(defn stopfollow [id]
-  (let [url (str URL-SFW "?id=" id)]
-    (GET url {:handler no-handler
-              :error-handler error-handler})))
+(defn stopfollow []
+  (GET URL-SFW {:handler no-handler
+              :error-handler error-handler}))
 
 ;; -------------------------- Commands -------------------------------
 
@@ -344,6 +342,17 @@
      (.getSouth bnd)
      (.getWest bnd)
      (.getEast bnd)]))
+
+(defn get-map-center []
+  (let [cen (.getCenter @chart)]
+    [(.-lat cen) (.-lng cen)]))
+
+(defn new-visible []
+  (let [[n s w e] (visible-map)
+        center (get-map-center)
+        url (str URL-NVI "?n=" n "&s=" s "&w=" w "&e=" e "&c=" center)]
+    (GET url {:handler no-handler
+              :error-handler error-handler})))
 
 (defn watch-visible []
   (let [[n s w e] (visible-map)
