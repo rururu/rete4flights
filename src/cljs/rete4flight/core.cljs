@@ -13,16 +13,18 @@
 
 (def pid180 (/ Math.PI 180)) ;; 1 degree in radians
 (def nmrad (/ Math.PI 10800)) ;; 1 nautical mile in radians
-(def chart (atom nil)) ;; chart object
-(def clock (atom 0.0)) ;; clock in hrs
-(def mapobs (atom {})) ;; map of all flights on chart
-(def links (atom {})) ;; map of all links on chart
-(def trails (atom {})) ;; map of all trails on chart
+(def chart (volatile! nil)) ;; chart object
+(def clock (volatile! 0.0)) ;; clock in hrs
+(def mapobs (volatile! {})) ;; map of all flights on chart
+(def links (volatile! {})) ;; map of all links on chart
+(def trails (volatile! {})) ;; map of all trails on chart
 (def CLK-STP 100) ;; clock step 100 msec (0.1 sec)
 (def CLS-HRS (/ CLK-STP 3600000)) ;; clock step in hours
 (def DLT-EVT 1000) ;; check event queue from server every 1000 msec (1 sec)
 (def DLT-MOV 200) ;; move flight every 200 msec (5 times per sec)
 (def DLT-LKS 300) ;; update links every 300 msec (3 times per sec)
+(def REM-CAL (volatile! "")) ;; remote call
+(def URL-CAL "http://localhost:3000/call/")
 (def URL-EVT "http://localhost:3000/events/")
 (def URL-NVI "http://localhost:3000/new-visible/")
 (def URL-WVI "http://localhost:3000/watch-visible/")
@@ -32,6 +34,8 @@
 (def URL-TRL "http://localhost:3000/trail/")
 (def URL-FLW "http://localhost:3000/follow/")
 (def URL-SFW "http://localhost:3000/stopfollow/")
+(def URL-CNS "http://localhost:3000/contries/")
+(def URL-APS "http://localhost:3000/airports/")
 (def URL-OSM "http://{s}.tile.osm.org/{z}/{x}/{y}.png")
 (def URL-MQO "http://otile1.mqcdn.com/tiles/1.0.0/{type}/{z}/{x}/{y}.png")
 (def URL-ICO {"INTERSECT" "http://localhost:3000/img/redpln32.png"
@@ -68,7 +72,7 @@
   (t/write (t/writer :json) x))
 
 (defn clock-step []
-  (swap! clock + CLS-HRS))
+  (vswap! clock + CLS-HRS))
 
 (defn repeater [task timo]
   "Channel that repeats task (function call) forever"
@@ -110,16 +114,16 @@
               pos (js/L.LatLng. lat lon)
               mrk (mob :marker)]
           (.setLatLng mrk pos)
-          (swap! mapobs assoc-in [id :anc-phi] phi2)
-          (swap! mapobs assoc-in [id :anc-lam] lam2)
-          (swap! mapobs assoc-in [id :anc-clk] cur))))))
+          (vswap! mapobs assoc-in [id :anc-phi] phi2)
+          (vswap! mapobs assoc-in [id :anc-lam] lam2)
+          (vswap! mapobs assoc-in [id :anc-clk] cur))))))
 
 (defn set-anchor [id lat lon crs spd]
-  (swap! mapobs assoc-in [id :anc-phi] (* lat pid180))
-  (swap! mapobs assoc-in [id :anc-lam] (* lon pid180))
-  (swap! mapobs assoc-in [id :anc-dir] (* crs pid180))
-  (swap! mapobs assoc-in [id :anc-rdh] (* spd nmrad))
-  (swap! mapobs assoc-in [id :anc-clk] @clock))
+  (vswap! mapobs assoc-in [id :anc-phi] (* lat pid180))
+  (vswap! mapobs assoc-in [id :anc-lam] (* lon pid180))
+  (vswap! mapobs assoc-in [id :anc-dir] (* crs pid180))
+  (vswap! mapobs assoc-in [id :anc-rdh] (* spd nmrad))
+  (vswap! mapobs assoc-in [id :anc-clk] @clock))
 
 (defn mapobPopup [id callsign alt lat lon crs spd sta]
   (str "<h3>" callsign "</h3>"
@@ -146,20 +150,20 @@
     (if-let [mvr (mob :mover)]
       (close! mvr))
     (.removeLayer @chart (mob :marker))
-    (swap! mapobs dissoc id)))
+    (vswap! mapobs dissoc id)))
 
 (defn create-mapob [id callsign lat lon crs spd alt sta]
   (if (@mapobs id)
     (delete-mapob id))
   (let [mrk (create-marker lat lon sta)]
-    (swap! mapobs assoc-in [id :marker] mrk)
-    (swap! mapobs assoc-in [id :radhrs] (* spd nmrad))
-    (swap! mapobs assoc-in [id :altitude] alt)
+    (vswap! mapobs assoc-in [id :marker] mrk)
+    (vswap! mapobs assoc-in [id :radhrs] (* spd nmrad))
+    (vswap! mapobs assoc-in [id :altitude] alt)
     (.addTo mrk @chart)
     (set! (.. mrk -options -angle) crs)
     (.bindPopup mrk (mapobPopup id callsign alt lat lon crs spd sta))
     (set-anchor id lat lon crs spd)
-    (swap! mapobs assoc-in [id :mover]
+    (vswap! mapobs assoc-in [id :mover]
            (repeater #(move id) DLT-MOV))))
 
 (defn clear-mapobs []
@@ -174,13 +178,13 @@
         lle (clj->js llg)
         trl (js/L.polyline lle ops)]
     (.addLayer @chart trl)
-    (swap! trails assoc-in [id :id] id)
-    (swap! trails assoc-in [id :trail] trl)
-    (swap! trails assoc-in [id :options] options)
+    (vswap! trails assoc-in [id :id] id)
+    (vswap! trails assoc-in [id :trail] trl)
+    (vswap! trails assoc-in [id :options] options)
     (if (> time 0)
       (go (<! (timeout time))
           (.removeLayer @chart trl)
-          (swap! trails dissoc id)))))
+          (vswap! trails dissoc id)))))
 
 ;;----------------------- Links manipulation ------------------------
 
@@ -214,16 +218,16 @@
         lnk (js/L.polyline llg ops)]
     (.addLayer @chart lnk)
     (.bindPopup lnk (linkPopup ids options))
-    (swap! links assoc ids lnk)
+    (vswap! links assoc ids lnk)
     (if (> del 0)
       (go (<! (timeout del))
           (.removeLayer @chart lnk)
-          (swap! links dissoc ids)))))
+          (vswap! links dissoc ids)))))
 
 (defn delete-link [ids]
   (when-let [lnk (get @links ids)]
     (.removeLayer @chart lnk)
-    (swap! links dissoc ids)))
+    (vswap! links dissoc ids)))
 
 (defn shift-links []
   (doseq [[ids lnk] @links]
@@ -262,6 +266,15 @@
     (.setView @chart cen zom {})
     (new-visible)))
 
+(defn clear-dialog []
+  (set-html! "callsign" "")
+  (set-html! "hour" "")
+  (set-html! "minute" "")
+  (set-html! "from-country" "")
+  (set-html! "from-airport" "")
+  (set-html! "to-country" "")
+  (set-html! "to-airport" ""))
+
 ;; ------------------------ Event handler ---------------------------
 
 (defn event-handler [response]
@@ -278,6 +291,7 @@
       :delete-link (let [{:keys [ids]} evt]
                      (delete-link ids))
       :clear-links (clear-links)
+      :clear-dialog (clear-dialog)
       :add-popup (let [{:keys [id lat lon html time]} evt]
                    (cond
                     id (add-popup id html time)
@@ -318,19 +332,117 @@
   (GET URL-SFW {:handler no-handler
               :error-handler error-handler}))
 
+;; ---------------------- schedule flights ---------------------------
+
+(defn schedule []
+  (let [inp (str "<input type='text' id='callsign' style='width:100px' value='callsign'"
+                 " onchange='javascript:rete4flight.core.selcallsgn(this.value)'>")]
+    (set-html! "callsign" inp)
+    (vreset! REM-CAL "?func=schedule")))
+
+(defn sel-hour []
+  (let [slh (str "<select onchange='javascript:rete4flight.core.selhour(this.value)'>"
+                 "<option value='select'>hh</option>"
+                 (apply str
+                        (for [hour (range 24)]
+                          (str "<option value='" hour "'>" hour "</option>")))
+                 "</select>")]
+    (set-html! "hour" slh)))
+
+(defn sel-minute []
+  (let [slm (str "<select onchange='javascript:rete4flight.core.selmin(this.value)'>"
+                 "<option value='select'>mm</option>"
+                 (apply str
+                        (for [min (range 60)]
+                          (str "<option value='" min "'>" min "</option>")))
+                 "</select>")]
+    (set-html! "minute" slm)))
+
+(defn sel-from-country [contries]
+  (let [sel (str "<select onchange='javascript:rete4flight.core.selfromcnt(this.value)'>"
+                 "<option value='select'>from country</option>"
+                 (apply str
+                        (for [contry contries]
+                          (str "<option value='" contry "'>" contry "</option>")))
+                 "</select>")]
+    (set-html! "from-country" sel)))
+
+(defn sel-from-airport [airports]
+  (let [sel (str "<select onchange='javascript:rete4flight.core.selfromapt(this.value)'>"
+                 "<option value='select'>from airport</option>"
+                 (apply str
+                        (for [airport airports]
+                          (str "<option value='" airport "'>" airport "</option>")))
+                 "</select>")]
+    (set-html! "from-airport" sel)))
+
+;; ---------------------------- Move to Airport -------------------------------
+
+(defn sel-to-country [contries]
+  (let [sel (str "<select onchange='javascript:rete4flight.core.seltocnt(this.value)'>"
+                 "<option value='select'>to country</option>"
+                 (apply str
+                        (for [contry contries]
+                          (str "<option value='" contry "'>" contry "</option>")))
+                 "</select>")]
+    (set-html! "to-country" sel)))
+
+(defn move-to []
+  (vreset! REM-CAL "?func=move-to")
+  (sel-to-country [])
+  (GET URL-CNS {:handler (fn [r] (sel-to-country (read-transit r)))
+                :error-handler error-handler}))
+
+(defn sel-to-airport [airports]
+  (let [sel (str "<select onchange='javascript:rete4flight.core.seltoapt(this.value)'>"
+                 "<option value='select'>to airport</option>"
+                 (apply str
+                        (for [airport airports]
+                          (str "<option value='" airport "'>" airport "</option>")))
+                 "</select>")]
+    (set-html! "to-airport" sel)))
+
+(defn selcallsgn [csn]
+  (vswap! REM-CAL str "&callsign=" csn)
+  (sel-hour))
+
+(defn selhour [hour]
+  (vswap! REM-CAL str "&hour=" hour)
+  (sel-minute))
+
+(defn selmin [min]
+  (vswap! REM-CAL str "&minute=" min)
+  (sel-from-country [])
+  (GET URL-CNS {:handler (fn [r] (sel-from-country (read-transit r)))
+                :error-handler error-handler}))
+
+(defn selfromcnt [country]
+  (vswap! REM-CAL str "&from-country=" country)
+  (sel-from-airport [])
+  (let [url (str URL-APS "?contry=" country)]
+    (GET url {:handler (fn [r] (sel-from-airport (read-transit r)))
+              :error-handler error-handler})))
+
+(defn selfromapt [airport]
+  (vswap! REM-CAL str "&from-airport=" airport)
+  (sel-to-country [])
+  (GET URL-CNS {:handler (fn [r] (sel-to-country (read-transit r)))
+                :error-handler error-handler}))
+
+(defn seltocnt [country]
+  (vswap! REM-CAL str "&to-country=" country)
+  (sel-to-airport [])
+  (let [url (str URL-APS "?contry=" country)]
+    (GET url {:handler (fn [r] (sel-to-airport (read-transit r)))
+              :error-handler error-handler})))
+
+(declare remote-call)
+
+(defn seltoapt [airport]
+  (vswap! REM-CAL str "&to-airport=" airport)
+  (remote-call))
+
 ;; -------------------------- Commands -------------------------------
-
-(def COMMANDS
-  "<select onchange='javascript:rete4flight.core.commands(this.value)'>
-  			<option value='commands'>Commands</option>
-  			<option value='watch-visible'>Watch visible area</option>
-  			<option value='flight-states'>State of flights</option>
-  			<option value='intersect'>Intersections</option>
-  			<option value='clear'>Clear</option>
-		</select>")
-
-(def PARAMETERS
-  "<input type='text' id='params' style='width:240px'>")
 
 (defn clear-all []
   (clear-links)
@@ -370,13 +482,29 @@
   (GET URL-INT {:handler no-handler
                 :error-handler error-handler}))
 
+(def COMMANDS
+  "<select onchange='javascript:rete4flight.core.commands(this.value)'>
+  			<option value='commands'>Commands</option>
+  			<option value='watch-visible'>Watch visible area</option>
+  			<option value='flight-states'>State of flights</option>
+  			<option value='intersect'>Intersections</option>
+  			<option value='move-to'>Move to Airport</option>
+  			<option value='clear'>Clear</option>
+		</select>")
+
 (defn commands [func]
   (condp = func
     "watch-visible" (watch-visible)
     "flight-states" (flight-states)
     "intersect" (intersect)
-    "clear" (clear-all))
+    "clear" (clear-all)
+    "move-to" (move-to)
+    "schedule" (schedule))
   (set-html! "commands" COMMANDS))
+
+(defn remote-call []
+  (GET (str URL-CAL @REM-CAL) {:handler no-handler
+                              :error-handler error-handler}))
 
 ;; ------------------------ Initialization ----------------------------
 
@@ -397,9 +525,8 @@
     (.addTo ctrl m)
     (.on m "mousemove"
       (fn [e] (mouse-move (.. e -latlng -lat) (.. e -latlng -lng))))
-    (reset! chart m)
+    (vreset! chart m)
     (set-html! "commands" COMMANDS)
-    (set-html! "parameters" PARAMETERS)
     (repeater #(check-events) DLT-EVT)
     (repeater #(shift-links) DLT-LKS)
     (.setInterval js/window #(clock-step) CLK-STP)))

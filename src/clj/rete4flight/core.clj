@@ -14,25 +14,28 @@
 
 ;; ------------------------- Flightradar24 client ------------------------
 
+(def SERV (volatile! nil))
 (def PORT 3000) ;; server port
 (def ROOT (str (System/getProperty "user.dir") "/resources/public/"))
 (def EVT-CHN (chan)) ;; events channel
 (def ES-FILE "src/clj/rete4flight/es.clj")
-(def BBX (atom [])) ;; bounding box
+(def BBX (volatile! [])) ;; bounding box
 (def WTCH-INTL 10000) ;; watch interval (10 sec)
 (def STAT-INTL 20000) ;; flight state checking interval (20 sec)
 (def POP-DEL 30000) ;; popup delay
 (def HIS-MEM 3) ;; number of remembered watching intervals (30 sec memory)
-(def REP-FLG-STA (atom nil)) ;; flight state checking repetition flag
-(def FOLLOW-ID (atom nil)) ;; id of followed flight
+(def REP-FLG-STA (volatile! nil)) ;; flight state checking repetition flag
+(def FOLLOW-ID (volatile! nil)) ;; id of followed flight
 (def FOLW-INTL 40000) ;; following interval (40 sec)
 
-(defonce FRS (atom {:balurl "http://www.flightradar24.com/balance.json"
+(defonce FRS (volatile! {:balurl "http://www.flightradar24.com/balance.json"
+                    :apsurl "http://www.flightradar24.com/_json/airports.php"
                     :allpath "/zones/fcgi/feed.json"
                     :plnpath "/_external/planedata_json.1.3.php?f="
                     :allurl nil
                     :plnurl nil
                     :all nil
+                    :airports nil
                     :infos {}}))
 
 (defn balance []
@@ -40,8 +43,8 @@
         bal (json/parse-string bal)
         bal (sort-by second (seq bal))
         bal (ffirst bal)]
-    (swap! FRS assoc :allurl (str "http://" bal (:allpath @FRS)))
-    (swap! FRS assoc :plnurl (str "http://" bal (:plnpath @FRS)))))
+    (vswap! FRS assoc :allurl (str "http://" bal (:allpath @FRS)))
+    (vswap! FRS assoc :plnurl (str "http://" bal (:plnpath @FRS)))))
 
 (defn corr-dat [y]
   (filter #(vector? (second %)) y))
@@ -52,9 +55,27 @@
       ff
       (if-let [url (:allurl @FRS)]
         (let [ff (json/parse-string (:body @(client/get url)))]
-          (swap! FRS assoc :all ff)
+          (vswap! FRS assoc :all ff)
           ff)
         (do (balance) (all))))
+    (catch Exception e
+      )))
+
+(defn mk-airports [rows]
+  (reduce #(assoc %1
+             (get %2 "country")
+             (assoc (or (get %1 (get %2 "country")) {})
+               (get %2 "name") %2)) {} rows))
+
+(defn airports []
+  (try
+    (if-let [aps (:airports @FRS)]
+      aps
+      (if-let [url (:apsurl @FRS)]
+        (let [aps (json/parse-string (:body @(client/get url)))
+              aps (mk-airports (get aps "rows"))]
+          (vswap! FRS assoc :airports aps)
+          aps)))
     (catch Exception e
       )))
 
@@ -63,7 +84,7 @@
     (if-let [aurl (:allurl @FRS)]
       (let [burl (str aurl "?bounds=" n "," s "," w "," e)
             ff (json/parse-string (:body @(client/get burl)))]
-        (swap! FRS assoc :all ff)
+        (vswap! FRS assoc :all ff)
         ff)
       (do (balance) (bbx n s w e)))
     (catch Exception e
@@ -74,16 +95,16 @@
     inf
     (if-let [url (:plnurl @FRS)]
       (let [inf (json/parse-string (:body @(client/get (str url id))))]
-        (swap! FRS assoc-in [:infos id] inf)
+        (vswap! FRS assoc-in [:infos id] inf)
         inf)
       (do (balance) (info id)))))
 
 (defn clear []
-  (swap! FRS assoc :allurl nil)
-  (swap! FRS assoc :plnurl nil)
-  (swap! FRS assoc :all nil)
-  (swap! FRS assoc :infos {})
-  (swap! FRS assoc :regions {}))
+  (vswap! FRS assoc :allurl nil)
+  (vswap! FRS assoc :plnurl nil)
+  (vswap! FRS assoc :all nil)
+  (vswap! FRS assoc :infos {})
+  (vswap! FRS assoc :regions {}))
 
 (defn dat [iod]
   (if (string? iod) (get (:all @FRS) iod) iod))
@@ -118,8 +139,8 @@
     dat))
 
 (def ngen
-  (let [counter (atom -1)]
-    (fn [] (do (swap! counter inc) @counter))))
+  (let [counter (volatile! -1)]
+    (fn [] (do (vswap! counter inc) @counter))))
 
 (defn assert-visible [n s w e his]
   (let [ff (corr-dat (bbx n s w e))
@@ -197,7 +218,7 @@
           w (params :w)
           e (params :e)
           c (params :c)]
-      (reset! BBX [n s w e c])))
+      (vreset! BBX [n s w e c])))
   "")
 
 (defn watch-visible [params]
@@ -208,7 +229,7 @@
         e (params :e)
         c (params :c)
         obbx @BBX]
-    (reset! BBX [n s w e c])
+    (vreset! BBX [n s w e c])
     (println "Clear all data.")
     (clear)
     (println (str "Start expert system from file: " ES-FILE))
@@ -228,7 +249,7 @@
 
 (defn flight-states []
   (let [orfs @REP-FLG-STA]
-    (reset! REP-FLG-STA true)
+    (vreset! REP-FLG-STA true)
     (when (nil? orfs)
       (println "Start (check-states)..")
       (repeater #(check-states) STAT-INTL))
@@ -307,7 +328,7 @@
 (defn follow-id [params]
   (println (str "Follow: " params))
   (let [ofid @FOLLOW-ID]
-    (reset! FOLLOW-ID (params :id))
+    (vreset! FOLLOW-ID (params :id))
     (when (nil? ofid)
       (println "Start (follow-flight)..")
       (repeater #(follow-flight) FOLW-INTL)))
@@ -315,7 +336,49 @@
 
 (defn stopfollow []
   (println "StopFollow.")
-  (reset! FOLLOW-ID "$$$$"))
+  (vreset! FOLLOW-ID "$$$$"))
+
+(defn contries []
+  (if-let [aps (airports)]
+    (write-transit (sort (keys aps)))))
+
+(defn airports-for-country [params]
+  (if-let [aps (airports)]
+    (write-transit (sort (keys (aps (params :contry)))))))
+
+;; --------------------- Call Functions ---------------------
+
+(defn call [params]
+  (let [func (params :func)
+        func (symbol func)
+        func (ns-resolve (find-ns 'rete4flight.core) func)]
+    (func params))
+  "")
+
+(defn move-to [params]
+  (let [apt (get-in (:airports @FRS)
+                    [(params :to-country) (params :to-airport)])
+        lat (apt "lat")
+        lon (apt "lon")]
+    (println [:APT apt])
+    (println [:LAT lat :LON lon])
+    (pump-in-evt {:event :set-map-view
+                       :lat lat
+                       :lon lon})
+    (pump-in-evt {:event :clear-dialog})))
+
+(defn schedule [params]
+  (let [apts (:airports @FRS)
+        call (params :callsign)
+        hour (params :hour)
+        min  (params :minute)
+        fapt (get-in apts [(params :from-country) (params :from-airport)])
+        tapt (get-in apts [(params :to-country) (params :to-airport)])]
+    (println [:CALLSIGN call :HR hour :MIN min])
+    (println [:FROM fapt])
+    (println [:TO tapt])))
+
+;; --------------------- Routes -----------------------------
 
 (defroutes app-routes
   (GET "/" [] (index-page))
@@ -328,6 +391,9 @@
   (GET "/trail/" [& params] (trail-id params))
   (GET "/follow/" [& params] (follow-id params))
   (GET "/stopfollow/" [] (stopfollow))
+  (GET "/contries/" [] (contries))
+  (GET "/airports/" [& params] (airports-for-country params))
+  (GET "/call/" [& params] (call params))
   (route/files "/" (do (println [:ROOT-FILES ROOT]) {:root ROOT}))
   (route/resources "/")
   (route/not-found "Not Found"))
@@ -339,7 +405,12 @@
   ([]
     (start-server PORT))
   ([port]
-    (jetty/run-jetty app {:port port :join? false})))
+    (vreset! SERV (jetty/run-jetty app {:port port :join? false}))))
+
+(defn stop-server []
+  (when-let [serv @SERV]
+    (.stop serv)
+    (println "Server stopped!")))
 
 (defn open-in-browser!
   ([]

@@ -24,4 +24,10 @@
         :jar true}}}
   :aot [rete4flight.core]
   :main rete4flight.core
-  :ring {:handler rete4flight.core/app})
+  :ring {:handler rete4flight.core/app}
+  :repl-options {
+             ;; If nREPL takes too long to load it may timeout,
+             ;; increase this to wait longer before timing out.
+             ;; Defaults to 30000 (30 seconds)
+             :timeout 600000
+             })
