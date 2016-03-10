@@ -9,10 +9,11 @@
             [clojure.core.async :as async :refer [chan alts!! put! <! go timeout]]
             [org.httpkit.client :as client]
             [clj-json.core :as json]
-            [rete.core :as rete])
+            [rete.core :as rete]
+            [rete4flight.geo :as geo])
   (:gen-class))
 
-;; ------------------------- Flightradar24 client ------------------------
+;; ----------------------- Flightradar24 client ------------------------
 
 (def SERV (volatile! nil))
 (def PORT 3000) ;; server port
@@ -20,6 +21,7 @@
 (def EVT-CHN (chan)) ;; events channel
 (def ES-FILE "src/clj/rete4flight/es.clj")
 (def BBX (volatile! [])) ;; bounding box
+(def WTCH-FIRST (volatile! true)) ;; first swatch
 (def WTCH-INTL 10000) ;; watch interval (10 sec)
 (def STAT-INTL 20000) ;; flight state checking interval (20 sec)
 (def POP-DEL 30000) ;; popup delay
@@ -27,16 +29,27 @@
 (def REP-FLG-STA (volatile! nil)) ;; flight state checking repetition flag
 (def FOLLOW-ID (volatile! nil)) ;; id of followed flight
 (def FOLW-INTL 40000) ;; following interval (40 sec)
+(def MYFS-INTL 1000) ;; my flights simulation interval (1 sec)
+(def BNK-STP 4) ;; step of course in degrees while banking
 
 (defonce FRS (volatile! {:balurl "http://www.flightradar24.com/balance.json"
-                    :apsurl "http://www.flightradar24.com/_json/airports.php"
-                    :allpath "/zones/fcgi/feed.json"
-                    :plnpath "/_external/planedata_json.1.3.php?f="
-                    :allurl nil
-                    :plnurl nil
-                    :all nil
-                    :airports nil
-                    :infos {}}))
+                         :apsurl "http://www.flightradar24.com/_json/airports.php"
+                         :allpath "/zones/fcgi/feed.json"
+                         :plnpath "/_external/planedata_json.1.3.php?f="
+                         :allurl nil
+                         :plnurl nil
+                         :all nil
+                         :airports nil
+                         :infos {}}))
+
+(defonce MYFS (volatile! {:all nil
+                          :infos {}})) ;; my flights
+
+(defonce RUNWAYS (volatile! {"URE" 180 "LED" 287 "LHR" 90
+                             "TAY" 269 "HEL" 228 "FRA" 70 "KEF" 180
+                             "KDL" 147 "JFK" 301 "BOS" 200}))
+
+;; --------------------- Flightradar24 Client Functions ------------------
 
 (defn balance []
   (let [bal (:body @(client/get (:balurl @FRS)))
@@ -56,7 +69,7 @@
       (if-let [url (:allurl @FRS)]
         (let [ff (json/parse-string (:body @(client/get url)))]
           (vswap! FRS assoc :all ff)
-          ff)
+          (merge ff (:all @MYFS)))
         (do (balance) (all))))
     (catch Exception e
       )))
@@ -85,13 +98,14 @@
       (let [burl (str aurl "?bounds=" n "," s "," w "," e)
             ff (json/parse-string (:body @(client/get burl)))]
         (vswap! FRS assoc :all ff)
-        ff)
+        (merge ff (:all @MYFS)))
       (do (balance) (bbx n s w e)))
     (catch Exception e
       )))
 
 (defn info [id]
-  (if-let [inf (get-in [:infos id] @FRS)]
+  (if-let [inf (or (get (:infos @FRS) id)
+                   (get (:infos @MYFS) id))]
     inf
     (if-let [url (:plnurl @FRS)]
       (let [inf (json/parse-string (:body @(client/get (str url id))))]
@@ -104,26 +118,64 @@
   (vswap! FRS assoc :plnurl nil)
   (vswap! FRS assoc :all nil)
   (vswap! FRS assoc :infos {})
-  (vswap! FRS assoc :regions {}))
+  (vswap! FRS assoc :regions {})
+  (vswap! MYFS assoc :all nil)
+  (vswap! MYFS assoc :infos {}))
 
 (defn dat [iod]
-  (if (string? iod) (get (:all @FRS) iod) iod))
+  (if (string? iod)
+    (or (get (:all @FRS) iod)
+        (get (:all @MYFS) iod))
+    iod))
 
 (defn coord [iod]
   (let [dd (dat iod)]
     [(nth dd 1) (nth dd 2)]))
 
+(defn coord! [iod [lat lon]]
+  (-> (dat iod)
+      (assoc 1 lat)
+      (assoc 2 lon)))
+
 (defn course [iod]
   (nth (dat iod) 3))
+
+(defn course! [iod crs]
+  (assoc (dat iod) 3 crs))
 
 (defn speed [iod]
   (nth (dat iod) 5))
 
+(defn speed! [iod spd]
+  (assoc (dat iod) 5 spd))
+
 (defn altitude [iod]
   (nth (dat iod) 4))
 
+(defn altitude! [iod alt]
+  (assoc (dat iod) 4 alt))
+
 (defn callsign [iod]
   (nth (dat iod) 16))
+
+(defn callsign! [iod cls]
+  (assoc (dat iod) 16 cls))
+
+(defn set-param! [id param val]
+  (vswap! MYFS assoc-in [:all id]
+          (case param
+            :course (course! id val)
+            :coord (coord! id val)
+            :speed (speed! id val)
+            :altitude (altitude! id val)
+            val)))
+
+(defn set-course! [id crs]
+  (let [crs (cond
+             (>= crs 360) (- crs 360)
+             (< crs 0) (+ crs 360)
+             true crs)]
+    (set-param! id :course crs)))
 
 (defn by-call [cs]
   (let [aa (corr-dat (all))]
@@ -138,23 +190,27 @@
   (if-let [[id dat] (by-call cs)]
     dat))
 
-(def ngen
-  (let [counter (volatile! -1)]
-    (fn [] (do (vswap! counter inc) @counter))))
+(defn what-side [crs on-course]
+  (if (> on-course crs)
+    (if (< (- on-course crs) 180)
+      :right
+      :left)
+    (if (< (- crs on-course) 180)
+      :left
+      :right)))
 
 (defn assert-visible [n s w e his]
   (let [ff (corr-dat (bbx n s w e))
         nf (count ff)]
     (doseq [[id dat] ff]
-      (let [[lat lon] (coord dat)
+      (let [crd (coord dat)
             crs (course dat)
             spd (speed dat)
             alt (altitude dat)]
         (rete/assert-frame ['Flight
                             'id id
                             'N (Integer/parseInt id 16)
-                            'latitude  lat
-                            'longitude lon
+                            'coord crd
                             'course crs
                             'speed spd
                             'altitude alt
@@ -163,6 +219,8 @@
                                      "LEVEL"
                                      "GROUND")])))
     nf))
+
+;; -------------------- Channel Operations --------------------------
 
 (defn pump-out [chn]
   (loop [[bit ch] (alts!! [chn] :default :none) bits []]
@@ -174,11 +232,42 @@
   ;;(println [:PIE val])
   (put! EVT-CHN val))
 
+;; ------------------------- Repeaters -------------------------------
+
 (defn repeater [task timo]
   "Channel that repeats task (function call) forever"
   (go (while true
         (task)
         (<! (timeout timo)))))
+
+(defn bank [id on-course]
+  "Banking of my flight plane on new course"
+  (pump-in-evt {:event :bank :id id :on-course on-course})
+  (if-let [crs (course id)]
+    (if (not= crs on-course)
+      (let [side (what-side crs on-course)]
+        (go (loop [crs crs]
+              (if (< (Math/abs (- crs on-course)) BNK-STP)
+                (set-param! id :course on-course)
+                (do
+                  (if (= side :left)
+                    (set-course! id (- crs BNK-STP))
+                    (set-course! id (+ crs BNK-STP)))
+                  (<! (timeout MYFS-INTL))
+                  (recur (course id))))))))))
+
+(defn plane-move [id hours]
+  "Moving my flight plane on plane during period of time = hours"
+  (let [mihs (/ MYFS-INTL 3600000)]
+    (go (loop [millis (* hours 3600000)]
+          (when (> millis 0)
+            (if-let [spd (speed id)]
+              (if (> spd 0)
+                (set-param! id :coord (geo/future-pos (coord id) (course id) spd mihs))))
+            (<! (timeout MYFS-INTL))
+            (recur (- millis MYFS-INTL)))))))
+
+;; --------------------------------------------------------------------
 
 (defn write-transit [x]
   (let [baos (ByteArrayOutputStream.)
@@ -200,13 +289,17 @@
 (defn events []
   (write-transit (deref (future (pump-out EVT-CHN)))))
 
+(def mgen
+  (let [counter (volatile! -1)]
+    (fn [] (do (vswap! counter inc) @counter))))
+
 (defn watch-all []
-  (let [his (ngen)
+  (let [mom (mgen)
         [n s w e c] @BBX
-        nf (assert-visible n s w e his)]
-    (println (str " - Flights in BBX: " nf))
+        nf (assert-visible n s w e mom)]
+    ;;(println (str " - Flights in BBX: " nf))
     (rete/assert-frame ['History
-                        'moment his
+                        'moment mom
                         'memory HIS-MEM])
     (rete/fire)))
 
@@ -236,14 +329,15 @@
     (binding [*ns* *ns*]
       (rete/app "run" ES-FILE))
     (println (str "Assert visible flights."))
-    (when (empty? obbx)
+    (when @WTCH-FIRST
       (println "Start (watch-all)..")
-      (repeater #(watch-all) WTCH-INTL))
+      (repeater #(watch-all) WTCH-INTL)
+      (vreset! WTCH-FIRST false))
     ""))
 
 (defn check-states []
   (when @REP-FLG-STA
-    (println "Check state of flights.")
+    ;;(println "Check state of flights.")
     (rete/assert-frame ['Check 'status "STATE"])
     (rete/fire)))
 
@@ -367,6 +461,26 @@
                        :lon lon})
     (pump-in-evt {:event :clear-dialog})))
 
+(def ngen
+  (let [counter (volatile! 0)]
+    (fn [] (do (vswap! counter inc) @counter))))
+
+(defn add-my-flight [call crd crs spd alt]
+  (let [id (str "-" (Integer/toHexString (ngen)))
+        mf (->(vec (range 18))
+              (callsign! call)
+              (coord! crd)
+              (course! crs)
+              (speed! spd)
+              (altitude! alt))]
+    (vswap! MYFS assoc-in [:all id] mf)
+    id))
+
+(defn runway [iata]
+  (if-let [rw (@RUNWAYS iata)]
+    (int rw)
+    (int (rand 360)))) ;; random runway direction
+
 (defn schedule [params]
   (let [apts (:airports @FRS)
         call (params :callsign)
@@ -374,9 +488,35 @@
         min  (params :minute)
         fapt (get-in apts [(params :from-country) (params :from-airport)])
         tapt (get-in apts [(params :to-country) (params :to-airport)])]
-    (println [:CALLSIGN call :HR hour :MIN min])
-    (println [:FROM fapt])
-    (println [:TO tapt])))
+    (let [tim [hour min]
+          fcrd [(read-string (fapt "lat")) (read-string (fapt "lon"))]
+          tcrd [(read-string (tapt "lat")) (read-string (tapt "lon"))]
+          iatf (fapt "iata")
+          iatt (tapt "iata")
+          crs 0
+          spd 0
+          alt 0
+          from [iatf fcrd (runway iatf)] ;; takeoff direction
+          to   [iatt tcrd (runway iatt)] ;; landing direction
+          id (add-my-flight call fcrd crs spd alt)
+          hrs (+ (/ (geo/distance-nm fcrd tcrd) 455) 2)] ;; approximate time of flight
+      (plane-move id hrs)
+      (println [:SCHEDULE :CALLSIGN call :TIME tim :FROM from :TO to :HOURS hrs])
+      (rete/assert-frame ['Schedule 'id id 'time tim 'from from 'to to])
+      (pump-in-evt {:event :clear-dialog})
+      (vswap! MYFS assoc-in [:infos id]
+              {"from_iata" iatf
+               "from_country" (fapt "country")
+               "from_airport" (fapt "name")
+               "from_pos" fcrd
+               "to_iata" iatt
+               "to_country" (tapt "country")
+               "to_airport" (tapt "name")
+               "to_pos" tcrd
+               "flight" call
+               "airline" "My Airlines"
+               "departure" (str hour " : " min)
+               "image" (str "img/" (int  (rand 7)) ".jpg")}))))
 
 ;; --------------------- Routes -----------------------------
 
@@ -426,3 +566,6 @@
 (defn -main [& args]
   (start-server)
   (open-in-browser!))
+
+
+

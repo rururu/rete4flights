@@ -23,7 +23,8 @@
 (def DLT-EVT 1000) ;; check event queue from server every 1000 msec (1 sec)
 (def DLT-MOV 200) ;; move flight every 200 msec (5 times per sec)
 (def DLT-LKS 300) ;; update links every 300 msec (3 times per sec)
-(def REM-CAL (volatile! "")) ;; remote call
+(def REM-CAL (volatile! {})) ;; remote call params
+(def MYFS-INTL 1000) ;; my flights simulation interval (1 sec)
 (def URL-CAL "http://localhost:3000/call/")
 (def URL-EVT "http://localhost:3000/events/")
 (def URL-NVI "http://localhost:3000/new-visible/")
@@ -37,7 +38,10 @@
 (def URL-CNS "http://localhost:3000/contries/")
 (def URL-APS "http://localhost:3000/airports/")
 (def URL-OSM "http://{s}.tile.osm.org/{z}/{x}/{y}.png")
-(def URL-MQO "http://otile1.mqcdn.com/tiles/1.0.0/{type}/{z}/{x}/{y}.png")
+(def URL-GST "http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}")
+(def URL-GHB "http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}")
+(def URL-GTR "http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}")
+(def URL-GSA "http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}")
 (def URL-ICO {"INTERSECT" "http://localhost:3000/img/redpln32.png"
               "DESCEND" "http://localhost:3000/img/greenpln32.png"
               "CLIMB" "http://localhost:3000/img/bluepln32.png"
@@ -275,6 +279,40 @@
   (set-html! "to-country" "")
   (set-html! "to-airport" ""))
 
+(defn course [id]
+  (int (/ (get-in @mapobs [id :anc-dir]) pid180)))
+
+(defn set-course! [id crs]
+  (let [crs (cond
+             (>= crs 360) (- crs 360)
+             (< crs 0) (+ crs 360)
+             true crs)
+        dir (* crs pid180)
+        mrk (get-in @mapobs [id :marker])]
+    (vswap! mapobs assoc-in [id :anc-dir] dir)
+    (set! (.. mrk -options -angle) crs)))
+
+(defn bank [id on-course]
+  "Banking of my flight plane on new course"
+  (let [crs (course id)]
+    (if (not= crs on-course)
+      (let [side (if (> on-course crs)
+                   (if (< (- on-course crs) 180)
+                     :right
+                     :left)
+                   (if (< (- crs on-course) 180)
+                     :left
+                     :right))]
+        (go (loop [crs crs]
+              (if (< (Math/abs (- crs on-course)) 4)
+                (set-course! id on-course)
+                (do
+                  (if (= side :left)
+                    (set-course! id (- crs 4))
+                    (set-course! id (+ crs 4)))
+                  (<! (timeout MYFS-INTL))
+                  (recur (course id))))))))))
+
 ;; ------------------------ Event handler ---------------------------
 
 (defn event-handler [response]
@@ -300,6 +338,8 @@
                    (add-trail id lla options time))
       :set-map-view (let [{:keys [lat lon]} evt]
                       (set-map-view lat lon))
+      :bank (let [{:keys [id on-course]} evt]
+                   (bank id on-course))
       (println (str "Unknown event: " [event evt])))))
 
 (defn error-handler [{:keys [status status-text]}]
@@ -338,7 +378,7 @@
   (let [inp (str "<input type='text' id='callsign' style='width:100px' value='callsign'"
                  " onchange='javascript:rete4flight.core.selcallsgn(this.value)'>")]
     (set-html! "callsign" inp)
-    (vreset! REM-CAL "?func=schedule")))
+    (vreset! REM-CAL {"?func=" "schedule"})))
 
 (defn sel-hour []
   (let [slh (str "<select onchange='javascript:rete4flight.core.selhour(this.value)'>"
@@ -388,7 +428,7 @@
     (set-html! "to-country" sel)))
 
 (defn move-to []
-  (vreset! REM-CAL "?func=move-to")
+  (vreset! REM-CAL {"?func=" "move-to"})
   (sel-to-country [])
   (GET URL-CNS {:handler (fn [r] (sel-to-country (read-transit r)))
                 :error-handler error-handler}))
@@ -403,34 +443,34 @@
     (set-html! "to-airport" sel)))
 
 (defn selcallsgn [csn]
-  (vswap! REM-CAL str "&callsign=" csn)
+  (vswap! REM-CAL assoc "&callsign=" csn)
   (sel-hour))
 
 (defn selhour [hour]
-  (vswap! REM-CAL str "&hour=" hour)
+  (vswap! REM-CAL assoc "&hour=" hour)
   (sel-minute))
 
 (defn selmin [min]
-  (vswap! REM-CAL str "&minute=" min)
+  (vswap! REM-CAL assoc "&minute=" min)
   (sel-from-country [])
   (GET URL-CNS {:handler (fn [r] (sel-from-country (read-transit r)))
                 :error-handler error-handler}))
 
 (defn selfromcnt [country]
-  (vswap! REM-CAL str "&from-country=" country)
+  (vswap! REM-CAL assoc "&from-country=" country)
   (sel-from-airport [])
   (let [url (str URL-APS "?contry=" country)]
     (GET url {:handler (fn [r] (sel-from-airport (read-transit r)))
               :error-handler error-handler})))
 
 (defn selfromapt [airport]
-  (vswap! REM-CAL str "&from-airport=" airport)
+  (vswap! REM-CAL assoc "&from-airport=" airport)
   (sel-to-country [])
   (GET URL-CNS {:handler (fn [r] (sel-to-country (read-transit r)))
                 :error-handler error-handler}))
 
 (defn seltocnt [country]
-  (vswap! REM-CAL str "&to-country=" country)
+  (vswap! REM-CAL assoc "&to-country=" country)
   (sel-to-airport [])
   (let [url (str URL-APS "?contry=" country)]
     (GET url {:handler (fn [r] (sel-to-airport (read-transit r)))
@@ -439,7 +479,7 @@
 (declare remote-call)
 
 (defn seltoapt [airport]
-  (vswap! REM-CAL str "&to-airport=" airport)
+  (vswap! REM-CAL assoc "&to-airport=" airport)
   (remote-call))
 
 ;; -------------------------- Commands -------------------------------
@@ -489,6 +529,7 @@
   			<option value='flight-states'>State of flights</option>
   			<option value='intersect'>Intersections</option>
   			<option value='move-to'>Move to Airport</option>
+  			<option value='schedule'>Schedule Flight</option>
   			<option value='clear'>Clear</option>
 		</select>")
 
@@ -503,23 +544,44 @@
   (set-html! "commands" COMMANDS))
 
 (defn remote-call []
-  (GET (str URL-CAL @REM-CAL) {:handler no-handler
-                              :error-handler error-handler}))
+  (let [fkey "?func="]
+    (if-let [func (get @REM-CAL fkey)]
+      (let [head (str fkey func)
+            tail (for [[f k] (seq (dissoc @REM-CAL fkey))] (str f k))
+            plis (str head (apply str tail))]
+        (GET (str URL-CAL plis) {:handler no-handler
+                                  :error-handler error-handler})))))
 
 ;; ------------------------ Initialization ----------------------------
 
 (defn init []
   (let [m (-> js/L
             (.map "map")
-            (.setView (array 40.8, -74.0) 9))
+            (.setView (array 40.8, -74.0) 9)) ;; New York City
         tile1 (-> js/L (.tileLayer URL-OSM
                          #js{:maxZoom 16
-                             :attribution "OOGIS RL &copy;"}))
-        tile2 (-> js/L (.tileLayer URL-MQO
-                         #js{:type "sat"
-                             :attribution "OOGIS RL &copy;"}))
-        base (clj->js {"osm" tile1
-                       "sat" tile2})
+                             :attribution "OOGIS RL, OpenStreetMap &copy;"}))
+        tile2 (-> js/L (.tileLayer URL-GSA
+                         #js{:maxZoom 20
+                             :subdomains #js["mt0" "mt1" "mt2" "mt3"]
+                             :attribution "OOGIS RL, Google &copy;"}))
+        tile3 (-> js/L (.tileLayer URL-GST
+                         #js{:maxZoom 20
+                             :subdomains #js["mt0" "mt1" "mt2" "mt3"]
+                             :attribution "OOGIS RL, Google &copy;"}))
+        tile4 (-> js/L (.tileLayer URL-GHB
+                         #js{:maxZoom 20
+                             :subdomains #js["mt0" "mt1" "mt2" "mt3"]
+                             :attribution "OOGIS RL, Google &copy;"}))
+        tile5 (-> js/L (.tileLayer URL-GTR
+                         #js{:maxZoom 20
+                             :subdomains #js["mt0" "mt1" "mt2" "mt3"]
+                             :attribution "OOGIS RL, Google &copy;"}))
+        base (clj->js {"OpenStreetMap" tile1
+                       "Google Satellite" tile2
+                       "Google Streets" tile3
+                       "Google Hybrid" tile4
+                       "Google Terrain" tile5})
         ctrl (-> js/L (.control.layers base nil))]
     (.addTo tile1 m)
     (.addTo ctrl m)

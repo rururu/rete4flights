@@ -37,6 +37,12 @@ Command "Intersection" calculates aircrafts that intersect in 6 minutes on a dis
 
 Click on an aircraft icon brings up a popup with general data of a flight and 4 buttons. Button "Inform" provides a popup with detailed information of the flight. Button "Trail" draws a current way of the aircraft. Button "Follow" starts moving of the visible area along this flight and periodically displays a trail of the flight. Button "Stop" ends up this moving.
 
+Using the command "Move to Airport" you can instantly shift to some other airport. First select a country and then an airport in this country.
+
+You can plan your own flights. To do this, use the command "Shedule Flight". Input a call sign of your flight, time of departure, select a country and an airport of departure and a country and an airport of arrival. That's all. When your flight starts you can follow it...
+
+Stay tuned. Soon you can come on board and enjoy 3D view from a cockpit..
+
 Expert system handling this process is in the file es.clj.
 
 Copyright and license
