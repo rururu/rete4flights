@@ -37,6 +37,7 @@
 (def URL-SFW "http://localhost:3000/stopfollow/")
 (def URL-CNS "http://localhost:3000/contries/")
 (def URL-APS "http://localhost:3000/airports/")
+(def URL-CAM "http://localhost:3000/camera/")
 (def URL-OSM "http://{s}.tile.osm.org/{z}/{x}/{y}.png")
 (def URL-GST "http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}")
 (def URL-GHB "http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}")
@@ -372,10 +373,73 @@
   (GET URL-SFW {:handler no-handler
               :error-handler error-handler}))
 
+;; ------------------------ camera control ---------------------------
+
+(def CAMERA :off)
+
+(defn camera-show []
+  (set-html! "camera" "<h4>Camera</h4>")
+  (set-html! "onboard" "Onboard:")
+  (set-html! "onboard-fld" (str "<input value='callsign' style='width:90px' "
+                                "onchange='javascript:rete4flight.core.camonb(this.value)'>"))
+  (set-html! "heading" "Heading:")
+  (set-html! "heading-fld" "<select onchange='javascript:rete4flight.core.camhea(this.value)'>
+             <option value='FORWARD'>FORWARD</option>
+             <option value='BACKWARD'>BACKWARD</option>
+             <option value='RIGHT'>RIGHT</option>
+             <option value='LEFT'>LEFT</option>
+             <option value='UP'>UP</option>
+             <option value='DOWN'>DOWN</option>
+             </select>")
+  (set-html! "pitch" "Pitch:")
+  (set-html! "pitch-fld" (str "<input value='-15' style='width:90px' "
+                              "onchange='javascript:rete4flight.core.campit(this.value)'>"))
+  (set-html! "roll" "Roll:")
+  (set-html! "roll-fld" (str "<input value='0' style='width:90px' "
+                             "onchange='javascript:rete4flight.core.camrol(this.value)'>")))
+
+(defn camera-hide []
+  (set-html! "camera" "")
+  (set-html! "onboard" "")
+  (set-html! "onboard-fld" "")
+  (set-html! "heading" "")
+  (set-html! "heading-fld" "")
+  (set-html! "pitch" "")
+  (set-html! "pitch-fld" "")
+  (set-html! "roll" "")
+  (set-html! "roll-fld" ""))
+
+(defn camera []
+  (cond
+    (= CAMERA :off)
+    (do (camera-show)
+      (GET (str URL-CAM "?camera=on") {:handler no-handler :error-handler error-handler})
+      (def CAMERA :on))
+    (= CAMERA :on)
+    (do (camera-hide)
+      (GET (str URL-CAM "?camera=off") {:handler no-handler :error-handler error-handler})
+      (def CAMERA :off))))
+
+(defn camonb [obj]
+  (let [url (str URL-CAM "?onboard=" obj)]
+    (GET url {:handler no-handler :error-handler error-handler})))
+
+(defn camhea [hea]
+  (let [url (str URL-CAM "?heading=" hea)]
+    (GET url {:handler no-handler :error-handler error-handler})))
+
+(defn campit [pit]
+  (let [url (str URL-CAM "?pitch=" pit)]
+    (GET url {:handler no-handler :error-handler error-handler})))
+
+(defn camrol [rol]
+  (let [url (str URL-CAM "?roll=" rol)]
+    (GET url {:handler no-handler :error-handler error-handler})))
+
 ;; ---------------------- schedule flights ---------------------------
 
 (defn schedule []
-  (let [inp (str "<input type='text' id='callsign' style='width:100px' value='callsign'"
+  (let [inp (str "<input type='text' id='callsign' style='width:80px' value='callsign'"
                  " onchange='javascript:rete4flight.core.selcallsgn(this.value)'>")]
     (set-html! "callsign" inp)
     (vreset! REM-CAL {"?func=" "schedule"})))
@@ -530,6 +594,7 @@
   			<option value='intersect'>Intersections</option>
   			<option value='move-to'>Move to Airport</option>
   			<option value='schedule'>Schedule Flight</option>
+  			<option value='camera'>Camera</option>
   			<option value='clear'>Clear</option>
 		</select>")
 
@@ -540,7 +605,8 @@
     "intersect" (intersect)
     "clear" (clear-all)
     "move-to" (move-to)
-    "schedule" (schedule))
+    "schedule" (schedule)
+    "camera" (camera))
   (set-html! "commands" COMMANDS))
 
 (defn remote-call []

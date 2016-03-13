@@ -33,6 +33,7 @@ rete4flight.core.URL_FLW = "http://localhost:3000/follow/";
 rete4flight.core.URL_SFW = "http://localhost:3000/stopfollow/";
 rete4flight.core.URL_CNS = "http://localhost:3000/contries/";
 rete4flight.core.URL_APS = "http://localhost:3000/airports/";
+rete4flight.core.URL_CAM = "http://localhost:3000/camera/";
 rete4flight.core.URL_OSM = "http://{s}.tile.osm.org/{z}/{x}/{y}.png";
 rete4flight.core.URL_GST = "http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}";
 rete4flight.core.URL_GHB = "http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}";
@@ -1530,8 +1531,82 @@ return ajax.core.GET.call(null,url,new cljs.core.PersistentArrayMap(null, 2, [ne
 rete4flight.core.stopfollow = (function rete4flight$core$stopfollow(){
 return ajax.core.GET.call(null,rete4flight.core.URL_SFW,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
 });
+rete4flight.core.CAMERA = new cljs.core.Keyword(null,"off","off",606440789);
+rete4flight.core.camera_show = (function rete4flight$core$camera_show(){
+rete4flight.core.set_html_BANG_.call(null,"camera","<h4>Camera</h4>");
+
+rete4flight.core.set_html_BANG_.call(null,"onboard","Onboard:");
+
+rete4flight.core.set_html_BANG_.call(null,"onboard-fld",[cljs.core.str("<input value='callsign' style='width:90px' "),cljs.core.str("onchange='javascript:rete4flight.core.camonb(this.value)'>")].join(''));
+
+rete4flight.core.set_html_BANG_.call(null,"heading","Heading:");
+
+rete4flight.core.set_html_BANG_.call(null,"heading-fld","<select onchange='javascript:rete4flight.core.camhea(this.value)'>\n             <option value='FORWARD'>FORWARD</option>\n             <option value='BACKWARD'>BACKWARD</option>\n             <option value='RIGHT'>RIGHT</option>\n             <option value='LEFT'>LEFT</option>\n             <option value='UP'>UP</option>\n             <option value='DOWN'>DOWN</option>\n             </select>");
+
+rete4flight.core.set_html_BANG_.call(null,"pitch","Pitch:");
+
+rete4flight.core.set_html_BANG_.call(null,"pitch-fld",[cljs.core.str("<input value='-15' style='width:90px' "),cljs.core.str("onchange='javascript:rete4flight.core.campit(this.value)'>")].join(''));
+
+rete4flight.core.set_html_BANG_.call(null,"roll","Roll:");
+
+return rete4flight.core.set_html_BANG_.call(null,"roll-fld",[cljs.core.str("<input value='0' style='width:90px' "),cljs.core.str("onchange='javascript:rete4flight.core.camrol(this.value)'>")].join(''));
+});
+rete4flight.core.camera_hide = (function rete4flight$core$camera_hide(){
+rete4flight.core.set_html_BANG_.call(null,"camera","");
+
+rete4flight.core.set_html_BANG_.call(null,"onboard","");
+
+rete4flight.core.set_html_BANG_.call(null,"onboard-fld","");
+
+rete4flight.core.set_html_BANG_.call(null,"heading","");
+
+rete4flight.core.set_html_BANG_.call(null,"heading-fld","");
+
+rete4flight.core.set_html_BANG_.call(null,"pitch","");
+
+rete4flight.core.set_html_BANG_.call(null,"pitch-fld","");
+
+rete4flight.core.set_html_BANG_.call(null,"roll","");
+
+return rete4flight.core.set_html_BANG_.call(null,"roll-fld","");
+});
+rete4flight.core.camera = (function rete4flight$core$camera(){
+if(cljs.core._EQ_.call(null,rete4flight.core.CAMERA,new cljs.core.Keyword(null,"off","off",606440789))){
+rete4flight.core.camera_show.call(null);
+
+ajax.core.GET.call(null,[cljs.core.str(rete4flight.core.URL_CAM),cljs.core.str("?camera=on")].join(''),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
+
+rete4flight.core.CAMERA = new cljs.core.Keyword(null,"on","on",173873944);
+} else {
+if(cljs.core._EQ_.call(null,rete4flight.core.CAMERA,new cljs.core.Keyword(null,"on","on",173873944))){
+rete4flight.core.camera_hide.call(null);
+
+ajax.core.GET.call(null,[cljs.core.str(rete4flight.core.URL_CAM),cljs.core.str("?camera=off")].join(''),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
+
+rete4flight.core.CAMERA = new cljs.core.Keyword(null,"off","off",606440789);
+} else {
+return null;
+}
+}
+});
+rete4flight.core.camonb = (function rete4flight$core$camonb(obj){
+var url = [cljs.core.str(rete4flight.core.URL_CAM),cljs.core.str("?onboard="),cljs.core.str(obj)].join('');
+return ajax.core.GET.call(null,url,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
+});
+rete4flight.core.camhea = (function rete4flight$core$camhea(hea){
+var url = [cljs.core.str(rete4flight.core.URL_CAM),cljs.core.str("?heading="),cljs.core.str(hea)].join('');
+return ajax.core.GET.call(null,url,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
+});
+rete4flight.core.campit = (function rete4flight$core$campit(pit){
+var url = [cljs.core.str(rete4flight.core.URL_CAM),cljs.core.str("?pitch="),cljs.core.str(pit)].join('');
+return ajax.core.GET.call(null,url,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
+});
+rete4flight.core.camrol = (function rete4flight$core$camrol(rol){
+var url = [cljs.core.str(rete4flight.core.URL_CAM),cljs.core.str("?roll="),cljs.core.str(rol)].join('');
+return ajax.core.GET.call(null,url,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
+});
 rete4flight.core.schedule = (function rete4flight$core$schedule(){
-var inp = [cljs.core.str("<input type='text' id='callsign' style='width:100px' value='callsign'"),cljs.core.str(" onchange='javascript:rete4flight.core.selcallsgn(this.value)'>")].join('');
+var inp = [cljs.core.str("<input type='text' id='callsign' style='width:80px' value='callsign'"),cljs.core.str(" onchange='javascript:rete4flight.core.selcallsgn(this.value)'>")].join('');
 rete4flight.core.set_html_BANG_.call(null,"callsign",inp);
 
 return cljs.core.vreset_BANG_.call(null,rete4flight.core.REM_CAL,new cljs.core.PersistentArrayMap(null, 1, ["?func=","schedule"], null));
@@ -1919,7 +1994,7 @@ return ajax.core.GET.call(null,rete4flight.core.URL_FLS,new cljs.core.Persistent
 rete4flight.core.intersect = (function rete4flight$core$intersect(){
 return ajax.core.GET.call(null,rete4flight.core.URL_INT,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
 });
-rete4flight.core.COMMANDS = "<select onchange='javascript:rete4flight.core.commands(this.value)'>\n  \t\t\t<option value='commands'>Commands</option>\n  \t\t\t<option value='watch-visible'>Watch visible area</option>\n  \t\t\t<option value='flight-states'>State of flights</option>\n  \t\t\t<option value='intersect'>Intersections</option>\n  \t\t\t<option value='move-to'>Move to Airport</option>\n  \t\t\t<option value='schedule'>Schedule Flight</option>\n  \t\t\t<option value='clear'>Clear</option>\n\t\t</select>";
+rete4flight.core.COMMANDS = "<select onchange='javascript:rete4flight.core.commands(this.value)'>\n  \t\t\t<option value='commands'>Commands</option>\n  \t\t\t<option value='watch-visible'>Watch visible area</option>\n  \t\t\t<option value='flight-states'>State of flights</option>\n  \t\t\t<option value='intersect'>Intersections</option>\n  \t\t\t<option value='move-to'>Move to Airport</option>\n  \t\t\t<option value='schedule'>Schedule Flight</option>\n  \t\t\t<option value='camera'>Camera</option>\n  \t\t\t<option value='clear'>Clear</option>\n\t\t</select>";
 rete4flight.core.commands = (function rete4flight$core$commands(func){
 var pred__16672_16675 = cljs.core._EQ_;
 var expr__16673_16676 = func;
@@ -1941,7 +2016,11 @@ rete4flight.core.move_to.call(null);
 if(cljs.core.truth_(pred__16672_16675.call(null,"schedule",expr__16673_16676))){
 rete4flight.core.schedule.call(null);
 } else {
+if(cljs.core.truth_(pred__16672_16675.call(null,"camera",expr__16673_16676))){
+rete4flight.core.camera.call(null);
+} else {
 throw (new Error([cljs.core.str("No matching clause: "),cljs.core.str(expr__16673_16676)].join('')));
+}
 }
 }
 }

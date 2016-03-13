@@ -1,7 +1,7 @@
 # rete4flights
 
 Air traffic control system - a test example for the [rete4frames] (http://github.com/rururu/rete4frames) expert system shell.
-It uses [Flightradar24] (http://www.flightradar24.com) web service and [Leaflet] (http://leafletjs.com) JavaScript library.
+It uses [Flightradar24] (http://www.flightradar24.com) web service, [Leaflet] (http://leafletjs.com) JavaScript library and Cesium WebGL virtual globe and map engine (https://cesiumjs.org/).
 
 ![screenshot](screenshot.jpg)
 
@@ -41,7 +41,9 @@ Using the command "Move to Airport" you can instantly shift to some other airpor
 
 You can plan your own flights. To do this, use the command "Shedule Flight". Input a call sign of your flight, time of departure, select a country and an airport of departure and a country and an airport of arrival. That's all. When your flight starts you can follow it...
 
-Stay tuned. Soon you can come on board and enjoy 3D view from a cockpit..
+The function "camera"  allows the to be in the cockpit of the aircraft and enjoy the view from the cockpit, experience exciting feeling of landing, available only to pilots. To get on board of aircraft just input its callsign in the field "onboard" and open second browser window on the address "http://localhost:3000/html/cezium.html".
+
+Soon you'll see other aircrafts from the cockpit. Stay tuned..
 
 Expert system handling this process is in the file es.clj.
 

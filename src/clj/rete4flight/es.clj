@@ -58,14 +58,15 @@
   (fl:FollowFlight
    0
    ?f (Follow id ?id)
-   (History moment ?now)
-   (Flight id ?id
-           coord ?crd
-           history ?now)
+   (Flight id ?id coord ?crd1 history ?h1)
+   (Flight id ?id coord ?crd2 history ?h2)
+   (Flight id ?id coord ?crd3 history ?now)
+   (History moment ?now
+            (> ?now ?h2 ?h1))
    =>
    ;;(println [:FOLLOW ?id :CENTER ?lat ?lon])
-   (fl/set-map-view ?crd)
-   (fl/follow-flight ?id)
+   (fl/set-map-view ?crd3)
+   (fl/follow-flight ?id ?crd3 ?crd2 ?crd1)
    (retract ?f))
 
 
@@ -220,9 +221,7 @@
          ccrd (fl/get-param ?id :coord)
          dist (fl/distance-nm ccrd crd2)]
      (if (< dist 0.05)
-       (do
-         (println [:ARRIVED :ID ?id :AIRPORT iata])
-         (fl/set-param! ?id nil nil)) ;; clear my flight
+       (fl/arrived ?id iata)
        (do
          (fl/set-param! ?id :course (int (fl/bear-deg ccrd crd2)))
          (fl/set-param! ?id :speed (int (fl/smooth-tabfun dist spd-tab)))
@@ -418,9 +417,9 @@
                         :lat lat
                         :lon lon}))
 
-   (defn follow-flight [id]
+   (defn follow-flight [id [y3 x3] [y2 x2] [y1 x1]]
      ;;(core/inform id)
-     (core/trail id))
+     (core/trail id [y3 x3 0 y2 x2 0 y1 x1 0]))
 
    (defn distance-nm [crd1 crd2]
      (geo/distance-nm crd1 crd2))
@@ -500,6 +499,11 @@
                (recur (ncrs (- crs step)) (geo/future-pos point crs spd mihs))
                (recur (ncrs (+ crs step)) (geo/future-pos point crs spd mihs))))))))
 
+   (defn arrived [id iata]
+     (println [:ARRIVED :ID id :AIRPORT iata])
+     (set-param! id nil nil) ;; clear my flight
+     (if (= id @core/FOLLOW-ID)
+       (core/stopfollow)))
 
    (defn shift-plan [curt tab]
      (vec (map #(vector (+ curt (first %)) (second %)) tab)))

@@ -10,7 +10,8 @@
             [org.httpkit.client :as client]
             [clj-json.core :as json]
             [rete.core :as rete]
-            [rete4flight.geo :as geo])
+            [rete4flight.geo :as geo]
+            [rete4flight.cesium :as cz])
   (:gen-class))
 
 ;; ----------------------- Flightradar24 client ------------------------
@@ -31,6 +32,7 @@
 (def FOLW-INTL 40000) ;; following interval (40 sec)
 (def MYFS-INTL 1000) ;; my flights simulation interval (1 sec)
 (def BNK-STP 4) ;; step of course in degrees while banking
+(def CZMW-INTL 20000) ;; Cesium work interval (20 sec)
 
 (defonce FRS (volatile! {:balurl "http://www.flightradar24.com/balance.json"
                          :apsurl "http://www.flightradar24.com/_json/airports.php"
@@ -178,9 +180,9 @@
     (set-param! id :course crs)))
 
 (defn by-call [cs]
-  (let [aa (corr-dat (all))]
+  (let [aa (concat (corr-dat (all)) (:all @MYFS))]
     (if-let [flt (filter #(= cs (callsign (second %))) aa)]
-      flt)))
+      (first flt))))
 
 (defn id-by-call [cs]
   (if-let [[id dat] (by-call cs)]
@@ -246,9 +248,13 @@
   (if-let [crs (course id)]
     (if (not= crs on-course)
       (let [side (what-side crs on-course)]
+        (condp = side
+          :right (vswap! cz/CAM assoc :roll 20)
+          :left (vswap! cz/CAM assoc :roll -20))
         (go (loop [crs crs]
               (if (< (Math/abs (- crs on-course)) BNK-STP)
-                (set-param! id :course on-course)
+                (do (set-param! id :course on-course)
+                  (vswap! cz/CAM assoc :roll 0))
                 (do
                   (if (= side :left)
                     (set-course! id (- crs BNK-STP))
@@ -399,19 +405,20 @@
   (inform (params :id)))
 
 
-(defn trail [id]
-  (println (str "Trail: " id))
+(defn trail [id head]
   (if-let [inf (info id)]
-    (pump-in-evt {:event :add-trail
-                  :id id
-                  :lla (inf "trail")
-                  :options {:weight 3
-                            :color "purple"}
-                  :time 30000}))
-  "")
+    (let [trl (inf "trail")]
+      (println [:TRAIL id (count head) (count trl)])
+      (pump-in-evt {:event :add-trail
+                    :id id
+                    :lla (concat head (inf "trail"))
+                    :options {:weight 3
+                              :color "purple"}
+                    :time 30000}))
+    ""))
 
 (defn trail-id [params]
-  (trail (params :id)))
+  (trail (params :id) []))
 
 (defn follow-flight []
   (let [id @FOLLOW-ID]
@@ -454,8 +461,8 @@
                     [(params :to-country) (params :to-airport)])
         lat (apt "lat")
         lon (apt "lon")]
-    (println [:APT apt])
-    (println [:LAT lat :LON lon])
+    (stopfollow)
+    (println [:MOVE-TO apt :LAT lat :LON lon])
     (pump-in-evt {:event :set-map-view
                        :lat lat
                        :lon lon})
@@ -518,6 +525,37 @@
                "departure" (str hour " : " min)
                "image" (str "img/" (int  (rand 7)) ".jpg")}))))
 
+(defn cesium-work []
+  (let [dt (dat (:id @cz/CAM))]
+    (when (vector? dt)
+      (let [[lat lon] (coord dt)
+            alt (* (altitude dt) 0.3048) ;; feet to meters
+            crs (course dt)
+            per (/ CZMW-INTL 1000)] ;; msec to sec
+        (cz/fly-to lat lon alt crs per)))))
+
+(defn start-cesium []
+  (when (nil? (:id @cz/CAM))
+    (println "Start (cesium-work)..")
+    (repeater #(cesium-work) CZMW-INTL)
+    (vswap! cz/CAM assoc :id 0))
+  (cz/start-sse-server))
+
+(defn camera [params]
+  (println [:CAMERA params])
+  (vswap! cz/CAM merge params)
+  (condp = (params :camera)
+    "on" (start-cesium)
+    "off"(cz/stop-sse-server)
+    true)
+  (if-let [onb (params :onboard)]
+    (vswap! cz/CAM assoc :id (id-by-call onb)))
+  (condp = (params :heading)
+    "UP" (vswap! cz/CAM assoc :pitch 90.0)
+    "DOWN" (vswap! cz/CAM assoc :pitch -90.0)
+    (vswap! cz/CAM assoc :pitch -15.0))
+  "")
+
 ;; --------------------- Routes -----------------------------
 
 (defroutes app-routes
@@ -533,6 +571,8 @@
   (GET "/stopfollow/" [] (stopfollow))
   (GET "/contries/" [] (contries))
   (GET "/airports/" [& params] (airports-for-country params))
+  (GET "/camera/" [& params] (camera params))
+  (GET "/czml/" [] (cz/events))
   (GET "/call/" [& params] (call params))
   (route/files "/" (do (println [:ROOT-FILES ROOT]) {:root ROOT}))
   (route/resources "/")
