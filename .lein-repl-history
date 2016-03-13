@@ -1,4 +1,3 @@
-(rete/assert-frame ['Test 'id "-33" 'param :speed 'value 17])
 (wtc)
 (rete/assert-frame ['Test 'id "-33" 'param :speed 'value 18])
 (wtc)
@@ -498,3 +497,4 @@
 (exit)
 (start-server)
 (exit)
+(start-server)

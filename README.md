@@ -43,6 +43,8 @@ You can plan your own flights. To do this, use the command "Shedule Flight". Inp
 
 The function "camera"  allows the to be in the cockpit of the aircraft and enjoy the view from the cockpit, experience exciting feeling of landing, available only to pilots. To get on board of aircraft just input its callsign in the field "onboard" and open second browser window on the address "http://localhost:3000/html/cezium.html".
 
+![screenshot](screenshot2.jpg)
+
 Soon you'll see other aircrafts from the cockpit. Stay tuned..
 
 Expert system handling this process is in the file es.clj.
