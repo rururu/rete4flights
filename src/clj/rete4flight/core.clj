@@ -34,12 +34,9 @@
 (def BNK-STP 4) ;; step of course in degrees while banking
 (def CZMW-INTL 20000) ;; Cesium work interval (20 sec)
 
-(defonce FRS (volatile! {:balurl "http://www.flightradar24.com/balance.json"
-                         :apsurl "http://www.flightradar24.com/_json/airports.php"
-                         :allpath "/zones/fcgi/feed.json"
-                         :plnpath "/_external/planedata_json.1.3.php?f="
-                         :allurl nil
-                         :plnurl nil
+(defonce FRS (volatile! {:apsurl "http://www.flightradar24.com/_json/airports.php"
+                         :allurl "http://data-live.flightradar24.com/zones/fcgi/feed.js"
+                         :plnurl "http://data-live.flightradar24.com/clickhandler/?version=1.5&flight="
                          :all nil
                          :airports nil
                          :infos {}}))
@@ -53,28 +50,28 @@
 
 ;; --------------------- Flightradar24 Client Functions ------------------
 
-(defn balance []
-  (let [bal (:body @(client/get (:balurl @FRS)))
-        bal (json/parse-string bal)
-        bal (sort-by second (seq bal))
-        bal (ffirst bal)]
-    (vswap! FRS assoc :allurl (str "http://" bal (:allpath @FRS)))
-    (vswap! FRS assoc :plnurl (str "http://" bal (:plnpath @FRS)))))
-
 (defn corr-dat [y]
   (filter #(vector? (second %)) y))
 
+(defn json-web-data [url]
+  (let [r @(client/get url)
+        s (:status r)]
+    (if (= s 200)
+      (try
+        (json/parse-string (:body r))
+        (catch Exception e
+          (println [:EXCEPTION e])
+          nil))
+      (do
+        (println [:STATUS s])
+        nil))))
+
 (defn all []
-  (try
-    (if-let [ff (:all @FRS)]
-      ff
-      (if-let [url (:allurl @FRS)]
-        (let [ff (json/parse-string (:body @(client/get url)))]
-          (vswap! FRS assoc :all ff)
-          (merge ff (:all @MYFS)))
-        (do (balance) (all))))
-    (catch Exception e
-      )))
+  (let [ff (or (:all @FRS)
+               (let [ff (json-web-data (:allurl @FRS))]
+                 (vswap! FRS assoc :all ff)
+                 ff))]
+    (merge ff (:all @MYFS))))
 
 (defn mk-airports [rows]
   (reduce #(assoc %1
@@ -83,41 +80,27 @@
                (get %2 "name") %2)) {} rows))
 
 (defn airports []
-  (try
-    (if-let [aps (:airports @FRS)]
-      aps
-      (if-let [url (:apsurl @FRS)]
-        (let [aps (json/parse-string (:body @(client/get url)))
-              aps (mk-airports (get aps "rows"))]
-          (vswap! FRS assoc :airports aps)
-          aps)))
-    (catch Exception e
-      )))
+  (or (:airports @FRS)
+      (let [aps (json-web-data (:apsurl @FRS))
+            aps (mk-airports (get aps "rows"))]
+        (vswap! FRS assoc :airports aps)
+        aps)))
 
 (defn bbx [n s w e]
-  (try
-    (if-let [aurl (:allurl @FRS)]
-      (let [burl (str aurl "?bounds=" n "," s "," w "," e)
-            ff (json/parse-string (:body @(client/get burl)))]
-        (vswap! FRS assoc :all ff)
-        (merge ff (:all @MYFS)))
-      (do (balance) (bbx n s w e)))
-    (catch Exception e
-      )))
+  (let [burl (str (:allurl @FRS) "?bounds=" n "," s "," w "," e)
+        ff (json-web-data burl)]
+    (vswap! FRS assoc :all ff)
+    (merge ff (:all @MYFS))))
 
 (defn info [id]
   (if-let [inf (or (get (:infos @FRS) id)
                    (get (:infos @MYFS) id))]
     inf
-    (if-let [url (:plnurl @FRS)]
-      (let [inf (json/parse-string (:body @(client/get (str url id))))]
-        (vswap! FRS assoc-in [:infos id] inf)
-        inf)
-      (do (balance) (info id)))))
+    (let [inf (json-web-data (str (:plnurl @FRS) id))]
+      (vswap! FRS assoc-in [:infos id] inf)
+      inf)))
 
 (defn clear []
-  (vswap! FRS assoc :allurl nil)
-  (vswap! FRS assoc :plnurl nil)
   (vswap! FRS assoc :all nil)
   (vswap! FRS assoc :infos {})
   (vswap! FRS assoc :regions {})
@@ -374,26 +357,18 @@
   (println (str "Info: " id))
   (if-let [inf (info id)]
     (let [cal (callsign id)
-          img (inf "image")
-          dat (dissoc inf
-                      "trail"
-                      "copyright_large"
-                      "imagesource"
-                      "image"
-                      "imagelink"
-                      "snapshot_id"
-                      "airline_url"
-                      "copyright"
-                      "imagelink_large"
-                      "first_timestamp"
-                      "image_large"
-                      "from_tz_code"
-                      "from_tz_offset"
-                      "from_tz_name"
-                      "to_tz_code"
-                      "to_tz_offset"
-                      "to_tz_name"
-                      )
+          apt (inf "airport")
+          acr (inf "aircraft")
+          tim (inf "time")
+          img (get (first (get-in acr ["images" "thumbnails"])) "src")
+          dat {"from" (get-in apt ["origin" "name"])
+               "from-iata" (get-in apt ["origin" "code" "iata"])
+               "to" (get-in apt ["destination" "name"])
+               "to-iata" (get-in apt ["destination" "code" "iata"])
+               "airline" (get-in inf ["airline" "short"])
+               "real-departure" (get-in tim ["real" "departure"])
+               "scheduled-arrival" (get-in tim ["scheduled" "arrival"])
+               "aircraft" (get-in acr ["model" "text"])}
           html (make-info-html cal img dat)]
       (pump-in-evt {:event :add-popup
                     :id id
@@ -404,18 +379,20 @@
 (defn info-id [params]
   (inform (params :id)))
 
+(defn trans-trail [trl]
+  (mapcat #(list (% "lat") (% "lng") (% "alt")) trl))
 
 (defn trail [id head]
   (if-let [inf (info id)]
-    (let [trl (inf "trail")]
+    (let [trl (trans-trail (inf "trail"))]
       (println [:TRAIL id (count head) (count trl)])
       (pump-in-evt {:event :add-trail
                     :id id
-                    :lla (concat head (inf "trail"))
+                    :lla (concat head trl)
                     :options {:weight 3
                               :color "purple"}
-                    :time 30000}))
-    ""))
+                    :time 30000})))
+  "")
 
 (defn trail-id [params]
   (trail (params :id) []))
@@ -512,18 +489,16 @@
       (rete/assert-frame ['Schedule 'id id 'time tim 'from from 'to to])
       (pump-in-evt {:event :clear-dialog})
       (vswap! MYFS assoc-in [:infos id]
-              {"from_iata" iatf
-               "from_country" (fapt "country")
-               "from_airport" (fapt "name")
-               "from_pos" fcrd
-               "to_iata" iatt
-               "to_country" (tapt "country")
-               "to_airport" (tapt "name")
-               "to_pos" tcrd
-               "flight" call
-               "airline" "My Airlines"
-               "departure" (str hour " : " min)
-               "image" (str "img/" (int  (rand 7)) ".jpg")}))))
+              {"airport" {"origin" {"name" (fapt "name") "code" {"iata" iatf}}
+                          "destination" {"name" (tapt "name") "code" {"iata" iatt}}}
+
+               "aircraft" {"model" {"text" "Ru Lentokone"}
+                           "images" {"thumbnails" [{"src" (str "img/" (int  (rand 7)) ".jpg")}]}}
+
+               "time" {"real" {"departure" (str hour ":" min)}
+                       "scheduled" {"arrival" "unk"}}
+
+               "airline" {"short" "Ru Airlines"}}))))
 
 (defn cesium-work []
   (let [dt (dat (:id @cz/CAM))]
