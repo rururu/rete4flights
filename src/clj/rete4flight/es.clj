@@ -201,9 +201,9 @@
         (let [ccrd (fl/get-param ?id :coord)]
           (when (fl/abaft ccrs ccrd ftpt)
             (println [:FINAL-TURN-ON rw2 :ID ?id])
-            (fl/bank ?id rw2)
-            (modify ?fp final-turn ["BANK" rw2])))
-        (and (= ftpt "BANK") (= ccrs rw2))
+            (fl/turn ?id rw2)
+            (modify ?fp final-turn ["TURN" rw2])))
+        (and (= ftpt "TURN") (= ccrs rw2))
         (do
           (println [:LANDING :ID ?id])
           (modify ?fp final-turn "DONE"))))))
@@ -257,9 +257,9 @@
      (cond
       (number? fst)
       (do
-        (fl/bank ?id fst)
-        (modify ?fp initial-turn ["BANK-ON" fst]))
-      (and (= fst "BANK-ON")
+        (fl/turn ?id fst)
+        (modify ?fp initial-turn ["TURN-ON" fst]))
+      (and (= fst "TURN-ON")
            (= (fl/get-param ?id :course) scd))
       (modify ?fp
               initial-turn "DONE"
@@ -347,7 +347,8 @@
    (ns fl
      (:import java.util.Calendar)
      (:require [rete4flight.core :as core]
-               [rete4flight.geo :as geo]))
+               [rete4flight.geo :as geo]
+               [rete4flight.cesium :as cz]))
 
    (def TIME 0.1) ;; forcast time for intersection in hours (6 min)
    (def DMIN 0.215) ;; distance of intersection in nautical miles (~400 m)
@@ -474,11 +475,11 @@
                crs2 (if (< crs2 0) (+ crs2 360) crs2)]
            (if (> can2 mdc) "FINAL" crs2)))))
 
-   (defn bank [id on-course]
-     (core/bank id on-course))
+   (defn turn [id on-course]
+     (core/turn id on-course))
 
   (defn what-side [crs on-course]
-    (core/what-side crs on-course))
+    (cz/what-side crs on-course))
 
   (defn ncrs [crs]
     (cond
@@ -490,7 +491,7 @@
      "Calculates end point of turn"
      (if (not= crs1 crs2)
        (let [mihs (/ core/MYFS-INTL 3600000)
-             step core/BNK-STP
+             step core/TRN-STP
              side (what-side crs1 crs2)]
          (loop [crs crs1 point ipoint]
            (if (< (Math/abs (- crs crs2)) step)

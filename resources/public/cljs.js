@@ -27583,34 +27583,34 @@ cognitect.transit.write_handler.cljs$core$IFn$_invoke$arity$3 = function(a, b, c
   return cognitect.transit.write_handler.call(null, a, b, c, null);
 };
 cognitect.transit.write_handler.cljs$core$IFn$_invoke$arity$4 = function(a, b, c, d) {
-  "undefined" === typeof cognitect.transit.t_cognitect$transit11369 && (cognitect.transit.t_cognitect$transit11369 = function(a, b, c, d, k) {
+  "undefined" === typeof cognitect.transit.t_cognitect$transit11420 && (cognitect.transit.t_cognitect$transit11420 = function(a, b, c, d, k) {
     this.tag_fn = a;
     this.rep_fn = b;
     this.str_rep_fn = c;
     this.verbose_handler_fn = d;
-    this.meta11370 = k;
+    this.meta11421 = k;
     this.cljs$lang$protocol_mask$partition0$ = 393216;
     this.cljs$lang$protocol_mask$partition1$ = 0;
-  }, cognitect.transit.t_cognitect$transit11369.prototype.cljs$core$IWithMeta$_with_meta$arity$2 = function(a, b) {
-    return new cognitect.transit.t_cognitect$transit11369(this.tag_fn, this.rep_fn, this.str_rep_fn, this.verbose_handler_fn, b);
-  }, cognitect.transit.t_cognitect$transit11369.prototype.cljs$core$IMeta$_meta$arity$1 = function(a) {
-    return this.meta11370;
-  }, cognitect.transit.t_cognitect$transit11369.prototype.tag = function(a) {
+  }, cognitect.transit.t_cognitect$transit11420.prototype.cljs$core$IWithMeta$_with_meta$arity$2 = function(a, b) {
+    return new cognitect.transit.t_cognitect$transit11420(this.tag_fn, this.rep_fn, this.str_rep_fn, this.verbose_handler_fn, b);
+  }, cognitect.transit.t_cognitect$transit11420.prototype.cljs$core$IMeta$_meta$arity$1 = function(a) {
+    return this.meta11421;
+  }, cognitect.transit.t_cognitect$transit11420.prototype.tag = function(a) {
     return this.tag_fn.call(null, a);
-  }, cognitect.transit.t_cognitect$transit11369.prototype.rep = function(a) {
+  }, cognitect.transit.t_cognitect$transit11420.prototype.rep = function(a) {
     return this.rep_fn.call(null, a);
-  }, cognitect.transit.t_cognitect$transit11369.prototype.stringRep = function(a) {
+  }, cognitect.transit.t_cognitect$transit11420.prototype.stringRep = function(a) {
     return cljs.core.truth_(this.str_rep_fn) ? this.str_rep_fn.call(null, a) : null;
-  }, cognitect.transit.t_cognitect$transit11369.prototype.getVerboseHandler = function() {
+  }, cognitect.transit.t_cognitect$transit11420.prototype.getVerboseHandler = function() {
     return cljs.core.truth_(this.verbose_handler_fn) ? this.verbose_handler_fn.call(null) : null;
-  }, cognitect.transit.t_cognitect$transit11369.getBasis = function() {
-    return new cljs.core.PersistentVector(null, 5, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Symbol(null, "tag-fn", "tag-fn", 242055482, null), new cljs.core.Symbol(null, "rep-fn", "rep-fn", -1724891035, null), new cljs.core.Symbol(null, "str-rep-fn", "str-rep-fn", -1179615016, null), new cljs.core.Symbol(null, "verbose-handler-fn", "verbose-handler-fn", 547340594, null), new cljs.core.Symbol(null, "meta11370", "meta11370", 641978628, null)], null);
-  }, cognitect.transit.t_cognitect$transit11369.cljs$lang$type = !0, cognitect.transit.t_cognitect$transit11369.cljs$lang$ctorStr = "cognitect.transit/t_cognitect$transit11369", cognitect.transit.t_cognitect$transit11369.cljs$lang$ctorPrWriter = function(a, b, c) {
-    return cljs.core._write.call(null, b, "cognitect.transit/t_cognitect$transit11369");
-  }, cognitect.transit.__GT_t_cognitect$transit11369 = function(a, b, c, d, k) {
-    return new cognitect.transit.t_cognitect$transit11369(a, b, c, d, k);
+  }, cognitect.transit.t_cognitect$transit11420.getBasis = function() {
+    return new cljs.core.PersistentVector(null, 5, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Symbol(null, "tag-fn", "tag-fn", 242055482, null), new cljs.core.Symbol(null, "rep-fn", "rep-fn", -1724891035, null), new cljs.core.Symbol(null, "str-rep-fn", "str-rep-fn", -1179615016, null), new cljs.core.Symbol(null, "verbose-handler-fn", "verbose-handler-fn", 547340594, null), new cljs.core.Symbol(null, "meta11421", "meta11421", 951733477, null)], null);
+  }, cognitect.transit.t_cognitect$transit11420.cljs$lang$type = !0, cognitect.transit.t_cognitect$transit11420.cljs$lang$ctorStr = "cognitect.transit/t_cognitect$transit11420", cognitect.transit.t_cognitect$transit11420.cljs$lang$ctorPrWriter = function(a, b, c) {
+    return cljs.core._write.call(null, b, "cognitect.transit/t_cognitect$transit11420");
+  }, cognitect.transit.__GT_t_cognitect$transit11420 = function(a, b, c, d, k) {
+    return new cognitect.transit.t_cognitect$transit11420(a, b, c, d, k);
   });
-  return new cognitect.transit.t_cognitect$transit11369(a, b, c, d, cljs.core.PersistentArrayMap.EMPTY);
+  return new cognitect.transit.t_cognitect$transit11420(a, b, c, d, cljs.core.PersistentArrayMap.EMPTY);
 };
 cognitect.transit.write_handler.cljs$lang$maxFixedArity = 4;
 cognitect.transit.tagged_value = function(a, b) {
@@ -30461,27 +30461,27 @@ cljs.core.async.impl.dispatch.queue_delay = function(a, b) {
 };
 cljs.core.async.impl.channels = {};
 cljs.core.async.impl.channels.box = function cljs$core$async$impl$channels$box(b) {
-  "undefined" === typeof cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921 && (cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921 = function(b, d, e) {
+  "undefined" === typeof cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197 && (cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197 = function(b, d, e) {
     this.box = b;
     this.val = d;
-    this.meta11922 = e;
+    this.meta11198 = e;
     this.cljs$lang$protocol_mask$partition0$ = 425984;
     this.cljs$lang$protocol_mask$partition1$ = 0;
-  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921.prototype.cljs$core$IWithMeta$_with_meta$arity$2 = function(b, d) {
-    return new cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921(this.box, this.val, d);
-  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921.prototype.cljs$core$IMeta$_meta$arity$1 = function(b) {
-    return this.meta11922;
-  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921.prototype.cljs$core$IDeref$_deref$arity$1 = function(b) {
+  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197.prototype.cljs$core$IWithMeta$_with_meta$arity$2 = function(b, d) {
+    return new cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197(this.box, this.val, d);
+  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197.prototype.cljs$core$IMeta$_meta$arity$1 = function(b) {
+    return this.meta11198;
+  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197.prototype.cljs$core$IDeref$_deref$arity$1 = function(b) {
     return this.val;
-  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921.getBasis = function() {
+  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197.getBasis = function() {
     return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [cljs.core.with_meta(new cljs.core.Symbol(null, "box", "box", -1123515375, null), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "arglists", "arglists", 1661989754), cljs.core.list(new cljs.core.Symbol(null, "quote", "quote", 1377916282, null), cljs.core.list(new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Symbol(null, "val", "val", 
-    1769233139, null)], null)))], null)), new cljs.core.Symbol(null, "val", "val", 1769233139, null), new cljs.core.Symbol(null, "meta11922", "meta11922", -564495791, null)], null);
-  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921.cljs$lang$type = !0, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921.cljs$lang$ctorStr = "cljs.core.async.impl.channels/t_cljs$core$async$impl$channels11921", cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921.cljs$lang$ctorPrWriter = function(b, d, e) {
-    return cljs.core._write.call(null, d, "cljs.core.async.impl.channels/t_cljs$core$async$impl$channels11921");
-  }, cljs.core.async.impl.channels.__GT_t_cljs$core$async$impl$channels11921 = function(b, d, e) {
-    return new cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921(b, d, e);
+    1769233139, null)], null)))], null)), new cljs.core.Symbol(null, "val", "val", 1769233139, null), new cljs.core.Symbol(null, "meta11198", "meta11198", -779724322, null)], null);
+  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197.cljs$lang$type = !0, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197.cljs$lang$ctorStr = "cljs.core.async.impl.channels/t_cljs$core$async$impl$channels11197", cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197.cljs$lang$ctorPrWriter = function(b, d, e) {
+    return cljs.core._write.call(null, d, "cljs.core.async.impl.channels/t_cljs$core$async$impl$channels11197");
+  }, cljs.core.async.impl.channels.__GT_t_cljs$core$async$impl$channels11197 = function(b, d, e) {
+    return new cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197(b, d, e);
   });
-  return new cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921(cljs$core$async$impl$channels$box, b, cljs.core.PersistentArrayMap.EMPTY);
+  return new cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197(cljs$core$async$impl$channels$box, b, cljs.core.PersistentArrayMap.EMPTY);
 };
 cljs.core.async.impl.channels.PutBox = function(a, b) {
   this.handler = a;
@@ -35426,7 +35426,7 @@ rete4flight.core.set_course_BANG_ = function(a, b) {
   cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-dir", "anc-dir", -977205314)], null), d));
   return e.options.angle = c;
 };
-rete4flight.core.bank = function(a, b) {
+rete4flight.core.turn = function(a, b) {
   var c = rete4flight.core.course.call(null, a);
   if (cljs.core.not_EQ_.call(null, c, b)) {
     var d = b > c ? 180 > b - c ? new cljs.core.Keyword(null, "right", "right", -452581833) : new cljs.core.Keyword(null, "left", "left", -399115937) : 180 > c - b ? new cljs.core.Keyword(null, "left", "left", -399115937) : new cljs.core.Keyword(null, "right", "right", -452581833), e = cljs.core.async.chan.call(null, 1);
@@ -35566,9 +35566,9 @@ rete4flight.core.event_handler = function(a) {
                           var V = h, xa = null != V && (V.cljs$lang$protocol_mask$partition0$ & 64 || V.cljs$core$ISeq$) ? cljs.core.apply.call(null, cljs.core.hash_map, V) : V, qa = cljs.core.get.call(null, xa, new cljs.core.Keyword(null, "lat", "lat", -580793929)), Ra = cljs.core.get.call(null, xa, new cljs.core.Keyword(null, "lon", "lon", 522068437));
                           rete4flight.core.set_map_view.call(null, qa, Ra);
                         } else {
-                          if (cljs.core.truth_(l.call(null, new cljs.core.Keyword(null, "bank", "bank", -1982531798), m))) {
+                          if (cljs.core.truth_(l.call(null, new cljs.core.Keyword(null, "turn", "turn", 75759344), m))) {
                             var ja = h, ya = null != ja && (ja.cljs$lang$protocol_mask$partition0$ & 64 || ja.cljs$core$ISeq$) ? cljs.core.apply.call(null, cljs.core.hash_map, ja) : ja, za = cljs.core.get.call(null, ya, new cljs.core.Keyword(null, "id", "id", -1388402092)), Sa = cljs.core.get.call(null, ya, new cljs.core.Keyword(null, "on-course", "on-course", -276445359));
-                            rete4flight.core.bank.call(null, za, Sa);
+                            rete4flight.core.turn.call(null, za, Sa);
                           } else {
                             cljs.core.println.call(null, [cljs.core.str("Unknown event: "), cljs.core.str(new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [k, h], null))].join(""));
                           }
@@ -35634,9 +35634,9 @@ rete4flight.core.event_handler = function(a) {
                               var pa = h, va = null != pa && (pa.cljs$lang$protocol_mask$partition0$ & 64 || pa.cljs$core$ISeq$) ? cljs.core.apply.call(null, cljs.core.hash_map, pa) : pa, Pa = cljs.core.get.call(null, va, new cljs.core.Keyword(null, "lat", "lat", -580793929)), ab = cljs.core.get.call(null, va, new cljs.core.Keyword(null, "lon", "lon", 522068437));
                               rete4flight.core.set_map_view.call(null, Pa, ab);
                             } else {
-                              if (cljs.core.truth_(X.call(null, new cljs.core.Keyword(null, "bank", "bank", -1982531798), Y))) {
+                              if (cljs.core.truth_(X.call(null, new cljs.core.Keyword(null, "turn", "turn", 75759344), Y))) {
                                 var ia = h, wa = null != ia && (ia.cljs$lang$protocol_mask$partition0$ & 64 || ia.cljs$core$ISeq$) ? cljs.core.apply.call(null, cljs.core.hash_map, ia) : ia, bb = cljs.core.get.call(null, wa, new cljs.core.Keyword(null, "id", "id", -1388402092)), cb = cljs.core.get.call(null, wa, new cljs.core.Keyword(null, "on-course", "on-course", -276445359));
-                                rete4flight.core.bank.call(null, bb, cb);
+                                rete4flight.core.turn.call(null, bb, cb);
                               } else {
                                 cljs.core.println.call(null, [cljs.core.str("Unknown event: "), cljs.core.str(new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [k, h], null))].join(""));
                               }

@@ -293,8 +293,8 @@
     (vswap! mapobs assoc-in [id :anc-dir] dir)
     (set! (.. mrk -options -angle) crs)))
 
-(defn bank [id on-course]
-  "Banking of my flight plane on new course"
+(defn turn [id on-course]
+  "turning of my flight plane on new course"
   (let [crs (course id)]
     (if (not= crs on-course)
       (let [side (if (> on-course crs)
@@ -339,8 +339,8 @@
                    (add-trail id lla options time))
       :set-map-view (let [{:keys [lat lon]} evt]
                       (set-map-view lat lon))
-      :bank (let [{:keys [id on-course]} evt]
-                   (bank id on-course))
+      :turn (let [{:keys [id on-course]} evt]
+                   (turn id on-course))
       (println (str "Unknown event: " [event evt])))))
 
 (defn error-handler [{:keys [status status-text]}]

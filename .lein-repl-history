@@ -1,14 +1,3 @@
-          [:RB (second (last table))])
-        [:LB (second (first lo))])))
-(defn linint [x [x1 y1] [x2 y2]]
-    (float (+ y1 (/ (* (- y2 y1) (- x x1)) (- x2 x1)))))
-(defn tabfun [x table]
-    ;; left and right borders in table are exclusive
-    (let [[lo hi] (split-with #(< (first %) x) table)]
-      (if (seq lo)
-        (if (seq hi)
-          (linint x (last lo) (first hi))
-          [:RB (second (last table))])
         [:LB (second (first lo))])))
 (tabfun 5 [[125 33000][0 0]])
 (tabfun 5 [[0 0][125 33000][0 0]])
@@ -498,3 +487,14 @@ t
 @FOLLOW-ID
 (vreset! FOLLOW-ID nil)
 @FOLLOW-ID
+(start-server)
+(def i (info "923e810"))
+(i "airport")
+i
+(i "aircraft")
+(keys i)
+(def i (info "9243ca7"))
+(keys i)
+(i "airport")
+((i "airport") "origin")
+(exit)

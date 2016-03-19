@@ -31,7 +31,7 @@
 (def FOLLOW-ID (volatile! nil)) ;; id of followed flight
 (def FOLW-INTL 40000) ;; following interval (40 sec)
 (def MYFS-INTL 1000) ;; my flights simulation interval (1 sec)
-(def BNK-STP 4) ;; step of course in degrees while banking
+(def TRN-STP 4) ;; step of course in degrees while turning
 (def CZMW-INTL 20000) ;; Cesium work interval (20 sec)
 
 (defonce FRS (volatile! {:apsurl "http://www.flightradar24.com/_json/airports.php"
@@ -44,9 +44,9 @@
 (defonce MYFS (volatile! {:all nil
                           :infos {}})) ;; my flights
 
-(defonce RUNWAYS (volatile! {"URE" 180 "LED" 287 "LHR" 90
+(defonce RUNWAYS (volatile! {"URE" 180 "LED" 287 "LHR" 90 "EWR" 26
                              "TAY" 269 "HEL" 228 "FRA" 70 "KEF" 180
-                             "KDL" 147 "JFK" 301 "BOS" 200}))
+                             "KDL" 147 "JFK" 301 "BOS" 200 "LGA" 122}))
 
 ;; --------------------- Flightradar24 Client Functions ------------------
 
@@ -175,15 +175,6 @@
   (if-let [[id dat] (by-call cs)]
     dat))
 
-(defn what-side [crs on-course]
-  (if (> on-course crs)
-    (if (< (- on-course crs) 180)
-      :right
-      :left)
-    (if (< (- crs on-course) 180)
-      :left
-      :right)))
-
 (defn assert-visible [n s w e his]
   (let [ff (corr-dat (bbx n s w e))
         nf (count ff)]
@@ -225,23 +216,19 @@
         (task)
         (<! (timeout timo)))))
 
-(defn bank [id on-course]
-  "Banking of my flight plane on new course"
-  (pump-in-evt {:event :bank :id id :on-course on-course})
+(defn turn [id on-course]
+  "turning of my flight plane on new course"
+  (pump-in-evt {:event :turn :id id :on-course on-course})
   (if-let [crs (course id)]
     (if (not= crs on-course)
-      (let [side (what-side crs on-course)]
-        (condp = side
-          :right (vswap! cz/CAM assoc :roll 20)
-          :left (vswap! cz/CAM assoc :roll -20))
+      (let [side (cz/what-side crs on-course)]
         (go (loop [crs crs]
-              (if (< (Math/abs (- crs on-course)) BNK-STP)
-                (do (set-param! id :course on-course)
-                  (vswap! cz/CAM assoc :roll 0))
+              (if (< (Math/abs (- crs on-course)) TRN-STP)
+                (set-param! id :course on-course)
                 (do
                   (if (= side :left)
-                    (set-course! id (- crs BNK-STP))
-                    (set-course! id (+ crs BNK-STP)))
+                    (set-course! id (- crs TRN-STP))
+                    (set-course! id (+ crs TRN-STP)))
                   (<! (timeout MYFS-INTL))
                   (recur (course id))))))))))
 

@@ -63,6 +63,24 @@
                per "}")]
     (send-event "fly" p)))
 
+(def OLD-CRS (volatile! 0))
+
+(defn what-side [crs on-course]
+  (if (> on-course crs)
+    (if (< (- on-course crs) 180)
+      :right
+      :left)
+    (if (< (- crs on-course) 180)
+      :left
+      :right)))
+
+(defn bank [dif side]
+  (let [dif (if (> dif 0) dif (- 0 dif))
+        rol (if (>= dif 4) 28 6)]
+    (condp = side
+      :right (vswap! CAM assoc :roll rol)
+      :left (vswap! CAM assoc :roll (- 0 rol)))))
+
 (defn fly-to [lat lon alt crs per]
   (let [pitch (:pitch @CAM)
         roll (:roll @CAM)
@@ -76,7 +94,15 @@
                "RIGHT" (direct (+ crs 90))
                "LEFT" (direct (- crs 90))
                "UP" (direct crs)
-               "DOWN" (direct crs))]
+               "DOWN" (direct crs))
+        dif (- crs @OLD-CRS)]
+    (if (< alt 300)
+      (vswap! CAM assoc :roll 0)
+      (if (or (> dif 1)(< dif -1))
+        (do
+          (bank dif (what-side @OLD-CRS crs))
+          (vreset! OLD-CRS crs))
+        (vswap! CAM assoc :roll 0)))
     (fly-control "fly" lat lon alt head pitch roll per)))
 
 
