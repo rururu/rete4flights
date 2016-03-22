@@ -1,7 +1,7 @@
 # rete4flights
 
 Air traffic control system and flight simulator - a test example for the [rete4frames] (http://github.com/rururu/rete4frames) expert system shell.
-It uses [Flightradar24] (http://www.flightradar24.com) web service, [Leaflet] (http://leafletjs.com) JavaScript library and Cesium WebGL virtual globe and map engine (https://cesiumjs.org/).
+It uses [Flightradar24] (http://www.flightradar24.com) web service, [Leaflet] (http://leafletjs.com) JavaScript library and [Cesium] (https://cesiumjs.org/) WebGL virtual globe and map engine.
 
 ![screenshot](screenshot.jpg)
 
@@ -45,7 +45,15 @@ The command "camera"  allows the to be in the cockpit of the aircraft and enjoy 
 
 You can see other flights from the cockpit if you synchronised Cesium clock with your computer clock. Use for this a slider control in the bottom of Cesium window. Start Cesium clock using a "play" button on the "Animation" control in the bottom left corner. Do this 10-20 seconds later then on your computer clock. Other flights displayed with blue and red icons and call signs. Blue flights are following with yours, red ones are opposite.
 
-You can fly yourself using the command "Manual Control". Start a new flight and switch to manual control. Now you can input in the autopilot new values of speed, course and altitude and it execute these directives in accordance with programmed dynamics (you can change it as you like). Naturally, you can not control real flights.
+You can fly yourself using the command "Manual Control". Start a new flight, climb on board and switch to manual control. Now you can input in the autopilot new values of speed, course and altitude and it execute these directives in accordance with programmed dynamics (you can change it as you like). Naturally, you can not control real flights.
+
+Alternatively, you can start your flight at any point by similar sequence of commands in the REPL:
+```
+rete4flight.core=> (add-my-flight "R1" [40.9177 -74.7949] 45 230 15000)
+"-1"
+rete4flight.core=> (plane-move "-1" 1)
+```
+
 
 ![screenshot](screenshot2.jpg)
 
