@@ -5,12 +5,13 @@
     [compojure.core :refer [defroutes routes GET]]
     [compojure.handler :as handler]
     [compojure.route :as route]
-    [clojure.core.async :as async :refer [chan put! alts!!]]))
+    [clojure.core.async :as async :refer [chan put! alts!!]])
+  (:import java.util.Calendar))
 
 (defonce CAM (volatile! {:onboard nil
                          :id nil
                          :heading "FORWARD"
-                         :pitch -15.0
+                         :pitch -10.0
                          :roll 0.0
                          :chan nil}))
 
@@ -78,8 +79,8 @@
   (let [dif (if (> dif 0) dif (- 0 dif))
         rol (if (>= dif 4) 28 6)]
     (condp = side
-      :right (vswap! CAM assoc :roll rol)
-      :left (vswap! CAM assoc :roll (- 0 rol)))))
+      :right rol
+      :left (- 0 rol))))
 
 (defn fly-to [lat lon alt crs per]
   (let [pitch (:pitch @CAM)
@@ -95,16 +96,79 @@
                "LEFT" (direct (- crs 90))
                "UP" (direct crs)
                "DOWN" (direct crs))
-        dif (- crs @OLD-CRS)]
-    (if (< alt 300)
-      (vswap! CAM assoc :roll 0)
-      (if (or (> dif 1)(< dif -1))
-        (do
-          (bank dif (what-side @OLD-CRS crs))
-          (vreset! OLD-CRS crs))
-        (vswap! CAM assoc :roll 0)))
+        dif (- crs @OLD-CRS)
+        roll (if (and (> alt 300) (or (> dif 1)(< dif -1)))
+               (bank dif (what-side @OLD-CRS crs))
+               roll)]
+    (vreset! OLD-CRS crs)
     (fly-control "fly" lat lon alt head pitch roll per)))
 
+(defn iso8601curt []
+  (let [cld (Calendar/getInstance)
+        yar (.get cld Calendar/YEAR )
+        mon (inc (.get cld Calendar/MONTH))
+        dat (.get cld Calendar/DATE)
+        hor (.get cld Calendar/HOUR_OF_DAY)
+        min (.get cld Calendar/MINUTE)
+        sec (.get cld Calendar/SECOND)]
+    (format "%04d-%02d-%02dT%02d:%02d:%02dZ" yar mon dat hor min sec)))
+
+(def DOC-SND (volatile! true))
+
+(defn doc []
+  "{\"id\":\"document\",\"version\":\"1.0\"}")
+
+(defn location [label img-url lat lon alt]
+  (when @DOC-SND
+    (send-event "czml" (doc))
+    (vreset! DOC-SND false))
+  (let [p (str "{\"id\":\""
+               label
+               "\",\"label\":{\"scale\":0.25,\"pixelOffset\":{\"cartesian2\":[8, -8]},\"text\":\""
+               label
+               "\"},\"billboard\":{\"image\":\""
+               img-url
+               "\"},\"position\":{\"cartographicDegrees\":["
+               lon
+               ", "
+               lat
+               ", "
+               alt
+               "]}}")]
+    (send-event "czml" p)))
+
+(defn leg [label img-url scale [lat1 lon1 alt1 tim1] [lat2 lon2 alt2 tim2]]
+  (when @DOC-SND
+    (send-event "czml" (doc))
+    (vreset! DOC-SND false))
+  (let [p (str "{\"id\":\""
+               label
+               "\",\"label\":{\"scale\":"
+               (/ scale 2)
+               ",\"pixelOffset\":{\"cartesian2\":[8, -8]},\"text\":\""
+               label
+               "\"},\"billboard\":{\"scale\":"
+               scale
+               ",\"image\":\""
+               img-url
+               "\"},\"position\":{\"cartographicDegrees\":[\""
+               tim1
+               "\", "
+               lon1
+               ", "
+               lat1
+               ", "
+               alt1
+               ",\""
+               tim2
+               "\", "
+               lon2
+               ", "
+               lat2
+               ", "
+               alt2
+               "]}}")]
+    (send-event "czml" p)))
 
 
 

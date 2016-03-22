@@ -34,8 +34,8 @@
       console.log(sourceURL);
       var viewer = new Cesium.Viewer('cesiumContainer');
       var scene = viewer.scene;
-      // Do not display undersurface parts of objects
-      scene.globe.depthTestAgainstTerrain = true;
+      // Display undersurface parts of objects
+      scene.globe.depthTestAgainstTerrain = false;
       var ellipsoid = scene.globe.ellipsoid;
       var entity = viewer.entities.add({
         label : {

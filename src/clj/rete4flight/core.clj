@@ -1,6 +1,7 @@
 (ns rete4flight.core
   (:import (java.io ByteArrayOutputStream
-                    ByteArrayInputStream))
+                    ByteArrayInputStream)
+           java.util.Calendar)
   (:require [ring.adapter.jetty :as jetty]
             [compojure.core :refer [defroutes GET]]
             [compojure.handler :as handler]
@@ -42,7 +43,8 @@
                          :infos {}}))
 
 (defonce MYFS (volatile! {:all nil
-                          :infos {}})) ;; my flights
+                          :infos {}
+                          :control {}})) ;; my flights
 
 (defonce RUNWAYS (volatile! {"URE" 180 "LED" 287 "LHR" 90 "EWR" 26
                              "TAY" 269 "HEL" 228 "FRA" 70 "KEF" 180
@@ -146,6 +148,14 @@
 (defn callsign! [iod cls]
   (assoc (dat iod) 16 cls))
 
+(defn get-param [id param]
+  (case param
+    :course   (course id)
+    :coord    (coord id)
+    :speed    (speed id)
+    :altitude (altitude id)
+    (get (:all @MYFS) id)))
+
 (defn set-param! [id param val]
   (vswap! MYFS assoc-in [:all id]
           (case param
@@ -179,18 +189,19 @@
   (let [ff (corr-dat (bbx n s w e))
         nf (count ff)]
     (doseq [[id dat] ff]
-      (let [crd (coord dat)
-            crs (course dat)
-            spd (speed dat)
-            alt (altitude dat)]
+      (let [[lat lon :as crd] (coord dat)
+            alt (altitude dat)
+            p4d (if (:chan @cz/CAM) [lat lon alt (cz/iso8601curt)])]
         (rete/assert-frame ['Flight
                             'id id
                             'N (Integer/parseInt id 16)
+                            'callsign (callsign dat)
                             'coord crd
-                            'course crs
-                            'speed spd
+                            'course (course dat)
+                            'speed (speed dat)
                             'altitude alt
                             'history his
+                            'pos4d p4d
                             'state (if (> alt 0)
                                      "LEVEL"
                                      "GROUND")])))
@@ -207,6 +218,28 @@
 (defn pump-in-evt [val]
   ;;(println [:PIE val])
   (put! EVT-CHN val))
+
+;; ------------------------- Table Function --------------------------
+
+   (defn linint [x [x1 y1] [x2 y2]]
+     (float (+ y1 (/ (* (- y2 y1) (- x x1)) (- x2 x1)))))
+
+   (defn tabfun [x table]
+     ;; left and right borders in table are exclusive
+     (let [[lo hi] (split-with #(< (first %) x) table)]
+       (if (seq lo)
+         (if (seq hi)
+           (linint x (last lo) (first hi))
+           [:UB (second (last table))])
+         [:LB (second (first table))])))
+
+   (defn i-mono-tabfun [y table]
+     ;; inverse function, only for monotone(!!!) functions
+     (tabfun y (map #(vector (second %)(first %)) table)))
+
+   (defn smooth-tabfun [x table]
+     (let [res (tabfun x table)]
+       (if (vector? res) (second res) res)))
 
 ;; ------------------------- Repeaters -------------------------------
 
@@ -243,7 +276,32 @@
             (<! (timeout MYFS-INTL))
             (recur (- millis MYFS-INTL)))))))
 
+(defn grad-mono-change [id param target table]
+  "Changes parameter gradually in accordance with table,
+  argument of table value is number of intervals MYFS-INTL,
+  only for monotone (!!!) table functions"
+  (if-let [y (get-param id param)]
+    (if (not= y target)
+      (let [[pred step] (if (> y target) [<= dec] [>= inc])]
+        (go (loop [x (int (i-mono-tabfun y table)) y y]
+              (if (pred y target)
+                (set-param! id param (int target))
+                (do
+                  (<! (timeout MYFS-INTL))
+                  (let [x (step x)
+                        y (smooth-tabfun x table)]
+                    (set-param! id param (int y))
+                    (recur x y))))))))))
+
 ;; --------------------------------------------------------------------
+
+(defn current-time []
+  (.getTimeInMillis (Calendar/getInstance)))
+
+(defn cur-hrs-min []
+  (let [cld (Calendar/getInstance)]
+    [(.get cld Calendar/HOUR_OF_DAY)
+     (.get cld Calendar/MINUTE)]))
 
 (defn write-transit [x]
   (let [baos (ByteArrayOutputStream.)
@@ -445,6 +503,7 @@
               (speed! spd)
               (altitude! alt))]
     (vswap! MYFS assoc-in [:all id] mf)
+    (vswap! MYFS assoc-in [:control id] :auto)
     id))
 
 (defn runway [iata]
@@ -511,11 +570,33 @@
     "off"(cz/stop-sse-server)
     true)
   (if-let [onb (params :onboard)]
-    (vswap! cz/CAM assoc :id (id-by-call onb)))
+    (let [id (id-by-call onb)]
+      (vswap! cz/CAM assoc :id id)
+      (vreset! cz/DOC-SND true)
+      (rete/assert-frame ['Camera
+                          'onboard id
+                          'time (current-time)])))
   (condp = (params :heading)
     "UP" (vswap! cz/CAM assoc :pitch 90.0)
     "DOWN" (vswap! cz/CAM assoc :pitch -90.0)
-    (vswap! cz/CAM assoc :pitch -15.0))
+    nil true
+    (vswap! cz/CAM assoc :pitch 0.0))
+  "")
+
+(defn manual [params]
+  (println [:MANUAL params])
+  (if-let [id (get @cz/CAM :id)]
+    (if (.startsWith id "-") ;; only my flights can be manually controlled
+      (if-let [man (params :manual)]
+        (condp = man
+          "on" (vswap! MYFS assoc-in [:control id] :manual)
+          "off" (vswap! MYFS assoc-in [:control id] :auto))
+        (if-let [spd (params :speed)]
+          (grad-mono-change id :speed (read-string spd) [[0 0][1800 600]])
+          (if-let [crs (params :course)]
+            (turn id (read-string crs))
+            (if-let [alt (params :altitude)]
+              (grad-mono-change id :altitude (read-string alt) [[0 0][1200 44000]])))))))
   "")
 
 ;; --------------------- Routes -----------------------------
@@ -534,6 +615,7 @@
   (GET "/contries/" [] (contries))
   (GET "/airports/" [& params] (airports-for-country params))
   (GET "/camera/" [& params] (camera params))
+  (GET "/manual/" [& params] (manual params))
   (GET "/czml/" [] (cz/events))
   (GET "/call/" [& params] (call params))
   (route/files "/" (do (println [:ROOT-FILES ROOT]) {:root ROOT}))
@@ -570,4 +652,4 @@
   (open-in-browser!))
 
 
-
+;; (rete/log-lst "beta-net-plan.txt" rete/BPLAN)

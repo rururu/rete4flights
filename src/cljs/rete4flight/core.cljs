@@ -38,6 +38,7 @@
 (def URL-CNS "http://localhost:3000/contries/")
 (def URL-APS "http://localhost:3000/airports/")
 (def URL-CAM "http://localhost:3000/camera/")
+(def URL-AUT "http://localhost:3000/manual/")
 (def URL-OSM "http://{s}.tile.osm.org/{z}/{x}/{y}.png")
 (def URL-GST "http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}")
 (def URL-GHB "http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}")
@@ -164,6 +165,7 @@
     (vswap! mapobs assoc-in [id :marker] mrk)
     (vswap! mapobs assoc-in [id :radhrs] (* spd nmrad))
     (vswap! mapobs assoc-in [id :altitude] alt)
+    (vswap! mapobs assoc-in [callsign :laloalcs] [lat lon alt crs spd])
     (.addTo mrk @chart)
     (set! (.. mrk -options -angle) crs)
     (.bindPopup mrk (mapobPopup id callsign alt lat lon crs spd sta))
@@ -314,6 +316,18 @@
                   (<! (timeout MYFS-INTL))
                   (recur (course id))))))))))
 
+(def CAMERA :off)
+(def ONBOARD nil)
+
+(defn display-flight-data []
+  (if (= CAMERA :on)
+    (when-let [[lat lon alt crs spd] (get-in @mapobs [ONBOARD :laloalcs])]
+      (set-html! "course" (str "Course: " crs))
+      (set-html! "speed" (str "Speed: " spd))
+      (set-html! "altitude" (str "Altitude: " alt))
+      (set-html! "lat" (str "Latitude: " (format "%.4f" lat)))
+      (set-html! "lon" (str "Longitude: " (format "%.4f" lon))))))
+
 ;; ------------------------ Event handler ---------------------------
 
 (defn event-handler [response]
@@ -348,7 +362,8 @@
 
 (defn check-events []
   (GET URL-EVT {:handler event-handler
-                 :error-handler error-handler}))
+                 :error-handler error-handler})
+  (display-flight-data))
 
 (defn no-handler [response])
 
@@ -373,17 +388,62 @@
   (GET URL-SFW {:handler no-handler
               :error-handler error-handler}))
 
+;; ----------------------------- Autopilot ----------------------------
+
+(def MANUAL :off)
+
+(defn manual-show []
+  (when (= CAMERA :on)
+    (set-html! "course-fld" (str "<input value='0' style='width:40px' "
+                                 "onchange='javascript:rete4flight.core.manualcrs(this.value)'>"))
+    (set-html! "speed-fld" (str "<input value='0' style='width:40px' "
+                                "onchange='javascript:rete4flight.core.manualspd(this.value)'>"))
+    (set-html! "altitude-fld" (str "<input value='0' style='width:40px' "
+                                   "onchange='javascript:rete4flight.core.manualalt(this.value)'>"))))
+
+(defn manual-hide []
+  (set-html! "course-fld" "")
+  (set-html! "speed-fld" "")
+  (set-html! "altitude-fld" ""))
+
+(defn manual []
+  (cond
+    (= MANUAL :off)
+    (do (manual-show)
+      (GET (str URL-AUT "?manual=on") {:handler no-handler :error-handler error-handler})
+      (def MANUAL :on))
+    (= MANUAL :on)
+    (do (manual-hide)
+      (GET (str URL-AUT "?manual=off") {:handler no-handler :error-handler error-handler})
+      (def MANUAL :off))))
+
+(defn manualcrs [crs]
+  (let [url (str URL-AUT "?course=" crs)]
+    (GET url {:handler no-handler :error-handler error-handler})))
+
+(defn manualspd [spd]
+  (let [url (str URL-AUT "?speed=" spd)]
+    (GET url {:handler no-handler :error-handler error-handler})))
+
+(defn manualalt [alt]
+  (let [url (str URL-AUT "?altitude=" alt)]
+    (GET url {:handler no-handler :error-handler error-handler})))
+
 ;; ------------------------ camera control ---------------------------
 
-(def CAMERA :off)
-
 (defn camera-show []
+  (set-html! "autopilot" "<h4>Autopilot</h4>")
+  (set-html! "course" "Course: 000")
+  (set-html! "speed" "Speed: 000")
+  (set-html! "altitude" "Altitude: 00000")
+  (set-html! "lat" "Latitude: 00.0000")
+  (set-html! "lon" "Longitude: 00.0000")
   (set-html! "camera" "<h4>Camera</h4>")
   (set-html! "onboard" "Onboard:")
   (set-html! "onboard-fld" (str "<input value='callsign' style='width:90px' "
                                 "onchange='javascript:rete4flight.core.camonb(this.value)'>"))
   (set-html! "heading" "Heading:")
-  (set-html! "heading-fld" "<select onchange='javascript:rete4flight.core.camhea(this.value)'>
+  (set-html! "heading-fld" "<select onchange='javascript:rete4flight.core.camhea(this.value)' style='width:96px'>
              <option value='FORWARD'>FORWARD</option>
              <option value='BACKWARD'>BACKWARD</option>
              <option value='RIGHT'>RIGHT</option>
@@ -392,13 +452,19 @@
              <option value='DOWN'>DOWN</option>
              </select>")
   (set-html! "pitch" "Pitch:")
-  (set-html! "pitch-fld" (str "<input value='-15' style='width:90px' "
+  (set-html! "pitch-fld" (str "<input value='-10' style='width:90px' "
                               "onchange='javascript:rete4flight.core.campit(this.value)'>"))
   (set-html! "roll" "Roll:")
   (set-html! "roll-fld" (str "<input value='0' style='width:90px' "
                              "onchange='javascript:rete4flight.core.camrol(this.value)'>")))
 
 (defn camera-hide []
+  (set-html! "autopilot" "")
+  (set-html! "course" "")
+  (set-html! "speed" "")
+  (set-html! "altitude" "")
+  (set-html! "lat" "")
+  (set-html! "lon" "")
   (set-html! "camera" "")
   (set-html! "onboard" "")
   (set-html! "onboard-fld" "")
@@ -407,7 +473,8 @@
   (set-html! "pitch" "")
   (set-html! "pitch-fld" "")
   (set-html! "roll" "")
-  (set-html! "roll-fld" ""))
+  (set-html! "roll-fld" "")
+  (manual-hide))
 
 (defn camera []
   (cond
@@ -422,7 +489,8 @@
 
 (defn camonb [obj]
   (let [url (str URL-CAM "?onboard=" obj)]
-    (GET url {:handler no-handler :error-handler error-handler})))
+    (GET url {:handler no-handler :error-handler error-handler})
+    (def ONBOARD obj)))
 
 (defn camhea [hea]
   (let [url (str URL-CAM "?heading=" hea)]
@@ -595,6 +663,7 @@
   			<option value='move-to'>Move to Airport</option>
   			<option value='schedule'>Schedule Flight</option>
   			<option value='camera'>Camera</option>
+  			<option value='manual'>Manual Control</option>
   			<option value='clear'>Clear</option>
 		</select>")
 
@@ -606,7 +675,8 @@
     "clear" (clear-all)
     "move-to" (move-to)
     "schedule" (schedule)
-    "camera" (camera))
+    "camera" (camera)
+    "manual" (manual))
   (set-html! "commands" COMMANDS))
 
 (defn remote-call []

@@ -1,6 +1,6 @@
 ((templates
   (Flight id coord course speed altitude
-          N history state)
+          N history state pos4d callsign)
   (History moment memory)
   (Check status)
   (Follow id)
@@ -11,7 +11,7 @@
               climb descent
               direct-flight final-coord)
   (Last id time history)
-  (Test id param value))
+  (Camera onboard time))
 
  (rules
   (fl:MoveHistory
@@ -21,6 +21,14 @@
                 (> ?m2 ?m1))
    =>
    (retract ?h1))
+
+  (fl:MoveCamera
+   1
+   ?c1 (Camera time ?t1)
+   ?c2 (Camera time ?t2
+               (> ?t2 ?t1))
+   =>
+   (retract ?c1))
 
   (fl:ForegetOldFlights
    0
@@ -75,10 +83,11 @@
    (Check status "STATE")
    (History moment ?now)
    (Flight id ?id
+           callsign ?cs
            history ?now
            state ?sta)
    =>
-   (fl/put-on-map ?id ?sta))
+   (fl/put-on-map ?id ?cs ?sta))
 
   (fl:CheckStateGone
    -1
@@ -97,6 +106,7 @@
    (Check status "INTERSECTION")
    (History moment ?now)
    (Flight id ?id1
+           callsign ?cs1
            coord ?crd1
            course ?crs1
            speed ?spd1
@@ -104,6 +114,7 @@
            history ?now
            N ?n1)
    (Flight id ?id2
+           callsign ?cs2
            coord ?crd2
            course ?crs2
            speed ?spd2
@@ -121,13 +132,32 @@
    (when-let [[dmin tmin] (fl/intersect?
                             ?crd1 ?crs1 ?spd1 ?crd2 ?crs2 ?spd2 ?id1 ?id2)]
      (println [:Dmin dmin :Tmin tmin])
-     (fl/pom-and-link ?id1 ?id2 dmin tmin)))
+     (fl/pom-and-link ?id1 ?cs1 ?id2 ?cs2 dmin tmin)))
 
   (fl:RetractCheck
    -2
    ?ch (Check)
    =>
    (retract ?ch))
+
+  (fl:CZML-LegGeneration
+   0
+   (Camera onboard ?id1)
+   (Flight id ?id1 coord ?c1 course ?crs1)
+   (Flight id ?id2 coord ?c2 altitude ?a2 pos4d ?p2 history ?h2)
+   (Flight id ?id2 coord ?c3 altitude ?a3 pos4d ?p3 history ?now course ?crs3 callsign ?cs)
+   (History moment ?now
+            (= (- ?now ?h2) 1))
+   =>
+   (let [dis (fl/distance-nm ?c1 ?c3)]
+     (if (< dis 10)
+       (fl/leg ?cs
+               (fl/smooth-tabfun dis [[0 1.0][20 0.1]])
+               (fl/following ?crs1 ?crs3)
+               ?p2 ?p3))))
+
+
+;; ------------------------ MyFlights --------------------
 
   (fl:ScheduleFlight
    0
@@ -139,7 +169,7 @@
             (fl/time-passed? ?tim))
    =>
    (println [:SCHEDULE-FLIGHT ?id ?tim ?frm ?to])
-   (let [start ((fl/current-time) :millis)]
+   (let [start (fl/current-time)]
      (asser Last id ?id
             time start
             history ?now)
@@ -154,6 +184,114 @@
             deceleration (fl/decel-plan start ?frm ?to)
             final-coord (nth ?to 1))
      (retract ?sd)))
+
+  (fl:MyFlight-Takeoff
+   0
+   ?fp (FlightPlan id ?id
+                   takeoff ?toff-plan
+                   (vector? ?toff-plan))
+   (History moment ?now
+            (fl/exists? ?id))
+   =>
+   ;; Takeoff done when min speed and min altitude reached
+   (let [[crs-tab min-spd min-alt] ?toff-plan
+         curt (fl/current-time)
+         pcrs (fl/tabfun curt crs-tab)]
+     (if (number? pcrs)
+       (fl/auto-control ?id :course (int pcrs))
+       (if (and (> (fl/get-param ?id :speed) min-spd)
+                (> (fl/get-param ?id :altitude) min-alt))
+         (modify ?fp takeoff "DONE")))))
+
+  (fl:MyFlight-Initial-Turn
+   0
+   ?fp (FlightPlan id ?id
+                   takeoff "DONE"
+                   initial-turn ?it-plan
+                   (vector? ?it-plan))
+   (History moment ?now
+            (fl/exists? ?id))
+   =>
+   ;; Initial turn done when course equal to bearing on destination airport
+   (let [[fst scd] ?it-plan]
+     (cond
+      (number? fst)
+      (do
+        (fl/turn ?id fst)
+        (modify ?fp initial-turn ["TURN-ON" fst]))
+      (and (= fst "TURN-ON")
+           (= (fl/get-param ?id :course) scd))
+      (modify ?fp
+              initial-turn "DONE"
+              direct-flight "AUTOPILOT"))))
+
+  (fl:MyFlight-Climb
+   0
+   ?fp (FlightPlan id ?id
+                   climb ?cli-plan)
+   (History moment ?now
+            ((vector? ?cli-plan)
+             (fl/exists? ?id)))
+   =>
+   (let [curt (fl/current-time)
+         calt (fl/tabfun curt ?cli-plan)]
+     (if (number? calt)
+       (fl/auto-control ?id :altitude (int calt))
+       (do
+         (fl/auto-control ?id :altitude (int (second calt)))
+         (modify ?fp climb "DONE")))))
+
+  (fl:MyFlight-Acceleration
+   0
+   ?fp (FlightPlan id ?id
+                   acceleration ?acl-plan)
+   (History moment ?now
+            ((vector? ?acl-plan)
+             (fl/exists? ?id)))
+   =>
+   (let [curt (fl/current-time)
+         cspd (fl/tabfun curt ?acl-plan)]
+     (if (number? cspd)
+       (fl/auto-control ?id :speed (int cspd))
+       (do
+         (fl/auto-control ?id :speed (int (second cspd)))
+         (modify ?fp acceleration "DONE")))))
+
+  (fl:MyFlight-Direct-Flight
+    0
+    ?fp (FlightPlan id ?id
+                    direct-flight "AUTOPILOT"
+                    final-coord ?fcrd)
+   (History moment ?now
+            (fl/exists? ?id))
+    =>
+    (let [ccrd (fl/get-param ?id :coord)
+          crs (fl/get-param ?id :course)
+          bea (int (fl/bear-deg ccrd ?fcrd))]
+      (if (not= crs bea)
+        (fl/auto-control ?id :course bea))))
+
+  (fl:MyFlight-Deceleration
+   0
+   ?fp (FlightPlan id ?id
+                   acceleration ?acl
+                   deceleration ?dcl-plan
+                   final-coord ?fcrd)
+   (History moment ?now
+            ((vector? ?dcl-plan)
+             (fl/exists? ?id)))
+   =>
+   (let [ccrd (fl/get-param ?id :coord)
+         dist (fl/distance-nm ccrd ?fcrd)
+         pspd (fl/tabfun dist ?dcl-plan)]
+     (if (number? pspd)
+       (when (< pspd (fl/get-param ?id :speed))
+         (fl/auto-control ?id :speed (int pspd))
+         (if (vector? ?acl)
+           (modify ?fp acceleration "DONE")))
+       (when (and (= ?acceleration "DONE") (= (first pspd) :LB))
+         (fl/auto-control ?id :speed (int (second pspd)))
+         (modify ?fp deceleration "DONE")))))
 
    (fl:MyFlight-Descent
      0
@@ -172,14 +310,14 @@
            [ftpt _] ?fint]
        (if (number? palt)
          (when (< palt (fl/get-param ?id :altitude))
-           (fl/set-param! ?id :altitude (int palt))
+           (fl/auto-control ?id :altitude (int palt))
            (if (vector? ?clm)
              (modify ?fp climb "DONE"))
            (when (not= ?fcrd ftpt)
              (println [:TURN-ON-FT-MARKER ftpt :ID ?id])
              (modify ?fp final-coord ftpt))) ;; turn on final turn start point
          (when (and (= ?clm "DONE") (= (first palt) :LB))
-           (fl/set-param! ?id :altitude (int (second palt)))
+           (fl/auto-control ?id :altitude (int (second palt)))
            (modify ?fp descent "DONE")))))
 
   (fl:MyFlight-Final-Turn
@@ -223,129 +361,13 @@
      (if (< dist 0.05)
        (fl/arrived ?id iata)
        (do
-         (fl/set-param! ?id :course (int (fl/bear-deg ccrd crd2)))
-         (fl/set-param! ?id :speed (int (fl/smooth-tabfun dist spd-tab)))
-         (fl/set-param! ?id :altitude (int (fl/smooth-tabfun dist alt-tab)))))))
-
-  (fl:MyFlight-Takeoff
-   0
-   ?fp (FlightPlan id ?id
-                   takeoff ?toff-plan
-                   (vector? ?toff-plan))
-   (History moment ?now
-            (fl/exists? ?id))
-   =>
-   (let [[crs-tab min-spd min-alt] ?toff-plan
-         curt ((fl/current-time) :millis)
-         pcrs (fl/tabfun curt crs-tab)]
-     (if (number? pcrs)
-       (fl/set-param! ?id :course (int pcrs))
-       (if (and (> (fl/get-param ?id :speed) min-spd)
-                (> (fl/get-param ?id :altitude) min-alt))
-         (modify ?fp takeoff "DONE")))))
-
-  (fl:MyFlight-Initial-Turn
-   0
-   ?fp (FlightPlan id ?id
-                   takeoff "DONE"
-                   initial-turn ?it-plan
-                   (vector? ?it-plan))
-   (History moment ?now
-            (fl/exists? ?id))
-   =>
-   (let [[fst scd] ?it-plan]
-     (cond
-      (number? fst)
-      (do
-        (fl/turn ?id fst)
-        (modify ?fp initial-turn ["TURN-ON" fst]))
-      (and (= fst "TURN-ON")
-           (= (fl/get-param ?id :course) scd))
-      (modify ?fp
-              initial-turn "DONE"
-              direct-flight "AUTOPILOT"))))
-
-  (fl:MyFlight-Direct-Flight
-    0
-    ?fp (FlightPlan id ?id
-                    direct-flight "AUTOPILOT"
-                    final-coord ?fcrd)
-    (History moment ?now)
-    =>
-    (let [ccrd (fl/get-param ?id :coord)
-          crs (fl/get-param ?id :course)
-          bea (int (fl/bear-deg ccrd ?fcrd))]
-      (if (not= crs bea)
-        (fl/set-param! ?id :course bea))))
-
-  (fl:MyFlight-Climb
-   0
-   ?fp (FlightPlan id ?id
-                   climb ?cli-plan)
-   (History moment ?now
-            ((vector? ?cli-plan)
-             (fl/exists? ?id)))
-   =>
-   (let [curt ((fl/current-time) :millis)
-         calt (fl/tabfun curt ?cli-plan)]
-     (if (number? calt)
-       (fl/set-param! ?id :altitude (int calt))
-       (do
-         (fl/set-param! ?id :altitude (int (second calt)))
-         (modify ?fp climb "DONE")))))
-
-  (fl:MyFlight-Acceleration
-   0
-   ?fp (FlightPlan id ?id
-                   acceleration ?acl-plan)
-   (History moment ?now
-            ((vector? ?acl-plan)
-             (fl/exists? ?id)))
-   =>
-   (let [curt ((fl/current-time) :millis)
-         cspd (fl/tabfun curt ?acl-plan)]
-     (if (number? cspd)
-       (fl/set-param! ?id :speed (int cspd))
-       (do
-         (fl/set-param! ?id :speed (int (second cspd)))
-         (modify ?fp acceleration "DONE")))))
-
-  (fl:MyFlight-Deceleration
-   0
-   ?fp (FlightPlan id ?id
-                   acceleration ?acl
-                   deceleration ?dcl-plan
-                   final-coord ?fcrd)
-   (History moment ?now
-            ((vector? ?dcl-plan)
-             (fl/exists? ?id)))
-   =>
-   (let [ccrd (fl/get-param ?id :coord)
-         dist (fl/distance-nm ccrd ?fcrd)
-         pspd (fl/tabfun dist ?dcl-plan)]
-     (if (number? pspd)
-       (when (< pspd (fl/get-param ?id :speed))
-         (fl/set-param! ?id :speed (int pspd))
-         (if (vector? ?acl)
-           (modify ?fp acceleration "DONE")))
-       (when (and (= ?acceleration "DONE") (= (first pspd) :LB))
-         (fl/set-param! ?id :speed (int (second pspd)))
-         (modify ?fp deceleration "DONE")))))
-
-  (fl:TestValue
-   0
-   ?tst (Test id ?id
-              param ?p
-              value ?v)
-   =>
-   (fl/set-param! ?id ?p ?v)
-   (println [:GET ?id ?p (fl/get-param ?id ?p)])
-   (retract ?tst)))
+         (fl/auto-control ?id :course (int (fl/bear-deg ccrd crd2)))
+         (fl/auto-control ?id :speed (int (fl/smooth-tabfun dist spd-tab)))
+         (fl/auto-control ?id :altitude (int (fl/smooth-tabfun dist alt-tab))))))))
 
 ;; ------------------------ Functions -------------------------
  (functions
    (ns fl
-     (:import java.util.Calendar)
      (:require [rete4flight.core :as core]
                [rete4flight.geo :as geo]
                [rete4flight.cesium :as cz]))
@@ -353,43 +375,29 @@
    (def TIME 0.1) ;; forcast time for intersection in hours (6 min)
    (def DMIN 0.215) ;; distance of intersection in nautical miles (~400 m)
 
-   (defn linint [x [x1 y1] [x2 y2]]
-     (float (+ y1 (/ (* (- y2 y1) (- x x1)) (- x2 x1)))))
-
    (defn tabfun [x table]
-     ;; left and right borders in table are exclusive
-     (let [[lo hi] (split-with #(< (first %) x) table)]
-       (if (seq lo)
-         (if (seq hi)
-           (linint x (last lo) (first hi))
-           [:UB (second (last table))])
-         [:LB (second (first table))])))
+     (core/tabfun x table))
 
    (defn smooth-tabfun [x table]
-     (let [res (tabfun x table)]
-       (if (vector? res) (second res) res)))
+     (core/smooth-tabfun x table))
 
    (defn get-param [id param]
-     (case param
-       :course   (core/course id)
-       :coord    (core/coord id)
-       :speed    (core/speed id)
-       :altitude (core/altitude id)
-       (get (:all @core/MYFS) id)))
+     (core/get-param id param))
 
-   (defn set-param! [id param val]
-     (core/set-param! id param val))
+   (defn auto-control [id param val]
+     (if (= (get-in @core/MYFS [:control id]) :auto)
+       (core/set-param! id param val)))
 
    (defn exists? [id]
      (get (:all @core/MYFS) id))
 
-   (defn put-on-map [id sta]
+   (defn put-on-map [id cs sta]
      (if-let [dat (or (get (:all @core/FRS) id)
                       (get (:all @core/MYFS) id))]
        (let [[lat lon] (core/coord dat)]
          (core/pump-in-evt {:event :create-mapob
                             :id id
-                            :callsign (core/callsign dat)
+                            :callsign cs
                             :lat lat
                             :lon lon
                             :crs (core/course dat)
@@ -400,18 +408,16 @@
    (defn put-off-map [id]
      (core/pump-in-evt {:event :delete-mapob :id id}))
 
-   (defn pom-and-link [id1 id2 dmin tmin]
-     (let [cs1 (core/callsign id1)
-           cs2 (core/callsign id2)]
-       (put-on-map id1 "INTERSECT")
-       (put-on-map id2 "INTERSECT")
-       (core/pump-in-evt {:event :add-link
-                          :ids [id1 id2]
-                          :options {:weight 4
-                                    :title (str cs1 " - " cs2)
-                                    :color "red"
-                                    :dmin dmin
-                                    :tmin tmin}})))
+  (defn pom-and-link [id1 cs1 id2 cs2 dmin tmin]
+    (put-on-map id1 cs1 "INTERSECT")
+    (put-on-map id2 cs1 "INTERSECT")
+    (core/pump-in-evt {:event :add-link
+                       :ids [id1 id2]
+                       :options {:weight 4
+                                 :title (str cs1 " - " cs2)
+                                 :color "red"
+                                 :dmin dmin
+                                 :tmin tmin}}))
 
    (defn set-map-view [[lat lon]]
      (core/pump-in-evt {:event :set-map-view
@@ -446,21 +452,12 @@
    ;; ------------------------ Current time -----------------------------
 
    (defn current-time []
-     (let [cld (Calendar/getInstance)]
-       {:year (.get cld Calendar/YEAR)
-        :month (inc (.get cld Calendar/MONTH))
-        :date (.get cld Calendar/DATE)
-        :hour (.get cld Calendar/HOUR_OF_DAY)
-        :minute (.get cld Calendar/MINUTE)
-        :second (.get cld Calendar/SECOND)
-        :millis (.getTimeInMillis cld)}))
+     (core/current-time))
 
    (defn time-passed? [[hour min]]
      (let [hr0 (read-string hour)
            mn0 (read-string min)
-           crt (current-time)
-           chr (crt :hour)
-           cmn  (crt :minute)]
+           [chr cmn] (core/cur-hrs-min)]
        (and (>= chr hr0) (>= cmn mn0))))
 
    (defn adjust-course [crs1 can1]
@@ -502,9 +499,19 @@
 
    (defn arrived [id iata]
      (println [:ARRIVED :ID id :AIRPORT iata])
-     (set-param! id nil nil) ;; clear my flight
+     (vswap! core/MYFS assoc-in [:all id] nil) ;; clear my flight
      (if (= id @core/FOLLOW-ID)
        (core/stopfollow)))
+
+  (defn leg [label scale following p4d1 p4d2]
+    (let [img (if following
+                "http://localhost:3000/img/b.png"
+                "http://localhost:3000/img/r.png")]
+      (cz/leg label img scale p4d1 p4d2)))
+
+   (defn following [crs1 crs2]
+     (let [dif (Math/abs (- crs2 crs1))]
+       (or (< dif 90)(> dif 270))))
 
    (defn shift-plan [curt tab]
      (vec (map #(vector (+ curt (first %)) (second %)) tab)))
@@ -512,7 +519,6 @@
    ;; ----------------------- Flight Plans -----------------------
 
    (defn initial-turn [start-msec from to]
-     ;; plan of start turn
      (let [[_ crd1 _] from
            [_ crd2 _] to
            bea1 (int (bear-deg crd1 crd2))]

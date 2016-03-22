@@ -34876,6 +34876,7 @@ rete4flight.core.URL_SFW = "http://localhost:3000/stopfollow/";
 rete4flight.core.URL_CNS = "http://localhost:3000/contries/";
 rete4flight.core.URL_APS = "http://localhost:3000/airports/";
 rete4flight.core.URL_CAM = "http://localhost:3000/camera/";
+rete4flight.core.URL_AUT = "http://localhost:3000/manual/";
 rete4flight.core.URL_OSM = "http://{s}.tile.osm.org/{z}/{x}/{y}.png";
 rete4flight.core.URL_GST = "http://{s}.google.com/vt/lyrs\x3dm\x26x\x3d{x}\x26y\x3d{y}\x26z\x3d{z}";
 rete4flight.core.URL_GHB = "http://{s}.google.com/vt/lyrs\x3ds,h\x26x\x3d{x}\x26y\x3d{y}\x26z\x3d{z}";
@@ -35058,6 +35059,7 @@ rete4flight.core.create_mapob = function(a, b, c, d, e, f, g, h) {
   cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "marker", "marker", 865118313)], null), k));
   cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "radhrs", "radhrs", -1542336081)], null), f * rete4flight.core.nmrad));
   cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "altitude", "altitude", 463588637)], null), g));
+  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [b, new cljs.core.Keyword(null, "laloalcs", "laloalcs", 1578251860)], null), new cljs.core.PersistentVector(null, 5, 5, cljs.core.PersistentVector.EMPTY_NODE, [c, d, g, e, f], null)));
   k.addTo(cljs.core.deref.call(null, rete4flight.core.chart));
   k.options.angle = e;
   k.bindPopup(rete4flight.core.mapobPopup.call(null, a, b, g, c, d, e, f, h));
@@ -35150,8 +35152,8 @@ rete4flight.core.add_trail = function(a, b, c, d) {
             }
             if (2 === c) {
               var c = b[2], e = cljs.core.deref.call(null, rete4flight.core.chart).removeLayer(g), f = cljs.core._deref.call(null, rete4flight.core.trails), f = cljs.core.dissoc.call(null, f, a), f = cljs.core._vreset_BANG_.call(null, rete4flight.core.trails, f);
-              b[7] = e;
-              b[8] = c;
+              b[7] = c;
+              b[8] = e;
               return cljs.core.async.impl.ioc_helpers.return_chan.call(null, b, f);
             }
             return null;
@@ -35250,8 +35252,8 @@ rete4flight.core.add_link = function(a, b) {
               }
               if (2 === c) {
                 var c = b[2], d = cljs.core.deref.call(null, rete4flight.core.chart).removeLayer(g), f = cljs.core._deref.call(null, rete4flight.core.links), f = cljs.core.dissoc.call(null, f, a), f = cljs.core._vreset_BANG_.call(null, rete4flight.core.links, f);
-                b[7] = d;
-                b[8] = c;
+                b[7] = c;
+                b[8] = d;
                 return cljs.core.async.impl.ioc_helpers.return_chan.call(null, b, f);
               }
               return null;
@@ -35519,6 +35521,22 @@ rete4flight.core.turn = function(a, b) {
   }
   return null;
 };
+rete4flight.core.CAMERA = new cljs.core.Keyword(null, "off", "off", 606440789);
+rete4flight.core.ONBOARD = null;
+rete4flight.core.display_flight_data = function() {
+  if (cljs.core._EQ_.call(null, rete4flight.core.CAMERA, new cljs.core.Keyword(null, "on", "on", 173873944))) {
+    var a = cljs.core.get_in.call(null, cljs.core.deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [rete4flight.core.ONBOARD, new cljs.core.Keyword(null, "laloalcs", "laloalcs", 1578251860)], null));
+    if (cljs.core.truth_(a)) {
+      var b = cljs.core.nth.call(null, a, 0, null), c = cljs.core.nth.call(null, a, 1, null), d = cljs.core.nth.call(null, a, 2, null), e = cljs.core.nth.call(null, a, 3, null), a = cljs.core.nth.call(null, a, 4, null);
+      rete4flight.core.set_html_BANG_.call(null, "course", [cljs.core.str("Course: "), cljs.core.str(e)].join(""));
+      rete4flight.core.set_html_BANG_.call(null, "speed", [cljs.core.str("Speed: "), cljs.core.str(a)].join(""));
+      rete4flight.core.set_html_BANG_.call(null, "altitude", [cljs.core.str("Altitude: "), cljs.core.str(d)].join(""));
+      rete4flight.core.set_html_BANG_.call(null, "lat", [cljs.core.str("Latitude: "), cljs.core.str(rete4flight.core.format.call(null, "%.4f", b))].join(""));
+      return rete4flight.core.set_html_BANG_.call(null, "lon", [cljs.core.str("Longitude: "), cljs.core.str(rete4flight.core.format.call(null, "%.4f", c))].join(""));
+    }
+  }
+  return null;
+};
 rete4flight.core.event_handler = function(a) {
   for (var b = cljs.core.seq.call(null, rete4flight.core.read_transit.call(null, a)), c = null, d = 0, e = 0;;) {
     if (e < d) {
@@ -35668,7 +35686,8 @@ rete4flight.core.error_handler = function(a) {
   return cljs.core.println.call(null, [cljs.core.str("AJAX ERROR: "), cljs.core.str(a), cljs.core.str(" "), cljs.core.str(b)].join(""));
 };
 rete4flight.core.check_events = function() {
-  return ajax.core.GET.call(null, rete4flight.core.URL_EVT, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.event_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
+  ajax.core.GET.call(null, rete4flight.core.URL_EVT, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.event_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
+  return rete4flight.core.display_flight_data.call(null);
 };
 rete4flight.core.no_handler = function(a) {
   return null;
@@ -35688,19 +35707,63 @@ rete4flight.core.follow = function(a) {
 rete4flight.core.stopfollow = function() {
   return ajax.core.GET.call(null, rete4flight.core.URL_SFW, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
 };
-rete4flight.core.CAMERA = new cljs.core.Keyword(null, "off", "off", 606440789);
+rete4flight.core.MANUAL = new cljs.core.Keyword(null, "off", "off", 606440789);
+rete4flight.core.manual_show = function() {
+  return cljs.core._EQ_.call(null, rete4flight.core.CAMERA, new cljs.core.Keyword(null, "on", "on", 173873944)) ? (rete4flight.core.set_html_BANG_.call(null, "course-fld", [cljs.core.str("\x3cinput value\x3d'0' style\x3d'width:40px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.manualcrs(this.value)'\x3e")].join("")), rete4flight.core.set_html_BANG_.call(null, "speed-fld", [cljs.core.str("\x3cinput value\x3d'0' style\x3d'width:40px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.manualspd(this.value)'\x3e")].join("")), 
+  rete4flight.core.set_html_BANG_.call(null, "altitude-fld", [cljs.core.str("\x3cinput value\x3d'0' style\x3d'width:40px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.manualalt(this.value)'\x3e")].join(""))) : null;
+};
+rete4flight.core.manual_hide = function() {
+  rete4flight.core.set_html_BANG_.call(null, "course-fld", "");
+  rete4flight.core.set_html_BANG_.call(null, "speed-fld", "");
+  return rete4flight.core.set_html_BANG_.call(null, "altitude-fld", "");
+};
+rete4flight.core.manual = function() {
+  if (cljs.core._EQ_.call(null, rete4flight.core.MANUAL, new cljs.core.Keyword(null, "off", "off", 606440789))) {
+    rete4flight.core.manual_show.call(null), ajax.core.GET.call(null, [cljs.core.str(rete4flight.core.URL_AUT), cljs.core.str("?manual\x3don")].join(""), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null)), rete4flight.core.MANUAL = new cljs.core.Keyword(null, "on", "on", 173873944);
+  } else {
+    if (cljs.core._EQ_.call(null, rete4flight.core.MANUAL, new cljs.core.Keyword(null, "on", "on", 173873944))) {
+      rete4flight.core.manual_hide.call(null), ajax.core.GET.call(null, [cljs.core.str(rete4flight.core.URL_AUT), cljs.core.str("?manual\x3doff")].join(""), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null)), rete4flight.core.MANUAL = new cljs.core.Keyword(null, "off", "off", 606440789);
+    } else {
+      return null;
+    }
+  }
+};
+rete4flight.core.manualcrs = function(a) {
+  a = [cljs.core.str(rete4flight.core.URL_AUT), cljs.core.str("?course\x3d"), cljs.core.str(a)].join("");
+  return ajax.core.GET.call(null, a, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
+};
+rete4flight.core.manualspd = function(a) {
+  a = [cljs.core.str(rete4flight.core.URL_AUT), cljs.core.str("?speed\x3d"), cljs.core.str(a)].join("");
+  return ajax.core.GET.call(null, a, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
+};
+rete4flight.core.manualalt = function(a) {
+  a = [cljs.core.str(rete4flight.core.URL_AUT), cljs.core.str("?altitude\x3d"), cljs.core.str(a)].join("");
+  return ajax.core.GET.call(null, a, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
+};
 rete4flight.core.camera_show = function() {
+  rete4flight.core.set_html_BANG_.call(null, "autopilot", "\x3ch4\x3eAutopilot\x3c/h4\x3e");
+  rete4flight.core.set_html_BANG_.call(null, "course", "Course: 000");
+  rete4flight.core.set_html_BANG_.call(null, "speed", "Speed: 000");
+  rete4flight.core.set_html_BANG_.call(null, "altitude", "Altitude: 00000");
+  rete4flight.core.set_html_BANG_.call(null, "lat", "Latitude: 00.0000");
+  rete4flight.core.set_html_BANG_.call(null, "lon", "Longitude: 00.0000");
   rete4flight.core.set_html_BANG_.call(null, "camera", "\x3ch4\x3eCamera\x3c/h4\x3e");
   rete4flight.core.set_html_BANG_.call(null, "onboard", "Onboard:");
   rete4flight.core.set_html_BANG_.call(null, "onboard-fld", [cljs.core.str("\x3cinput value\x3d'callsign' style\x3d'width:90px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.camonb(this.value)'\x3e")].join(""));
   rete4flight.core.set_html_BANG_.call(null, "heading", "Heading:");
-  rete4flight.core.set_html_BANG_.call(null, "heading-fld", "\x3cselect onchange\x3d'javascript:rete4flight.core.camhea(this.value)'\x3e\n             \x3coption value\x3d'FORWARD'\x3eFORWARD\x3c/option\x3e\n             \x3coption value\x3d'BACKWARD'\x3eBACKWARD\x3c/option\x3e\n             \x3coption value\x3d'RIGHT'\x3eRIGHT\x3c/option\x3e\n             \x3coption value\x3d'LEFT'\x3eLEFT\x3c/option\x3e\n             \x3coption value\x3d'UP'\x3eUP\x3c/option\x3e\n             \x3coption value\x3d'DOWN'\x3eDOWN\x3c/option\x3e\n             \x3c/select\x3e");
+  rete4flight.core.set_html_BANG_.call(null, "heading-fld", "\x3cselect onchange\x3d'javascript:rete4flight.core.camhea(this.value)' style\x3d'width:96px'\x3e\n             \x3coption value\x3d'FORWARD'\x3eFORWARD\x3c/option\x3e\n             \x3coption value\x3d'BACKWARD'\x3eBACKWARD\x3c/option\x3e\n             \x3coption value\x3d'RIGHT'\x3eRIGHT\x3c/option\x3e\n             \x3coption value\x3d'LEFT'\x3eLEFT\x3c/option\x3e\n             \x3coption value\x3d'UP'\x3eUP\x3c/option\x3e\n             \x3coption value\x3d'DOWN'\x3eDOWN\x3c/option\x3e\n             \x3c/select\x3e");
   rete4flight.core.set_html_BANG_.call(null, "pitch", "Pitch:");
-  rete4flight.core.set_html_BANG_.call(null, "pitch-fld", [cljs.core.str("\x3cinput value\x3d'-15' style\x3d'width:90px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.campit(this.value)'\x3e")].join(""));
+  rete4flight.core.set_html_BANG_.call(null, "pitch-fld", [cljs.core.str("\x3cinput value\x3d'-10' style\x3d'width:90px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.campit(this.value)'\x3e")].join(""));
   rete4flight.core.set_html_BANG_.call(null, "roll", "Roll:");
   return rete4flight.core.set_html_BANG_.call(null, "roll-fld", [cljs.core.str("\x3cinput value\x3d'0' style\x3d'width:90px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.camrol(this.value)'\x3e")].join(""));
 };
 rete4flight.core.camera_hide = function() {
+  rete4flight.core.set_html_BANG_.call(null, "autopilot", "");
+  rete4flight.core.set_html_BANG_.call(null, "course", "");
+  rete4flight.core.set_html_BANG_.call(null, "speed", "");
+  rete4flight.core.set_html_BANG_.call(null, "altitude", "");
+  rete4flight.core.set_html_BANG_.call(null, "lat", "");
+  rete4flight.core.set_html_BANG_.call(null, "lon", "");
   rete4flight.core.set_html_BANG_.call(null, "camera", "");
   rete4flight.core.set_html_BANG_.call(null, "onboard", "");
   rete4flight.core.set_html_BANG_.call(null, "onboard-fld", "");
@@ -35709,7 +35772,8 @@ rete4flight.core.camera_hide = function() {
   rete4flight.core.set_html_BANG_.call(null, "pitch", "");
   rete4flight.core.set_html_BANG_.call(null, "pitch-fld", "");
   rete4flight.core.set_html_BANG_.call(null, "roll", "");
-  return rete4flight.core.set_html_BANG_.call(null, "roll-fld", "");
+  rete4flight.core.set_html_BANG_.call(null, "roll-fld", "");
+  return rete4flight.core.manual_hide.call(null);
 };
 rete4flight.core.camera = function() {
   if (cljs.core._EQ_.call(null, rete4flight.core.CAMERA, new cljs.core.Keyword(null, "off", "off", 606440789))) {
@@ -35723,8 +35787,9 @@ rete4flight.core.camera = function() {
   }
 };
 rete4flight.core.camonb = function(a) {
-  a = [cljs.core.str(rete4flight.core.URL_CAM), cljs.core.str("?onboard\x3d"), cljs.core.str(a)].join("");
-  return ajax.core.GET.call(null, a, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
+  var b = [cljs.core.str(rete4flight.core.URL_CAM), cljs.core.str("?onboard\x3d"), cljs.core.str(a)].join("");
+  ajax.core.GET.call(null, b, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
+  rete4flight.core.ONBOARD = a;
 };
 rete4flight.core.camhea = function(a) {
   a = [cljs.core.str(rete4flight.core.URL_CAM), cljs.core.str("?heading\x3d"), cljs.core.str(a)].join("");
@@ -36023,7 +36088,7 @@ rete4flight.core.flight_states = function() {
 rete4flight.core.intersect = function() {
   return ajax.core.GET.call(null, rete4flight.core.URL_INT, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
 };
-rete4flight.core.COMMANDS = "\x3cselect onchange\x3d'javascript:rete4flight.core.commands(this.value)'\x3e\n  \t\t\t\x3coption value\x3d'commands'\x3eCommands\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'watch-visible'\x3eWatch visible area\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'flight-states'\x3eState of flights\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'intersect'\x3eIntersections\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'move-to'\x3eMove to Airport\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'schedule'\x3eSchedule Flight\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'camera'\x3eCamera\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'clear'\x3eClear\x3c/option\x3e\n\t\t\x3c/select\x3e";
+rete4flight.core.COMMANDS = "\x3cselect onchange\x3d'javascript:rete4flight.core.commands(this.value)'\x3e\n  \t\t\t\x3coption value\x3d'commands'\x3eCommands\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'watch-visible'\x3eWatch visible area\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'flight-states'\x3eState of flights\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'intersect'\x3eIntersections\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'move-to'\x3eMove to Airport\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'schedule'\x3eSchedule Flight\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'camera'\x3eCamera\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'manual'\x3eManual Control\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'clear'\x3eClear\x3c/option\x3e\n\t\t\x3c/select\x3e";
 rete4flight.core.commands = function(a) {
   var b = cljs.core._EQ_;
   if (cljs.core.truth_(b.call(null, "watch-visible", a))) {
@@ -36047,7 +36112,11 @@ rete4flight.core.commands = function(a) {
               if (cljs.core.truth_(b.call(null, "camera", a))) {
                 rete4flight.core.camera.call(null);
               } else {
-                throw Error([cljs.core.str("No matching clause: "), cljs.core.str(a)].join(""));
+                if (cljs.core.truth_(b.call(null, "manual", a))) {
+                  rete4flight.core.manual.call(null);
+                } else {
+                  throw Error([cljs.core.str("No matching clause: "), cljs.core.str(a)].join(""));
+                }
               }
             }
           }
