@@ -485,7 +485,8 @@
                     [(params :to-country) (params :to-airport)])
         lat (apt "lat")
         lon (apt "lon")]
-    (stopfollow)
+    (if @FOLLOW-ID
+      (stopfollow))
     (println [:MOVE-TO apt :LAT lat :LON lon])
     (pump-in-evt {:event :set-map-view
                        :lat lat
