@@ -251,19 +251,20 @@
 
 (defn turn [id on-course]
   "turning of my flight plane on new course"
-  (pump-in-evt {:event :turn :id id :on-course on-course})
-  (if-let [crs (course id)]
-    (if (not= crs on-course)
-      (let [side (cz/what-side crs on-course)]
-        (go (loop [crs crs]
-              (if (< (Math/abs (- crs on-course)) TRN-STP)
-                (set-param! id :course on-course)
-                (do
-                  (if (= side :left)
-                    (set-course! id (- crs TRN-STP))
-                    (set-course! id (+ crs TRN-STP)))
-                  (<! (timeout MYFS-INTL))
-                  (recur (course id))))))))))
+  (when (<= 0 on-course 359)
+    (pump-in-evt {:event :turn :id id :on-course on-course})
+    (if-let [crs (course id)]
+      (if (not= crs on-course)
+        (let [side (cz/what-side crs on-course)]
+          (go (loop [crs crs]
+                (if (< (Math/abs (- crs on-course)) TRN-STP)
+                  (set-param! id :course on-course)
+                  (do
+                    (if (= side :left)
+                      (set-course! id (- crs TRN-STP))
+                      (set-course! id (+ crs TRN-STP)))
+                    (<! (timeout MYFS-INTL))
+                    (recur (course id)))))))))))
 
 (defn plane-move [id hours]
   "Moving my flight plane on plane during period of time = hours"
@@ -280,18 +281,19 @@
   "Changes parameter gradually in accordance with table,
   argument of table value is number of intervals MYFS-INTL,
   only for monotone (!!!) table functions"
-  (if-let [y (get-param id param)]
-    (if (not= y target)
-      (let [[pred step] (if (> y target) [<= dec] [>= inc])]
-        (go (loop [x (int (i-mono-tabfun y table)) y y]
-              (if (pred y target)
-                (set-param! id param (int target))
-                (do
-                  (<! (timeout MYFS-INTL))
-                  (let [x (step x)
-                        y (smooth-tabfun x table)]
-                    (set-param! id param (int y))
-                    (recur x y))))))))))
+  (when (< (second (first table)) target (second (last table)))
+    (if-let [y (get-param id param)]
+      (if (not= y target)
+        (let [[pred step] (if (> y target) [<= dec] [>= inc])]
+          (go (loop [x (int (i-mono-tabfun y table)) y y]
+                (if (pred y target)
+                  (set-param! id param (int target))
+                  (do
+                    (<! (timeout MYFS-INTL))
+                    (let [x (step x)
+                          y (smooth-tabfun x table)]
+                      (set-param! id param (int y))
+                      (recur x y)))))))))))
 
 ;; --------------------------------------------------------------------
 

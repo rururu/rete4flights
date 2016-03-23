@@ -30,8 +30,8 @@ And open address http://localhost:3000 in a browser.
 
 ## Usage
 
-First select in a "Commands" selector an item "Watch visible area". Then select an item "State of flights". This begins a process of collection and display information of flights in the visible area. Black icons means aircrafts on the ground, green ones are descending, blue ones are climbing and purple - on level flight. Subsequent changes or shifts of a window do not change of the area under control.
-To do this execute the "Watch visible area" command again in needed place.
+First select in a "Commands" selector an item "Watch visible area". Then select an item "State of flights". This begins a process of collection and display information of flights in the visible area. Black icons means aircrafts on the ground, green ones are descending, blue ones are climbing and purple - on a level flight. Subsequent changes or shifts of a window do not change of the area under control.
+To do this execute the "Watch visible area" command again in a needed place.
 
 Command "Intersection" calculates aircrafts that intersect in 6 minutes on a distance less then 400 meters (altitude differense less than 10000 feet). If you click on a link between aircrafts you know accurate values.
 
@@ -39,15 +39,15 @@ Click on an aircraft icon brings up a popup with general data of a flight and 4 
 
 Using the command "Move to Airport" you can instantly shift to some other airport. First select a country and then an airport in this country.
 
-You can plan your own flights. To do this, use the command "Shedule Flight". Input a call sign of your flight, time of departure, select a country and an airport of departure and a country and an airport of arrival. That's all. When your flight starts you can follow it...
+You can plan your own flights. To do this, use the command "Schedule Flight". Input a call sign of your flight, time of departure, select a country and an airport of departure and a country and an airport of arrival. That's all. When your flight starts you can follow it...
 
-The command "camera"  allows the to be in the cockpit of the aircraft and enjoy the view from the cockpit, experience exciting feeling of landing, available only to pilots. To get on board of aircraft just input its callsign in the field "onboard" and open second browser window on the address "http://localhost:3000/html/cezium.html".
+The command "Camera"  allows you to be in a cockpit of the aircraft and enjoy a view from the cockpit, experience exciting feeling of landing, available only to pilots. To get on board of aircraft just input its callsign in a field "onboard" and open a second browser window on the address "http://localhost:3000/html/cezium.html".
 
-You can see other flights from the cockpit if you synchronised Cesium clock with your computer clock. Use for this a slider control in the bottom of Cesium window. Start Cesium clock using a "play" button on the "Animation" control in the bottom left corner. Do this 10-20 seconds later then on your computer clock. Other flights displayed with blue and red icons and call signs. Blue flights are following with yours, red ones are opposite.
+You can see other flights from the cockpit if you synchronise Cesium clock with your computer clock. Use for this a slider control in a bottom of Cesium window. Start Cesium clock using a "play" button on an "Animation" control in the bottom left corner. Do this 10-20 seconds later then on your computer clock. Other flights displayed with blue and red icons and call signs. Blue flights are following with yours, red ones are opposite.
 
-You can fly yourself using the command "Manual Control". Start a new flight, climb on board and switch to manual control. Now you can input in the autopilot new values of speed, course and altitude and it execute these directives in accordance with programmed dynamics (you can change it as you like). Naturally, you can not control real flights.
+You can fly yourself using the command "Manual Control". Start a new flight, climb on board and switch to the manual control. Now you can input in the autopilot new values of speed, course and altitude and it execute these directives in accordance with programmed dynamics (you can change it as you like). Naturally, you can't control real flights.
 
-Alternatively, you can start your flight at any point by similar sequence of commands in the REPL:
+Alternatively, you can start your flight at any point by a similar sequence of commands in the REPL:
 ```
 rete4flight.core=> (add-my-flight "R1" [40.9177 -74.7949] 45 230 15000)
 "-1"
