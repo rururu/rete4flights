@@ -278,20 +278,20 @@
                    deceleration ?dcl-plan
                    final-coord ?fcrd)
    (History moment ?now
-            ((vector? ?dcl-plan)
-             (fl/exists? ?id)))
+            (vector? ?dcl-plan))
    =>
-   (let [ccrd (fl/get-param ?id :coord)
-         dist (fl/distance-nm ccrd ?fcrd)
-         pspd (fl/tabfun dist ?dcl-plan)]
-     (if (number? pspd)
-       (when (< pspd (fl/get-param ?id :speed))
-         (fl/auto-control ?id :speed (int pspd))
-         (if (vector? ?acl)
-           (modify ?fp acceleration "DONE")))
-       (when (and (= ?acceleration "DONE") (= (first pspd) :LB))
-         (fl/auto-control ?id :speed (int (second pspd)))
-         (modify ?fp deceleration "DONE")))))
+   (if (fl/exists? ?id)
+     (let [ccrd (fl/get-param ?id :coord)
+           dist (fl/distance-nm ccrd ?fcrd)
+           pspd (fl/tabfun dist ?dcl-plan)]
+       (if (number? pspd)
+         (when (< pspd (fl/get-param ?id :speed))
+           (fl/auto-control ?id :speed (int pspd))
+           (if (vector? ?acl)
+             (modify ?fp acceleration "DONE")))
+         (when (and (= ?acceleration "DONE") (= (first pspd) :LB))
+           (fl/auto-control ?id :speed (int (second pspd)))
+           (modify ?fp deceleration "DONE"))))))
 
    (fl:MyFlight-Descent
      0
@@ -556,7 +556,7 @@
    (defn landing-plan [start-msec from to]
      (let [[iata crd2 _] to]
        [iata crd2
-        [[0.05 40][0.5 140][3 250]]     ;; x - distance, y - speed
+        [[0.05 5][0.5 140][3 250]]     ;; x - distance, y - speed
         [[0.05 0] [0.5 50][2 1000][4 3400]]]))) ;; x - distance, y - altitude
 
 
