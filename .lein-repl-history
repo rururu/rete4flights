@@ -1,6 +1,3 @@
-(kt 1 12 49)
-(exit)
-(start-server)
 (kt 0 12 55)
 (plane-move "-1" 0.1)
 (start-server)
@@ -498,3 +495,6 @@ cz/DOC-SND
 (vreset! FOLLOW-ID nil)
 (rete/facts 'FlightPlan)
 (exit)
+(start-server)
+(rete/facts 'FlightPlan)
+(start-server)

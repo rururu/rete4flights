@@ -128,7 +128,11 @@
   (nth (dat iod) 3))
 
 (defn course! [iod crs]
-  (assoc (dat iod) 3 crs))
+  (let [crs2 (cond
+               (>= crs 360) (- crs 360)
+               (< crs 0) (+ crs 360)
+               true crs)]
+    (assoc (dat iod) 3 crs2)))
 
 (defn speed [iod]
   (nth (dat iod) 5))
@@ -164,13 +168,6 @@
             :speed (speed! id val)
             :altitude (altitude! id val)
             val)))
-
-(defn set-course! [id crs]
-  (let [crs (cond
-             (>= crs 360) (- crs 360)
-             (< crs 0) (+ crs 360)
-             true crs)]
-    (set-param! id :course crs)))
 
 (defn by-call [cs]
   (let [aa (concat (corr-dat (all)) (:all @MYFS))]
@@ -261,8 +258,8 @@
                   (set-param! id :course on-course)
                   (do
                     (if (= side :left)
-                      (set-course! id (- crs TRN-STP))
-                      (set-course! id (+ crs TRN-STP)))
+                      (set-param! id :course (- crs TRN-STP))
+                      (set-param! id :course (+ crs TRN-STP)))
                     (<! (timeout MYFS-INTL))
                     (recur (course id)))))))))))
 
