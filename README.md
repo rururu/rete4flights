@@ -41,7 +41,7 @@ Using the command "Move to Airport" you can instantly shift to some other airpor
 
 You can plan your own flights. To do this, use the command "Schedule Flight". Input a call sign of your flight, time of departure, select a country and an airport of departure and a country and an airport of arrival. That's all. When your flight starts you can follow it...
 
-The command "Camera"  allows you to be in a cockpit of the aircraft and enjoy a view from the cockpit, experience exciting feeling of landing, available only to pilots. To get on board of aircraft just input its callsign in a field "onboard" and open a second browser window on the address "http://localhost:3000/html/cezium.html".
+The command "Camera"  allows you to be in a cockpit of the aircraft and enjoy a view from the cockpit, experience exciting feeling of landing, available only to pilots. To get on board of aircraft just input its callsign in a field "onboard" and open a second browser window on the address "http://localhost:3000/html/cezium.html". If you have powerful hardware and want to fly in mountains try this address: "http://localhost:3000/html/terrain3D.html".
 
 You can see other flights from the cockpit if you synchronise Cesium clock with your computer clock. Use for this a slider control in a bottom of Cesium window. Start Cesium clock using a "play" button on an "Animation" control in the bottom left corner. Do this 10-20 seconds later then on your computer clock. Other flights displayed with blue and red icons and call signs. Blue flights are following with yours, red ones are opposite.
 

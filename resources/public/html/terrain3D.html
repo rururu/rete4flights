@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Cockpit View</title>
+    <script src="../Cesium/Cesium.js"></script>
+    <style>
+      @import url(../Cesium/Widgets/widgets.css);
+      #cesiumContainer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        overflow: hidden;
+        padding: 0;
+        font-family: sans-serif;
+      }
+      html {
+        height: 100%;
+      }
+      body {
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="cesiumContainer"></div>
+    <script>
+      var sourceURL = "http://localhost:3000/czml/";
+      console.log(sourceURL);
+      var viewer = new Cesium.Viewer('cesiumContainer');
+      // Terrain providers
+      var cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
+        url : '//assets.agi.com/stk-terrain/world',
+        requestWaterMask : false,
+        requestVertexNormals : false});
+      viewer.terrainProvider = cesiumTerrainProviderMeshes;
+      var scene = viewer.scene;
+      // Display undersurface parts of objects
+      scene.globe.depthTestAgainstTerrain = false;
+      var ellipsoid = scene.globe.ellipsoid;
+      var entity = viewer.entities.add({
+        label : {
+          show : false
+        }
+      });
+      // Mouse over the globe to see the cartographic position
+      var mposdispl = function(movement) {
+        var cartesian = viewer.camera.pickEllipsoid(movement.endPosition, ellipsoid);
+        if (cartesian) {
+          var cartographic = ellipsoid.cartesianToCartographic(cartesian);
+          var longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(3);
+          var latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(3);
+          entity.position = cartesian;
+          entity.label.show = true;
+          entity.label.text = '(' + longitudeString + ', ' + latitudeString + ')';
+        } else {
+          entity.label.show = false;
+        }
+      };
+      var handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+      //handler.setInputAction(mposdispl, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+      // STREAMING FROM CZML SERVER
+      console.log("Streaming from czml server: "+sourceURL);
+      var dataSource = new Cesium.CzmlDataSource();
+      viewer.dataSources.add(dataSource);
+      var source = new EventSource(sourceURL);
+      source.addEventListener('czml', function(e) {
+        console.log(e.data);
+        var data = JSON.parse(e.data);
+        dataSource.process(data);
+      }, false);
+      source.addEventListener('fly', function(e) {
+        console.log(e.data);
+        var data = JSON.parse(e.data);
+        if (data.ctrl == "fly"){
+          viewer.camera.flyTo({
+            destination : Cesium.Cartesian3.fromDegrees(data.lon, data.lat, data.altitude),
+            orientation : {
+              heading : Cesium.Math.toRadians(data.heading),
+              pitch : Cesium.Math.toRadians(data.pitch),
+              roll : Cesium.Math.toRadians(data.roll)
+            },
+            duration : data.duration,
+            easingFunction : function(time) { return time; }
+          });
+        } else if (data.ctrl == "view") {
+          viewer.camera.setView({
+            position : Cesium.Cartesian3.fromDegrees(data.lon, data.lat, data.altitude),
+            heading : Cesium.Math.toRadians(data.heading),
+            pitch : Cesium.Math.toRadians(data.pitch),
+            roll : Cesium.Math.toRadians(data.roll)
+          });
+        }
+      }, false);
+    </script>
+  </body>
+</html>
