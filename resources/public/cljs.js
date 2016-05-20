@@ -35152,8 +35152,8 @@ rete4flight.core.add_trail = function(a, b, c, d) {
             }
             if (2 === c) {
               var c = b[2], e = cljs.core.deref.call(null, rete4flight.core.chart).removeLayer(g), f = cljs.core._deref.call(null, rete4flight.core.trails), f = cljs.core.dissoc.call(null, f, a), f = cljs.core._vreset_BANG_.call(null, rete4flight.core.trails, f);
-              b[7] = c;
-              b[8] = e;
+              b[7] = e;
+              b[8] = c;
               return cljs.core.async.impl.ioc_helpers.return_chan.call(null, b, f);
             }
             return null;
@@ -35252,8 +35252,8 @@ rete4flight.core.add_link = function(a, b) {
               }
               if (2 === c) {
                 var c = b[2], d = cljs.core.deref.call(null, rete4flight.core.chart).removeLayer(g), f = cljs.core._deref.call(null, rete4flight.core.links), f = cljs.core.dissoc.call(null, f, a), f = cljs.core._vreset_BANG_.call(null, rete4flight.core.links, f);
-                b[7] = c;
-                b[8] = d;
+                b[7] = d;
+                b[8] = c;
                 return cljs.core.async.impl.ioc_helpers.return_chan.call(null, b, f);
               }
               return null;
