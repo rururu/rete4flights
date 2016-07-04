@@ -1,4 +1,3 @@
-(load-file "src/clj/rete4flight/core.clj")
 (rete/facts)
 (exit)
 (start-server)
@@ -498,3 +497,4 @@ cz/DOC-SND
 (start-server)
 (-main)
 (rete.core/clear-deleted)
+(-main)

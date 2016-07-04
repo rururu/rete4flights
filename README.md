@@ -43,6 +43,8 @@ You can plan your own flights. To do this, use the command "Schedule Flight". In
 
 The command "Camera"  allows you to be in a cockpit of the aircraft and enjoy a view from the cockpit, experience exciting feeling of landing, available only to pilots. To get on board of aircraft just input its callsign in a field "onboard" and open a second browser window on the address "http://localhost:3000/html/cezium.html". If you have powerful hardware and want to fly in mountains try this address: "http://localhost:3000/html/terrain3D.html".
 
+If you see black starry sky under blue sky instead of surface, select in the "Imagery" menu in the right upper corner the item "ESRI World Imagery".
+
 You can see other flights from the cockpit. Other flights displayed with blue and red icons and call signs. Blue flights are following with yours, red ones are opposite.
 
 You can fly yourself using the command "Manual Control". Start a new flight, climb on board and switch to the manual control. Now you can input in the autopilot new values of speed, course and altitude and it execute these directives in accordance with programmed dynamics (you can change it as you like). Naturally, you can't control real flights.
