@@ -27583,34 +27583,34 @@ cognitect.transit.write_handler.cljs$core$IFn$_invoke$arity$3 = function(a, b, c
   return cognitect.transit.write_handler.call(null, a, b, c, null);
 };
 cognitect.transit.write_handler.cljs$core$IFn$_invoke$arity$4 = function(a, b, c, d) {
-  "undefined" === typeof cognitect.transit.t_cognitect$transit11420 && (cognitect.transit.t_cognitect$transit11420 = function(a, b, c, d, k) {
+  "undefined" === typeof cognitect.transit.t_cognitect$transit11369 && (cognitect.transit.t_cognitect$transit11369 = function(a, b, c, d, k) {
     this.tag_fn = a;
     this.rep_fn = b;
     this.str_rep_fn = c;
     this.verbose_handler_fn = d;
-    this.meta11421 = k;
+    this.meta11370 = k;
     this.cljs$lang$protocol_mask$partition0$ = 393216;
     this.cljs$lang$protocol_mask$partition1$ = 0;
-  }, cognitect.transit.t_cognitect$transit11420.prototype.cljs$core$IWithMeta$_with_meta$arity$2 = function(a, b) {
-    return new cognitect.transit.t_cognitect$transit11420(this.tag_fn, this.rep_fn, this.str_rep_fn, this.verbose_handler_fn, b);
-  }, cognitect.transit.t_cognitect$transit11420.prototype.cljs$core$IMeta$_meta$arity$1 = function(a) {
-    return this.meta11421;
-  }, cognitect.transit.t_cognitect$transit11420.prototype.tag = function(a) {
+  }, cognitect.transit.t_cognitect$transit11369.prototype.cljs$core$IWithMeta$_with_meta$arity$2 = function(a, b) {
+    return new cognitect.transit.t_cognitect$transit11369(this.tag_fn, this.rep_fn, this.str_rep_fn, this.verbose_handler_fn, b);
+  }, cognitect.transit.t_cognitect$transit11369.prototype.cljs$core$IMeta$_meta$arity$1 = function(a) {
+    return this.meta11370;
+  }, cognitect.transit.t_cognitect$transit11369.prototype.tag = function(a) {
     return this.tag_fn.call(null, a);
-  }, cognitect.transit.t_cognitect$transit11420.prototype.rep = function(a) {
+  }, cognitect.transit.t_cognitect$transit11369.prototype.rep = function(a) {
     return this.rep_fn.call(null, a);
-  }, cognitect.transit.t_cognitect$transit11420.prototype.stringRep = function(a) {
+  }, cognitect.transit.t_cognitect$transit11369.prototype.stringRep = function(a) {
     return cljs.core.truth_(this.str_rep_fn) ? this.str_rep_fn.call(null, a) : null;
-  }, cognitect.transit.t_cognitect$transit11420.prototype.getVerboseHandler = function() {
+  }, cognitect.transit.t_cognitect$transit11369.prototype.getVerboseHandler = function() {
     return cljs.core.truth_(this.verbose_handler_fn) ? this.verbose_handler_fn.call(null) : null;
-  }, cognitect.transit.t_cognitect$transit11420.getBasis = function() {
-    return new cljs.core.PersistentVector(null, 5, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Symbol(null, "tag-fn", "tag-fn", 242055482, null), new cljs.core.Symbol(null, "rep-fn", "rep-fn", -1724891035, null), new cljs.core.Symbol(null, "str-rep-fn", "str-rep-fn", -1179615016, null), new cljs.core.Symbol(null, "verbose-handler-fn", "verbose-handler-fn", 547340594, null), new cljs.core.Symbol(null, "meta11421", "meta11421", 951733477, null)], null);
-  }, cognitect.transit.t_cognitect$transit11420.cljs$lang$type = !0, cognitect.transit.t_cognitect$transit11420.cljs$lang$ctorStr = "cognitect.transit/t_cognitect$transit11420", cognitect.transit.t_cognitect$transit11420.cljs$lang$ctorPrWriter = function(a, b, c) {
-    return cljs.core._write.call(null, b, "cognitect.transit/t_cognitect$transit11420");
-  }, cognitect.transit.__GT_t_cognitect$transit11420 = function(a, b, c, d, k) {
-    return new cognitect.transit.t_cognitect$transit11420(a, b, c, d, k);
+  }, cognitect.transit.t_cognitect$transit11369.getBasis = function() {
+    return new cljs.core.PersistentVector(null, 5, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Symbol(null, "tag-fn", "tag-fn", 242055482, null), new cljs.core.Symbol(null, "rep-fn", "rep-fn", -1724891035, null), new cljs.core.Symbol(null, "str-rep-fn", "str-rep-fn", -1179615016, null), new cljs.core.Symbol(null, "verbose-handler-fn", "verbose-handler-fn", 547340594, null), new cljs.core.Symbol(null, "meta11370", "meta11370", 641978628, null)], null);
+  }, cognitect.transit.t_cognitect$transit11369.cljs$lang$type = !0, cognitect.transit.t_cognitect$transit11369.cljs$lang$ctorStr = "cognitect.transit/t_cognitect$transit11369", cognitect.transit.t_cognitect$transit11369.cljs$lang$ctorPrWriter = function(a, b, c) {
+    return cljs.core._write.call(null, b, "cognitect.transit/t_cognitect$transit11369");
+  }, cognitect.transit.__GT_t_cognitect$transit11369 = function(a, b, c, d, k) {
+    return new cognitect.transit.t_cognitect$transit11369(a, b, c, d, k);
   });
-  return new cognitect.transit.t_cognitect$transit11420(a, b, c, d, cljs.core.PersistentArrayMap.EMPTY);
+  return new cognitect.transit.t_cognitect$transit11369(a, b, c, d, cljs.core.PersistentArrayMap.EMPTY);
 };
 cognitect.transit.write_handler.cljs$lang$maxFixedArity = 4;
 cognitect.transit.tagged_value = function(a, b) {
@@ -30461,27 +30461,27 @@ cljs.core.async.impl.dispatch.queue_delay = function(a, b) {
 };
 cljs.core.async.impl.channels = {};
 cljs.core.async.impl.channels.box = function cljs$core$async$impl$channels$box(b) {
-  "undefined" === typeof cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197 && (cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197 = function(b, d, e) {
+  "undefined" === typeof cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921 && (cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921 = function(b, d, e) {
     this.box = b;
     this.val = d;
-    this.meta11198 = e;
+    this.meta11922 = e;
     this.cljs$lang$protocol_mask$partition0$ = 425984;
     this.cljs$lang$protocol_mask$partition1$ = 0;
-  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197.prototype.cljs$core$IWithMeta$_with_meta$arity$2 = function(b, d) {
-    return new cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197(this.box, this.val, d);
-  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197.prototype.cljs$core$IMeta$_meta$arity$1 = function(b) {
-    return this.meta11198;
-  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197.prototype.cljs$core$IDeref$_deref$arity$1 = function(b) {
+  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921.prototype.cljs$core$IWithMeta$_with_meta$arity$2 = function(b, d) {
+    return new cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921(this.box, this.val, d);
+  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921.prototype.cljs$core$IMeta$_meta$arity$1 = function(b) {
+    return this.meta11922;
+  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921.prototype.cljs$core$IDeref$_deref$arity$1 = function(b) {
     return this.val;
-  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197.getBasis = function() {
+  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921.getBasis = function() {
     return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [cljs.core.with_meta(new cljs.core.Symbol(null, "box", "box", -1123515375, null), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "arglists", "arglists", 1661989754), cljs.core.list(new cljs.core.Symbol(null, "quote", "quote", 1377916282, null), cljs.core.list(new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Symbol(null, "val", "val", 
-    1769233139, null)], null)))], null)), new cljs.core.Symbol(null, "val", "val", 1769233139, null), new cljs.core.Symbol(null, "meta11198", "meta11198", -779724322, null)], null);
-  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197.cljs$lang$type = !0, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197.cljs$lang$ctorStr = "cljs.core.async.impl.channels/t_cljs$core$async$impl$channels11197", cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197.cljs$lang$ctorPrWriter = function(b, d, e) {
-    return cljs.core._write.call(null, d, "cljs.core.async.impl.channels/t_cljs$core$async$impl$channels11197");
-  }, cljs.core.async.impl.channels.__GT_t_cljs$core$async$impl$channels11197 = function(b, d, e) {
-    return new cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197(b, d, e);
+    1769233139, null)], null)))], null)), new cljs.core.Symbol(null, "val", "val", 1769233139, null), new cljs.core.Symbol(null, "meta11922", "meta11922", -564495791, null)], null);
+  }, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921.cljs$lang$type = !0, cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921.cljs$lang$ctorStr = "cljs.core.async.impl.channels/t_cljs$core$async$impl$channels11921", cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921.cljs$lang$ctorPrWriter = function(b, d, e) {
+    return cljs.core._write.call(null, d, "cljs.core.async.impl.channels/t_cljs$core$async$impl$channels11921");
+  }, cljs.core.async.impl.channels.__GT_t_cljs$core$async$impl$channels11921 = function(b, d, e) {
+    return new cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921(b, d, e);
   });
-  return new cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11197(cljs$core$async$impl$channels$box, b, cljs.core.PersistentArrayMap.EMPTY);
+  return new cljs.core.async.impl.channels.t_cljs$core$async$impl$channels11921(cljs$core$async$impl$channels$box, b, cljs.core.PersistentArrayMap.EMPTY);
 };
 cljs.core.async.impl.channels.PutBox = function(a, b) {
   this.handler = a;
@@ -35755,7 +35755,9 @@ rete4flight.core.camera_show = function() {
   rete4flight.core.set_html_BANG_.call(null, "pitch", "Pitch:");
   rete4flight.core.set_html_BANG_.call(null, "pitch-fld", [cljs.core.str("\x3cinput value\x3d'-10' style\x3d'width:90px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.campit(this.value)'\x3e")].join(""));
   rete4flight.core.set_html_BANG_.call(null, "roll", "Roll:");
-  return rete4flight.core.set_html_BANG_.call(null, "roll-fld", [cljs.core.str("\x3cinput value\x3d'0' style\x3d'width:90px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.camrol(this.value)'\x3e")].join(""));
+  rete4flight.core.set_html_BANG_.call(null, "roll-fld", [cljs.core.str("\x3cinput value\x3d'0' style\x3d'width:90px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.camrol(this.value)'\x3e")].join(""));
+  rete4flight.core.set_html_BANG_.call(null, "hud", "HUD:");
+  return rete4flight.core.set_html_BANG_.call(null, "hud-fld", "\x3cselect id\x3d'hud-val' style\x3d'width:96px'\x3e\n             \x3coption value\x3d'2D'\x3eflat terrain\x3c/option\x3e\n             \x3coption value\x3d'3D'\x3e3D terrain\x3c/option\x3e\n             \x3c/select\x3e");
 };
 rete4flight.core.camera_hide = function() {
   rete4flight.core.set_html_BANG_.call(null, "autopilot", "");
@@ -35773,11 +35775,51 @@ rete4flight.core.camera_hide = function() {
   rete4flight.core.set_html_BANG_.call(null, "pitch-fld", "");
   rete4flight.core.set_html_BANG_.call(null, "roll", "");
   rete4flight.core.set_html_BANG_.call(null, "roll-fld", "");
+  rete4flight.core.set_html_BANG_.call(null, "hud", "");
+  rete4flight.core.set_html_BANG_.call(null, "hud-fld", "");
   return rete4flight.core.manual_hide.call(null);
+};
+rete4flight.core.camera_on_handler = function(a) {
+  var b = rete4flight.core.read_transit.call(null, a), c = cljs.core.println.call(null, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "CSS", "CSS", 135559744), b], null));
+  a = [cljs.core.str("\x3cselect onchange\x3d'javascript:rete4flight.core.camonb(this.value)' style\x3d'width:94px'\x3e"), cljs.core.str("\x3coption value\x3d'0'/\x3e"), cljs.core.str(cljs.core.apply.call(null, cljs.core.str, function() {
+    return function(a, b) {
+      return function g(c) {
+        return new cljs.core.LazySeq(null, function(a, b) {
+          return function() {
+            for (;;) {
+              var a = cljs.core.seq.call(null, c);
+              if (a) {
+                if (cljs.core.chunked_seq_QMARK_.call(null, a)) {
+                  var b = cljs.core.chunk_first.call(null, a), d = cljs.core.count.call(null, b), e = cljs.core.chunk_buffer.call(null, d);
+                  a: {
+                    for (var k = 0;;) {
+                      if (k < d) {
+                        var l = cljs.core._nth.call(null, b, k);
+                        cljs.core.chunk_append.call(null, e, [cljs.core.str("\x3coption value\x3d'"), cljs.core.str(l), cljs.core.str("'\x3e"), cljs.core.str(l), cljs.core.str("\x3c/option\x3e")].join(""));
+                        k += 1;
+                      } else {
+                        b = !0;
+                        break a;
+                      }
+                    }
+                  }
+                  return b ? cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, e), g.call(null, cljs.core.chunk_rest.call(null, a))) : cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, e), null);
+                }
+                e = cljs.core.first.call(null, a);
+                return cljs.core.cons.call(null, [cljs.core.str("\x3coption value\x3d'"), cljs.core.str(e), cljs.core.str("'\x3e"), cljs.core.str(e), cljs.core.str("\x3c/option\x3e")].join(""), g.call(null, cljs.core.rest.call(null, a)));
+              }
+              return null;
+            }
+          };
+        }(a, b), null, null);
+      };
+    }(b, c).call(null, b);
+  }())), cljs.core.str("\x3c/select\x3e")].join("");
+  return rete4flight.core.set_html_BANG_.call(null, "onboard-fld", a);
 };
 rete4flight.core.camera = function() {
   if (cljs.core._EQ_.call(null, rete4flight.core.CAMERA, new cljs.core.Keyword(null, "off", "off", 606440789))) {
-    rete4flight.core.camera_show.call(null), ajax.core.GET.call(null, [cljs.core.str(rete4flight.core.URL_CAM), cljs.core.str("?camera\x3don")].join(""), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null)), rete4flight.core.CAMERA = new cljs.core.Keyword(null, "on", "on", 173873944);
+    rete4flight.core.camera_show.call(null), ajax.core.GET.call(null, [cljs.core.str(rete4flight.core.URL_CAM), cljs.core.str("?camera\x3don")].join(""), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.camera_on_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null)), rete4flight.core.CAMERA = new cljs.core.Keyword(null, "on", "on", 173873944);
   } else {
     if (cljs.core._EQ_.call(null, rete4flight.core.CAMERA, new cljs.core.Keyword(null, "on", "on", 173873944))) {
       rete4flight.core.camera_hide.call(null), ajax.core.GET.call(null, [cljs.core.str(rete4flight.core.URL_CAM), cljs.core.str("?camera\x3doff")].join(""), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null)), rete4flight.core.CAMERA = new cljs.core.Keyword(null, "off", "off", 606440789);
@@ -35786,8 +35828,12 @@ rete4flight.core.camera = function() {
     }
   }
 };
+rete4flight.core.selection = function(a) {
+  a = rete4flight.core.by_id.call(null, a);
+  return a.options[a.selectedIndex].value;
+};
 rete4flight.core.camonb = function(a) {
-  var b = [cljs.core.str(rete4flight.core.URL_CAM), cljs.core.str("?onboard\x3d"), cljs.core.str(a)].join("");
+  var b = [cljs.core.str(rete4flight.core.URL_CAM), cljs.core.str("?onboard\x3d"), cljs.core.str(a), cljs.core.str("\x26hud\x3d"), cljs.core.str(rete4flight.core.selection.call(null, "hud-val"))].join("");
   ajax.core.GET.call(null, b, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
   rete4flight.core.ONBOARD = a;
 };
@@ -36170,7 +36216,7 @@ rete4flight.core.remote_call = function() {
   return null;
 };
 rete4flight.core.init = function() {
-  var a = L.map("map").setView([40.8, -74], 9), b = L.tileLayer(rete4flight.core.URL_OSM, {maxZoom:16, attribution:"OOGIS RL, OpenStreetMap \x26copy;"}), c = L.tileLayer(rete4flight.core.URL_GSA, {maxZoom:20, subdomains:["mt0", "mt1", "mt2", "mt3"], attribution:"OOGIS RL, Google \x26copy;"}), d = L.tileLayer(rete4flight.core.URL_GST, {maxZoom:20, subdomains:["mt0", "mt1", "mt2", "mt3"], attribution:"OOGIS RL, Google \x26copy;"}), e = L.tileLayer(rete4flight.core.URL_GHB, {maxZoom:20, subdomains:["mt0", 
+  var a = L.map("map").setView([40.8, -74], 10), b = L.tileLayer(rete4flight.core.URL_OSM, {maxZoom:16, attribution:"OOGIS RL, OpenStreetMap \x26copy;"}), c = L.tileLayer(rete4flight.core.URL_GSA, {maxZoom:20, subdomains:["mt0", "mt1", "mt2", "mt3"], attribution:"OOGIS RL, Google \x26copy;"}), d = L.tileLayer(rete4flight.core.URL_GST, {maxZoom:20, subdomains:["mt0", "mt1", "mt2", "mt3"], attribution:"OOGIS RL, Google \x26copy;"}), e = L.tileLayer(rete4flight.core.URL_GHB, {maxZoom:20, subdomains:["mt0", 
   "mt1", "mt2", "mt3"], attribution:"OOGIS RL, Google \x26copy;"}), f = L.tileLayer(rete4flight.core.URL_GTR, {maxZoom:20, subdomains:["mt0", "mt1", "mt2", "mt3"], attribution:"OOGIS RL, Google \x26copy;"}), g = cljs.core.clj__GT_js.call(null, new cljs.core.PersistentArrayMap(null, 5, ["OpenStreetMap", b, "Google Satellite", c, "Google Streets", d, "Google Hybrid", e, "Google Terrain", f], null)), h = L.control.layers(g, null);
   b.addTo(a);
   h.addTo(a);

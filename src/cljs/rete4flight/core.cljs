@@ -456,7 +456,12 @@
                               "onchange='javascript:rete4flight.core.campit(this.value)'>"))
   (set-html! "roll" "Roll:")
   (set-html! "roll-fld" (str "<input value='0' style='width:90px' "
-                             "onchange='javascript:rete4flight.core.camrol(this.value)'>")))
+                             "onchange='javascript:rete4flight.core.camrol(this.value)'>"))
+  (set-html! "hud" "HUD:")
+  (set-html! "hud-fld" "<select id='hud-val' style='width:96px'>
+             <option value='2D'>flat terrain</option>
+             <option value='3D'>3D terrain</option>
+             </select>"))
 
 (defn camera-hide []
   (set-html! "autopilot" "")
@@ -474,21 +479,37 @@
   (set-html! "pitch-fld" "")
   (set-html! "roll" "")
   (set-html! "roll-fld" "")
+  (set-html! "hud" "")
+  (set-html! "hud-fld" "")
   (manual-hide))
+
+(defn camera-on-handler [response]
+  (let [callsigns (read-transit response)
+        _ (println [:CSS callsigns])
+        sel (str "<select onchange='javascript:rete4flight.core.camonb(this.value)' style='width:94px'>"
+                 "<option value='0'/>"
+                 (apply str (for [e callsigns]
+                              (str "<option value='" e "'>" e "</option>")))
+                 "</select>")]
+    (set-html! "onboard-fld" sel)))
 
 (defn camera []
   (cond
     (= CAMERA :off)
     (do (camera-show)
-      (GET (str URL-CAM "?camera=on") {:handler no-handler :error-handler error-handler})
+      (GET (str URL-CAM "?camera=on") {:handler camera-on-handler :error-handler error-handler})
       (def CAMERA :on))
     (= CAMERA :on)
     (do (camera-hide)
       (GET (str URL-CAM "?camera=off") {:handler no-handler :error-handler error-handler})
       (def CAMERA :off))))
 
+(defn selection [id]
+  (let [e (by-id id)]
+    (.-value (aget (.-options e) (.-selectedIndex e)))))
+
 (defn camonb [obj]
-  (let [url (str URL-CAM "?onboard=" obj)]
+  (let [url (str URL-CAM "?onboard=" obj "&hud=" (selection "hud-val"))]
     (GET url {:handler no-handler :error-handler error-handler})
     (def ONBOARD obj)))
 
@@ -693,7 +714,7 @@
 (defn init []
   (let [m (-> js/L
             (.map "map")
-            (.setView (array 40.8, -74.0) 9)) ;; New York City
+            (.setView (array 40.8, -74.0) 10)) ;; New York City
         tile1 (-> js/L (.tileLayer URL-OSM
                          #js{:maxZoom 16
                              :attribution "OOGIS RL, OpenStreetMap &copy;"}))

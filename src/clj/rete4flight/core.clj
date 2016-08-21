@@ -24,16 +24,16 @@
 (def ES-FILE "src/clj/rete4flight/es.clj")
 (def BBX (volatile! [])) ;; bounding box
 (def WTCH-FIRST (volatile! true)) ;; first swatch
-(def WTCH-INTL 10000) ;; watch interval (10 sec)
+(def WTCH-INTL 20000) ;; watch interval (10 sec)
 (def STAT-INTL 20000) ;; flight state checking interval (20 sec)
 (def POP-DEL 30000) ;; popup delay
 (def HIS-MEM 3) ;; number of remembered watching intervals (30 sec memory)
 (def REP-FLG-STA (volatile! nil)) ;; flight state checking repetition flag
 (def FOLLOW-ID (volatile! nil)) ;; id of followed flight
 (def FOLW-INTL 40000) ;; following interval (40 sec)
-(def MYFS-INTL 1000) ;; my flights simulation interval (1 sec)
+(def MYFS-INTL 4000) ;; my flights simulation interval (1 sec)
 (def TRN-STP 4) ;; step of course in degrees while turning
-(def CZMW-INTL 20000) ;; Cesium work interval (20 sec)
+(def CZMW-INTL 30000) ;; Cesium work interval (20 sec)
 
 (defonce FRS (volatile! {:apsurl "http://www.flightradar24.com/_json/airports.php"
                          :allurl "http://data-live.flightradar24.com/zones/fcgi/feed.js"
@@ -182,23 +182,29 @@
   (if-let [[id dat] (by-call cs)]
     dat))
 
+(defn current-time []
+  (System/currentTimeMillis))
+
 (defn assert-visible [n s w e his]
   (let [ff (corr-dat (bbx n s w e))
         nf (count ff)]
     (doseq [[id dat] ff]
       (let [[lat lon :as crd] (coord dat)
             alt (altitude dat)
+            crs (course dat)
+            spd (speed dat)
             p4d (if (:chan @cz/CAM) [lat lon alt (cz/iso8601curt)])]
         (rete/assert-frame ['Flight
                             'id id
                             'N (Integer/parseInt id 16)
                             'callsign (callsign dat)
                             'coord crd
-                            'course (course dat)
-                            'speed (speed dat)
+                            'course crs
+                            'speed spd
                             'altitude alt
                             'history his
                             'pos4d p4d
+                            'time (current-time)
                             'state (if (> alt 0)
                                      "LEVEL"
                                      "GROUND")])))
@@ -241,10 +247,14 @@
 ;; ------------------------- Repeaters -------------------------------
 
 (defn repeater [task timo]
-  "Channel that repeats task (function call) forever"
+  "Channel that repeats task (function call) forever
+  with minimal timeout"
   (go (while true
-        (task)
-        (<! (timeout timo)))))
+        (let [st (System/currentTimeMillis)]
+          (task)
+          (let [elt (- (System/currentTimeMillis) st)]
+            (if (< elt timo)
+              (<! (timeout (- timo elt)))))))))
 
 (defn turn [id on-course]
   "turning of my flight plane on new course"
@@ -293,9 +303,6 @@
                       (recur x y)))))))))))
 
 ;; --------------------------------------------------------------------
-
-(defn current-time []
-  (.getTimeInMillis (Calendar/getInstance)))
 
 (defn cur-hrs-min []
   (let [cld (Calendar/getInstance)]
@@ -546,42 +553,57 @@
 
                "airline" {"short" "Ru Airlines"}}))))
 
-(defn cesium-work []
-  (let [dt (dat (:id @cz/CAM))]
-    (when (vector? dt)
-      (let [[lat lon] (coord dt)
-            alt (* (altitude dt) 0.3048) ;; feet to meters
-            crs (course dt)
-            per (/ CZMW-INTL 1000)] ;; msec to sec
-        (cz/fly-to lat lon alt crs per)))))
+(defn open-in-browser!
+  ([]
+   (open-in-browser! (str "http://localhost:" PORT)))
+  ([address]
+   (println "Location:" address)
+   (when (java.awt.Desktop/isDesktopSupported)
+     (.browse (java.awt.Desktop/getDesktop) (java.net.URI. address)))))
 
-(defn start-cesium []
-  (when (nil? (:id @cz/CAM))
-    (println "Start (cesium-work)..")
-    (repeater #(cesium-work) CZMW-INTL)
-    (vswap! cz/CAM assoc :id 0))
-  (cz/start-sse-server))
+(defn open-hud-window [terra]
+  (if-let [addr (condp = terra
+                  "2D" (str "http://localhost:" PORT "/html/cezium.html")
+                  "3D" (str "http://localhost:" PORT "/html/terrain3D.html"))]
+    (open-in-browser! addr)))
+
+(def BROWIND true)
+
+(defn callsign-list []
+  (->> (vals (:all @FRS))
+       (concat (vals (:all @MYFS)))
+       (filter vector?)
+       (map callsign)
+       (filter #(not (empty? %)))
+       sort))
 
 (defn camera [params]
   (println [:CAMERA params])
   (vswap! cz/CAM merge params)
-  (condp = (params :camera)
-    "on" (start-cesium)
-    "off"(cz/stop-sse-server)
-    true)
-  (if-let [onb (params :onboard)]
-    (let [id (id-by-call onb)]
+  (cond
+   (= (params :camera) "on")
+     (cz/start-sse-server)
+   (= (params :camera) "off")
+     (cz/stop-sse-server)
+   (some? (params :onboard))
+     (when-let [id (id-by-call (params :onboard))]
+      (when BROWIND
+        (open-hud-window (params :hud))
+        (def BROWIND false))
       (vswap! cz/CAM assoc :id id)
       (vreset! cz/DOC-SND true)
       (rete/assert-frame ['Camera
                           'onboard id
-                          'time (current-time)])))
-  (condp = (params :heading)
-    "UP" (vswap! cz/CAM assoc :pitch 90.0)
-    "DOWN" (vswap! cz/CAM assoc :pitch -90.0)
-    nil true
-    (vswap! cz/CAM assoc :pitch 0.0))
-  "")
+                          'time (current-time)]))
+   (= (params :heading) "UP")
+     (vswap! cz/CAM assoc :pitch 90.0)
+   (= (params :heading) "DOWN")
+     (vswap! cz/CAM assoc :pitch -90.0)
+   true
+     (vswap! cz/CAM assoc :pitch 0.0))
+  (if (= (params :camera) "on")
+    (write-transit (callsign-list))
+    ""))
 
 (defn manual [params]
   (println [:MANUAL params])
@@ -636,20 +658,10 @@
     (.stop serv)
     (println "Server stopped!")))
 
-(defn open-in-browser!
-  ([]
-    (open-in-browser! PORT))
-  ([port]
-    (let [address (str "http://localhost:" port)]
-      (println "Location:" address)
-      (when (java.awt.Desktop/isDesktopSupported)
-        (.browse (java.awt.Desktop/getDesktop) (java.net.URI. address))))))
-
 ;; ---------------------------- Start server ---------------------------
 
 (defn -main [& args]
   (start-server)
   (open-in-browser!))
-
 
 ;; (rete/log-lst "beta-net-plan.txt" rete/BPLAN)

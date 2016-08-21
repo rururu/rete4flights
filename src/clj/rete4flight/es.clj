@@ -1,6 +1,7 @@
 ((templates
   (Flight id coord course speed altitude
-          N history state pos4d callsign)
+          N history state pos4d callsign
+          time)
   (History moment memory)
   (Check status)
   (Follow id)
@@ -147,15 +148,40 @@
    (Flight id ?id2 coord ?c2 altitude ?a2 pos4d ?p2 history ?h2)
    (Flight id ?id2 coord ?c3 altitude ?a3 pos4d ?p3 history ?now course ?crs3 callsign ?cs)
    (History moment ?now
-            (= (- ?now ?h2) 1))
+            ((= (- ?now ?h2) 1)
+             (< (fl/distance-nm ?c1 ?c3) 10)))
    =>
-   (let [dis (fl/distance-nm ?c1 ?c3)]
-     (if (< dis 10)
-       (fl/leg ?cs
-               (fl/smooth-tabfun dis [[0 1.0][20 0.1]])
-               (fl/following ?crs1 ?crs3)
-               ?p2 ?p3))))
+   (fl/leg ?cs
+           (fl/smooth-tabfun (fl/distance-nm ?c1 ?c3) [[0 1.0][20 0.1]])
+           (fl/following ?crs1 ?crs3)
+           ?p2
+           ?p3))
 
+  (fl:Fly-to
+   0
+   (Camera onboard ?id1)
+   (Flight id ?id1 coord ?c1 time ?t1 history ?h1)
+   (Flight id ?id1 coord ?c2 altitude ?a2 time ?t2 history ?now)
+   (History moment ?now
+            (= (- ?now ?h1) 1))
+   =>
+   (let [bea (fl/bear-deg ?c1 ?c2)
+         sec (long (/ (- ?t2 ?t1) 1000))]
+     ;;(println [:fly-to ?c2 ?a2 bea sec])
+     (fl/fly-to ?c2 ?a2 bea sec)))
+
+  (fl:SwtchCamera
+   2
+   (Camera onboard ?id1 time ?t1)
+   (Camera onboard ?id2 time ?t2
+           ((not= ?id1 ?id2)
+            (> ?t2 ?t1)))
+   (Flight id ?id1 coord ?c1 altitude ?a1)
+   (Flight id ?id2 coord ?c2 altitude ?a2)
+   =>
+   (let [bea (fl/bear-deg ?c2 ?c1)]
+     ;;(println [:from ?id1 ?c1 :to ?id2 ?c2])
+     (fl/fly-to ?c2 ?a2 bea 4)))
 
 ;; ------------------------ MyFlights --------------------
 
@@ -502,6 +528,9 @@
      (vswap! core/MYFS assoc-in [:all id] nil) ;; clear my flight
      (if (= id @core/FOLLOW-ID)
        (core/stopfollow)))
+
+  (defn fly-to [[lat lon] alt crs per]
+    (cz/fly-to lat lon alt crs per))
 
   (defn leg [label scale following p4d1 p4d2]
     (let [img (if following

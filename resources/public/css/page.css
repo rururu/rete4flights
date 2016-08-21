@@ -68,69 +68,6 @@
   padding:5px;
   z-index:100;
 }
-#camera {
-  position:fixed;
-  bottom:120px;
-  right:40px;
-  padding:5px;
-  z-index:100;
-}
-#onboard {
-  position:fixed;
-  bottom:110px;
-  right:120px;
-  padding:5px;
-  z-index:100;
-}
-#onboard-fld {
-  position:fixed;
-  bottom:110px;
-  right:20px;
-  padding:5px;
-  z-index:100;
-}
-#heading {
-  position:fixed;
-  bottom:90px;
-  right:120px;
-  padding:5px;
-  z-index:100;
-}
-#heading-fld {
-  position:fixed;
-  bottom:90px;
-  right:20px;
-  padding:5px;
-  z-index:100;
-}
-#pitch {
-  position:fixed;
-  bottom:70px;
-  right:120px;
-  padding:5px;
-  z-index:100;
-}
-#pitch-fld {
-  position:fixed;
-  bottom:70px;
-  right:20px;
-  padding:5px;
-  z-index:100;
-}
-#roll {
-  position:fixed;
-  bottom:50px;
-  right:120px;
-  padding:5px;
-  z-index:100;
-}
-#roll-fld {
-  position:fixed;
-  bottom:50px;
-  right:20px;
-  padding:5px;
-  z-index:100;
-}
 #autopilot {
   position:fixed;
   bottom:290px;
@@ -194,3 +131,81 @@
   padding:5px;
   z-index:100;
 }
+#camera {
+  position:fixed;
+  bottom:140px;
+  right:40px;
+  padding:5px;
+  z-index:100;
+}
+#onboard {
+  position:fixed;
+  bottom:130px;
+  right:120px;
+  padding:5px;
+  z-index:100;
+}
+#onboard-fld {
+  position:fixed;
+  bottom:130px;
+  right:20px;
+  padding:5px;
+  z-index:100;
+}
+#heading {
+  position:fixed;
+  bottom:110px;
+  right:120px;
+  padding:5px;
+  z-index:100;
+}
+#heading-fld {
+  position:fixed;
+  bottom:110px;
+  right:20px;
+  padding:5px;
+  z-index:100;
+}
+#pitch {
+  position:fixed;
+  bottom:90px;
+  right:120px;
+  padding:5px;
+  z-index:100;
+}
+#pitch-fld {
+  position:fixed;
+  bottom:90px;
+  right:20px;
+  padding:5px;
+  z-index:100;
+}
+#roll {
+  position:fixed;
+  bottom:70px;
+  right:120px;
+  padding:5px;
+  z-index:100;
+}
+#roll-fld {
+  position:fixed;
+  bottom:70px;
+  right:20px;
+  padding:5px;
+  z-index:100;
+}
+#hud {
+  position:fixed;
+  bottom:50px;
+  right:120px;
+  padding:5px;
+  z-index:100;
+}
+#hud-fld {
+  position:fixed;
+  bottom:50px;
+  right:20px;
+  padding:5px;
+  z-index:100;
+}
+

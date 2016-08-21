@@ -1643,7 +1643,11 @@ rete4flight.core.set_html_BANG_.call(null,"pitch-fld",[cljs.core.str("<input val
 
 rete4flight.core.set_html_BANG_.call(null,"roll","Roll:");
 
-return rete4flight.core.set_html_BANG_.call(null,"roll-fld",[cljs.core.str("<input value='0' style='width:90px' "),cljs.core.str("onchange='javascript:rete4flight.core.camrol(this.value)'>")].join(''));
+rete4flight.core.set_html_BANG_.call(null,"roll-fld",[cljs.core.str("<input value='0' style='width:90px' "),cljs.core.str("onchange='javascript:rete4flight.core.camrol(this.value)'>")].join(''));
+
+rete4flight.core.set_html_BANG_.call(null,"hud","HUD:");
+
+return rete4flight.core.set_html_BANG_.call(null,"hud-fld","<select id='hud-val' style='width:96px'>\n             <option value='2D'>flat terrain</option>\n             <option value='3D'>3D terrain</option>\n             </select>");
 });
 rete4flight.core.camera_hide = (function rete4flight$core$camera_hide(){
 rete4flight.core.set_html_BANG_.call(null,"autopilot","");
@@ -1676,13 +1680,69 @@ rete4flight.core.set_html_BANG_.call(null,"roll","");
 
 rete4flight.core.set_html_BANG_.call(null,"roll-fld","");
 
+rete4flight.core.set_html_BANG_.call(null,"hud","");
+
+rete4flight.core.set_html_BANG_.call(null,"hud-fld","");
+
 return rete4flight.core.manual_hide.call(null);
+});
+rete4flight.core.camera_on_handler = (function rete4flight$core$camera_on_handler(response){
+var callsigns = rete4flight.core.read_transit.call(null,response);
+var _ = cljs.core.println.call(null,new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"CSS","CSS",135559744),callsigns], null));
+var sel = [cljs.core.str("<select onchange='javascript:rete4flight.core.camonb(this.value)' style='width:94px'>"),cljs.core.str("<option value='0'/>"),cljs.core.str(cljs.core.apply.call(null,cljs.core.str,(function (){var iter__6928__auto__ = ((function (callsigns,_){
+return (function rete4flight$core$camera_on_handler_$_iter__12828(s__12829){
+return (new cljs.core.LazySeq(null,((function (callsigns,_){
+return (function (){
+var s__12829__$1 = s__12829;
+while(true){
+var temp__4657__auto__ = cljs.core.seq.call(null,s__12829__$1);
+if(temp__4657__auto__){
+var s__12829__$2 = temp__4657__auto__;
+if(cljs.core.chunked_seq_QMARK_.call(null,s__12829__$2)){
+var c__6926__auto__ = cljs.core.chunk_first.call(null,s__12829__$2);
+var size__6927__auto__ = cljs.core.count.call(null,c__6926__auto__);
+var b__12831 = cljs.core.chunk_buffer.call(null,size__6927__auto__);
+if((function (){var i__12830 = (0);
+while(true){
+if((i__12830 < size__6927__auto__)){
+var e = cljs.core._nth.call(null,c__6926__auto__,i__12830);
+cljs.core.chunk_append.call(null,b__12831,[cljs.core.str("<option value='"),cljs.core.str(e),cljs.core.str("'>"),cljs.core.str(e),cljs.core.str("</option>")].join(''));
+
+var G__12832 = (i__12830 + (1));
+i__12830 = G__12832;
+continue;
+} else {
+return true;
+}
+break;
+}
+})()){
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12831),rete4flight$core$camera_on_handler_$_iter__12828.call(null,cljs.core.chunk_rest.call(null,s__12829__$2)));
+} else {
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12831),null);
+}
+} else {
+var e = cljs.core.first.call(null,s__12829__$2);
+return cljs.core.cons.call(null,[cljs.core.str("<option value='"),cljs.core.str(e),cljs.core.str("'>"),cljs.core.str(e),cljs.core.str("</option>")].join(''),rete4flight$core$camera_on_handler_$_iter__12828.call(null,cljs.core.rest.call(null,s__12829__$2)));
+}
+} else {
+return null;
+}
+break;
+}
+});})(callsigns,_))
+,null,null));
+});})(callsigns,_))
+;
+return iter__6928__auto__.call(null,callsigns);
+})())),cljs.core.str("</select>")].join('');
+return rete4flight.core.set_html_BANG_.call(null,"onboard-fld",sel);
 });
 rete4flight.core.camera = (function rete4flight$core$camera(){
 if(cljs.core._EQ_.call(null,rete4flight.core.CAMERA,new cljs.core.Keyword(null,"off","off",606440789))){
 rete4flight.core.camera_show.call(null);
 
-ajax.core.GET.call(null,[cljs.core.str(rete4flight.core.URL_CAM),cljs.core.str("?camera=on")].join(''),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
+ajax.core.GET.call(null,[cljs.core.str(rete4flight.core.URL_CAM),cljs.core.str("?camera=on")].join(''),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.camera_on_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
 
 rete4flight.core.CAMERA = new cljs.core.Keyword(null,"on","on",173873944);
 } else {
@@ -1697,8 +1757,12 @@ return null;
 }
 }
 });
+rete4flight.core.selection = (function rete4flight$core$selection(id){
+var e = rete4flight.core.by_id.call(null,id);
+return (e.options[e.selectedIndex]).value;
+});
 rete4flight.core.camonb = (function rete4flight$core$camonb(obj){
-var url = [cljs.core.str(rete4flight.core.URL_CAM),cljs.core.str("?onboard="),cljs.core.str(obj)].join('');
+var url = [cljs.core.str(rete4flight.core.URL_CAM),cljs.core.str("?onboard="),cljs.core.str(obj),cljs.core.str("&hud="),cljs.core.str(rete4flight.core.selection.call(null,"hud-val"))].join('');
 ajax.core.GET.call(null,url,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
 
 rete4flight.core.ONBOARD = obj;
@@ -1722,53 +1786,7 @@ rete4flight.core.set_html_BANG_.call(null,"callsign",inp);
 return cljs.core.vreset_BANG_.call(null,rete4flight.core.REM_CAL,new cljs.core.PersistentArrayMap(null, 1, ["?func=","schedule"], null));
 });
 rete4flight.core.sel_hour = (function rete4flight$core$sel_hour(){
-var slh = [cljs.core.str("<select onchange='javascript:rete4flight.core.selhour(this.value)'>"),cljs.core.str("<option value='select'>hh</option>"),cljs.core.str(cljs.core.apply.call(null,cljs.core.str,(function (){var iter__6928__auto__ = (function rete4flight$core$sel_hour_$_iter__12828(s__12829){
-return (new cljs.core.LazySeq(null,(function (){
-var s__12829__$1 = s__12829;
-while(true){
-var temp__4657__auto__ = cljs.core.seq.call(null,s__12829__$1);
-if(temp__4657__auto__){
-var s__12829__$2 = temp__4657__auto__;
-if(cljs.core.chunked_seq_QMARK_.call(null,s__12829__$2)){
-var c__6926__auto__ = cljs.core.chunk_first.call(null,s__12829__$2);
-var size__6927__auto__ = cljs.core.count.call(null,c__6926__auto__);
-var b__12831 = cljs.core.chunk_buffer.call(null,size__6927__auto__);
-if((function (){var i__12830 = (0);
-while(true){
-if((i__12830 < size__6927__auto__)){
-var hour = cljs.core._nth.call(null,c__6926__auto__,i__12830);
-cljs.core.chunk_append.call(null,b__12831,[cljs.core.str("<option value='"),cljs.core.str(hour),cljs.core.str("'>"),cljs.core.str(hour),cljs.core.str("</option>")].join(''));
-
-var G__12832 = (i__12830 + (1));
-i__12830 = G__12832;
-continue;
-} else {
-return true;
-}
-break;
-}
-})()){
-return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12831),rete4flight$core$sel_hour_$_iter__12828.call(null,cljs.core.chunk_rest.call(null,s__12829__$2)));
-} else {
-return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12831),null);
-}
-} else {
-var hour = cljs.core.first.call(null,s__12829__$2);
-return cljs.core.cons.call(null,[cljs.core.str("<option value='"),cljs.core.str(hour),cljs.core.str("'>"),cljs.core.str(hour),cljs.core.str("</option>")].join(''),rete4flight$core$sel_hour_$_iter__12828.call(null,cljs.core.rest.call(null,s__12829__$2)));
-}
-} else {
-return null;
-}
-break;
-}
-}),null,null));
-});
-return iter__6928__auto__.call(null,cljs.core.range.call(null,(24)));
-})())),cljs.core.str("</select>")].join('');
-return rete4flight.core.set_html_BANG_.call(null,"hour",slh);
-});
-rete4flight.core.sel_minute = (function rete4flight$core$sel_minute(){
-var slm = [cljs.core.str("<select onchange='javascript:rete4flight.core.selmin(this.value)'>"),cljs.core.str("<option value='select'>mm</option>"),cljs.core.str(cljs.core.apply.call(null,cljs.core.str,(function (){var iter__6928__auto__ = (function rete4flight$core$sel_minute_$_iter__12837(s__12838){
+var slh = [cljs.core.str("<select onchange='javascript:rete4flight.core.selhour(this.value)'>"),cljs.core.str("<option value='select'>hh</option>"),cljs.core.str(cljs.core.apply.call(null,cljs.core.str,(function (){var iter__6928__auto__ = (function rete4flight$core$sel_hour_$_iter__12837(s__12838){
 return (new cljs.core.LazySeq(null,(function (){
 var s__12838__$1 = s__12838;
 while(true){
@@ -1782,8 +1800,8 @@ var b__12840 = cljs.core.chunk_buffer.call(null,size__6927__auto__);
 if((function (){var i__12839 = (0);
 while(true){
 if((i__12839 < size__6927__auto__)){
-var min = cljs.core._nth.call(null,c__6926__auto__,i__12839);
-cljs.core.chunk_append.call(null,b__12840,[cljs.core.str("<option value='"),cljs.core.str(min),cljs.core.str("'>"),cljs.core.str(min),cljs.core.str("</option>")].join(''));
+var hour = cljs.core._nth.call(null,c__6926__auto__,i__12839);
+cljs.core.chunk_append.call(null,b__12840,[cljs.core.str("<option value='"),cljs.core.str(hour),cljs.core.str("'>"),cljs.core.str(hour),cljs.core.str("</option>")].join(''));
 
 var G__12841 = (i__12839 + (1));
 i__12839 = G__12841;
@@ -1794,13 +1812,13 @@ return true;
 break;
 }
 })()){
-return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12840),rete4flight$core$sel_minute_$_iter__12837.call(null,cljs.core.chunk_rest.call(null,s__12838__$2)));
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12840),rete4flight$core$sel_hour_$_iter__12837.call(null,cljs.core.chunk_rest.call(null,s__12838__$2)));
 } else {
 return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12840),null);
 }
 } else {
-var min = cljs.core.first.call(null,s__12838__$2);
-return cljs.core.cons.call(null,[cljs.core.str("<option value='"),cljs.core.str(min),cljs.core.str("'>"),cljs.core.str(min),cljs.core.str("</option>")].join(''),rete4flight$core$sel_minute_$_iter__12837.call(null,cljs.core.rest.call(null,s__12838__$2)));
+var hour = cljs.core.first.call(null,s__12838__$2);
+return cljs.core.cons.call(null,[cljs.core.str("<option value='"),cljs.core.str(hour),cljs.core.str("'>"),cljs.core.str(hour),cljs.core.str("</option>")].join(''),rete4flight$core$sel_hour_$_iter__12837.call(null,cljs.core.rest.call(null,s__12838__$2)));
 }
 } else {
 return null;
@@ -1809,12 +1827,12 @@ break;
 }
 }),null,null));
 });
-return iter__6928__auto__.call(null,cljs.core.range.call(null,(60)));
+return iter__6928__auto__.call(null,cljs.core.range.call(null,(24)));
 })())),cljs.core.str("</select>")].join('');
-return rete4flight.core.set_html_BANG_.call(null,"minute",slm);
+return rete4flight.core.set_html_BANG_.call(null,"hour",slh);
 });
-rete4flight.core.sel_from_country = (function rete4flight$core$sel_from_country(contries){
-var sel = [cljs.core.str("<select onchange='javascript:rete4flight.core.selfromcnt(this.value)'>"),cljs.core.str("<option value='select'>from country</option>"),cljs.core.str(cljs.core.apply.call(null,cljs.core.str,(function (){var iter__6928__auto__ = (function rete4flight$core$sel_from_country_$_iter__12846(s__12847){
+rete4flight.core.sel_minute = (function rete4flight$core$sel_minute(){
+var slm = [cljs.core.str("<select onchange='javascript:rete4flight.core.selmin(this.value)'>"),cljs.core.str("<option value='select'>mm</option>"),cljs.core.str(cljs.core.apply.call(null,cljs.core.str,(function (){var iter__6928__auto__ = (function rete4flight$core$sel_minute_$_iter__12846(s__12847){
 return (new cljs.core.LazySeq(null,(function (){
 var s__12847__$1 = s__12847;
 while(true){
@@ -1828,8 +1846,8 @@ var b__12849 = cljs.core.chunk_buffer.call(null,size__6927__auto__);
 if((function (){var i__12848 = (0);
 while(true){
 if((i__12848 < size__6927__auto__)){
-var contry = cljs.core._nth.call(null,c__6926__auto__,i__12848);
-cljs.core.chunk_append.call(null,b__12849,[cljs.core.str("<option value='"),cljs.core.str(contry),cljs.core.str("'>"),cljs.core.str(contry),cljs.core.str("</option>")].join(''));
+var min = cljs.core._nth.call(null,c__6926__auto__,i__12848);
+cljs.core.chunk_append.call(null,b__12849,[cljs.core.str("<option value='"),cljs.core.str(min),cljs.core.str("'>"),cljs.core.str(min),cljs.core.str("</option>")].join(''));
 
 var G__12850 = (i__12848 + (1));
 i__12848 = G__12850;
@@ -1840,13 +1858,13 @@ return true;
 break;
 }
 })()){
-return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12849),rete4flight$core$sel_from_country_$_iter__12846.call(null,cljs.core.chunk_rest.call(null,s__12847__$2)));
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12849),rete4flight$core$sel_minute_$_iter__12846.call(null,cljs.core.chunk_rest.call(null,s__12847__$2)));
 } else {
 return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12849),null);
 }
 } else {
-var contry = cljs.core.first.call(null,s__12847__$2);
-return cljs.core.cons.call(null,[cljs.core.str("<option value='"),cljs.core.str(contry),cljs.core.str("'>"),cljs.core.str(contry),cljs.core.str("</option>")].join(''),rete4flight$core$sel_from_country_$_iter__12846.call(null,cljs.core.rest.call(null,s__12847__$2)));
+var min = cljs.core.first.call(null,s__12847__$2);
+return cljs.core.cons.call(null,[cljs.core.str("<option value='"),cljs.core.str(min),cljs.core.str("'>"),cljs.core.str(min),cljs.core.str("</option>")].join(''),rete4flight$core$sel_minute_$_iter__12846.call(null,cljs.core.rest.call(null,s__12847__$2)));
 }
 } else {
 return null;
@@ -1855,12 +1873,12 @@ break;
 }
 }),null,null));
 });
-return iter__6928__auto__.call(null,contries);
+return iter__6928__auto__.call(null,cljs.core.range.call(null,(60)));
 })())),cljs.core.str("</select>")].join('');
-return rete4flight.core.set_html_BANG_.call(null,"from-country",sel);
+return rete4flight.core.set_html_BANG_.call(null,"minute",slm);
 });
-rete4flight.core.sel_from_airport = (function rete4flight$core$sel_from_airport(airports){
-var sel = [cljs.core.str("<select onchange='javascript:rete4flight.core.selfromapt(this.value)'>"),cljs.core.str("<option value='select'>from airport</option>"),cljs.core.str(cljs.core.apply.call(null,cljs.core.str,(function (){var iter__6928__auto__ = (function rete4flight$core$sel_from_airport_$_iter__12855(s__12856){
+rete4flight.core.sel_from_country = (function rete4flight$core$sel_from_country(contries){
+var sel = [cljs.core.str("<select onchange='javascript:rete4flight.core.selfromcnt(this.value)'>"),cljs.core.str("<option value='select'>from country</option>"),cljs.core.str(cljs.core.apply.call(null,cljs.core.str,(function (){var iter__6928__auto__ = (function rete4flight$core$sel_from_country_$_iter__12855(s__12856){
 return (new cljs.core.LazySeq(null,(function (){
 var s__12856__$1 = s__12856;
 while(true){
@@ -1874,8 +1892,8 @@ var b__12858 = cljs.core.chunk_buffer.call(null,size__6927__auto__);
 if((function (){var i__12857 = (0);
 while(true){
 if((i__12857 < size__6927__auto__)){
-var airport = cljs.core._nth.call(null,c__6926__auto__,i__12857);
-cljs.core.chunk_append.call(null,b__12858,[cljs.core.str("<option value='"),cljs.core.str(airport),cljs.core.str("'>"),cljs.core.str(airport),cljs.core.str("</option>")].join(''));
+var contry = cljs.core._nth.call(null,c__6926__auto__,i__12857);
+cljs.core.chunk_append.call(null,b__12858,[cljs.core.str("<option value='"),cljs.core.str(contry),cljs.core.str("'>"),cljs.core.str(contry),cljs.core.str("</option>")].join(''));
 
 var G__12859 = (i__12857 + (1));
 i__12857 = G__12859;
@@ -1886,13 +1904,13 @@ return true;
 break;
 }
 })()){
-return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12858),rete4flight$core$sel_from_airport_$_iter__12855.call(null,cljs.core.chunk_rest.call(null,s__12856__$2)));
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12858),rete4flight$core$sel_from_country_$_iter__12855.call(null,cljs.core.chunk_rest.call(null,s__12856__$2)));
 } else {
 return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12858),null);
 }
 } else {
-var airport = cljs.core.first.call(null,s__12856__$2);
-return cljs.core.cons.call(null,[cljs.core.str("<option value='"),cljs.core.str(airport),cljs.core.str("'>"),cljs.core.str(airport),cljs.core.str("</option>")].join(''),rete4flight$core$sel_from_airport_$_iter__12855.call(null,cljs.core.rest.call(null,s__12856__$2)));
+var contry = cljs.core.first.call(null,s__12856__$2);
+return cljs.core.cons.call(null,[cljs.core.str("<option value='"),cljs.core.str(contry),cljs.core.str("'>"),cljs.core.str(contry),cljs.core.str("</option>")].join(''),rete4flight$core$sel_from_country_$_iter__12855.call(null,cljs.core.rest.call(null,s__12856__$2)));
 }
 } else {
 return null;
@@ -1901,12 +1919,12 @@ break;
 }
 }),null,null));
 });
-return iter__6928__auto__.call(null,airports);
+return iter__6928__auto__.call(null,contries);
 })())),cljs.core.str("</select>")].join('');
-return rete4flight.core.set_html_BANG_.call(null,"from-airport",sel);
+return rete4flight.core.set_html_BANG_.call(null,"from-country",sel);
 });
-rete4flight.core.sel_to_country = (function rete4flight$core$sel_to_country(contries){
-var sel = [cljs.core.str("<select onchange='javascript:rete4flight.core.seltocnt(this.value)'>"),cljs.core.str("<option value='select'>to country</option>"),cljs.core.str(cljs.core.apply.call(null,cljs.core.str,(function (){var iter__6928__auto__ = (function rete4flight$core$sel_to_country_$_iter__12864(s__12865){
+rete4flight.core.sel_from_airport = (function rete4flight$core$sel_from_airport(airports){
+var sel = [cljs.core.str("<select onchange='javascript:rete4flight.core.selfromapt(this.value)'>"),cljs.core.str("<option value='select'>from airport</option>"),cljs.core.str(cljs.core.apply.call(null,cljs.core.str,(function (){var iter__6928__auto__ = (function rete4flight$core$sel_from_airport_$_iter__12864(s__12865){
 return (new cljs.core.LazySeq(null,(function (){
 var s__12865__$1 = s__12865;
 while(true){
@@ -1920,8 +1938,8 @@ var b__12867 = cljs.core.chunk_buffer.call(null,size__6927__auto__);
 if((function (){var i__12866 = (0);
 while(true){
 if((i__12866 < size__6927__auto__)){
-var contry = cljs.core._nth.call(null,c__6926__auto__,i__12866);
-cljs.core.chunk_append.call(null,b__12867,[cljs.core.str("<option value='"),cljs.core.str(contry),cljs.core.str("'>"),cljs.core.str(contry),cljs.core.str("</option>")].join(''));
+var airport = cljs.core._nth.call(null,c__6926__auto__,i__12866);
+cljs.core.chunk_append.call(null,b__12867,[cljs.core.str("<option value='"),cljs.core.str(airport),cljs.core.str("'>"),cljs.core.str(airport),cljs.core.str("</option>")].join(''));
 
 var G__12868 = (i__12866 + (1));
 i__12866 = G__12868;
@@ -1932,13 +1950,59 @@ return true;
 break;
 }
 })()){
-return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12867),rete4flight$core$sel_to_country_$_iter__12864.call(null,cljs.core.chunk_rest.call(null,s__12865__$2)));
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12867),rete4flight$core$sel_from_airport_$_iter__12864.call(null,cljs.core.chunk_rest.call(null,s__12865__$2)));
 } else {
 return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12867),null);
 }
 } else {
-var contry = cljs.core.first.call(null,s__12865__$2);
-return cljs.core.cons.call(null,[cljs.core.str("<option value='"),cljs.core.str(contry),cljs.core.str("'>"),cljs.core.str(contry),cljs.core.str("</option>")].join(''),rete4flight$core$sel_to_country_$_iter__12864.call(null,cljs.core.rest.call(null,s__12865__$2)));
+var airport = cljs.core.first.call(null,s__12865__$2);
+return cljs.core.cons.call(null,[cljs.core.str("<option value='"),cljs.core.str(airport),cljs.core.str("'>"),cljs.core.str(airport),cljs.core.str("</option>")].join(''),rete4flight$core$sel_from_airport_$_iter__12864.call(null,cljs.core.rest.call(null,s__12865__$2)));
+}
+} else {
+return null;
+}
+break;
+}
+}),null,null));
+});
+return iter__6928__auto__.call(null,airports);
+})())),cljs.core.str("</select>")].join('');
+return rete4flight.core.set_html_BANG_.call(null,"from-airport",sel);
+});
+rete4flight.core.sel_to_country = (function rete4flight$core$sel_to_country(contries){
+var sel = [cljs.core.str("<select onchange='javascript:rete4flight.core.seltocnt(this.value)'>"),cljs.core.str("<option value='select'>to country</option>"),cljs.core.str(cljs.core.apply.call(null,cljs.core.str,(function (){var iter__6928__auto__ = (function rete4flight$core$sel_to_country_$_iter__12873(s__12874){
+return (new cljs.core.LazySeq(null,(function (){
+var s__12874__$1 = s__12874;
+while(true){
+var temp__4657__auto__ = cljs.core.seq.call(null,s__12874__$1);
+if(temp__4657__auto__){
+var s__12874__$2 = temp__4657__auto__;
+if(cljs.core.chunked_seq_QMARK_.call(null,s__12874__$2)){
+var c__6926__auto__ = cljs.core.chunk_first.call(null,s__12874__$2);
+var size__6927__auto__ = cljs.core.count.call(null,c__6926__auto__);
+var b__12876 = cljs.core.chunk_buffer.call(null,size__6927__auto__);
+if((function (){var i__12875 = (0);
+while(true){
+if((i__12875 < size__6927__auto__)){
+var contry = cljs.core._nth.call(null,c__6926__auto__,i__12875);
+cljs.core.chunk_append.call(null,b__12876,[cljs.core.str("<option value='"),cljs.core.str(contry),cljs.core.str("'>"),cljs.core.str(contry),cljs.core.str("</option>")].join(''));
+
+var G__12877 = (i__12875 + (1));
+i__12875 = G__12877;
+continue;
+} else {
+return true;
+}
+break;
+}
+})()){
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12876),rete4flight$core$sel_to_country_$_iter__12873.call(null,cljs.core.chunk_rest.call(null,s__12874__$2)));
+} else {
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12876),null);
+}
+} else {
+var contry = cljs.core.first.call(null,s__12874__$2);
+return cljs.core.cons.call(null,[cljs.core.str("<option value='"),cljs.core.str(contry),cljs.core.str("'>"),cljs.core.str(contry),cljs.core.str("</option>")].join(''),rete4flight$core$sel_to_country_$_iter__12873.call(null,cljs.core.rest.call(null,s__12874__$2)));
 }
 } else {
 return null;
@@ -1961,25 +2025,25 @@ return rete4flight.core.sel_to_country.call(null,rete4flight.core.read_transit.c
 }),new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
 });
 rete4flight.core.sel_to_airport = (function rete4flight$core$sel_to_airport(airports){
-var sel = [cljs.core.str("<select onchange='javascript:rete4flight.core.seltoapt(this.value)'>"),cljs.core.str("<option value='select'>to airport</option>"),cljs.core.str(cljs.core.apply.call(null,cljs.core.str,(function (){var iter__6928__auto__ = (function rete4flight$core$sel_to_airport_$_iter__12873(s__12874){
+var sel = [cljs.core.str("<select onchange='javascript:rete4flight.core.seltoapt(this.value)'>"),cljs.core.str("<option value='select'>to airport</option>"),cljs.core.str(cljs.core.apply.call(null,cljs.core.str,(function (){var iter__6928__auto__ = (function rete4flight$core$sel_to_airport_$_iter__12882(s__12883){
 return (new cljs.core.LazySeq(null,(function (){
-var s__12874__$1 = s__12874;
+var s__12883__$1 = s__12883;
 while(true){
-var temp__4657__auto__ = cljs.core.seq.call(null,s__12874__$1);
+var temp__4657__auto__ = cljs.core.seq.call(null,s__12883__$1);
 if(temp__4657__auto__){
-var s__12874__$2 = temp__4657__auto__;
-if(cljs.core.chunked_seq_QMARK_.call(null,s__12874__$2)){
-var c__6926__auto__ = cljs.core.chunk_first.call(null,s__12874__$2);
+var s__12883__$2 = temp__4657__auto__;
+if(cljs.core.chunked_seq_QMARK_.call(null,s__12883__$2)){
+var c__6926__auto__ = cljs.core.chunk_first.call(null,s__12883__$2);
 var size__6927__auto__ = cljs.core.count.call(null,c__6926__auto__);
-var b__12876 = cljs.core.chunk_buffer.call(null,size__6927__auto__);
-if((function (){var i__12875 = (0);
+var b__12885 = cljs.core.chunk_buffer.call(null,size__6927__auto__);
+if((function (){var i__12884 = (0);
 while(true){
-if((i__12875 < size__6927__auto__)){
-var airport = cljs.core._nth.call(null,c__6926__auto__,i__12875);
-cljs.core.chunk_append.call(null,b__12876,[cljs.core.str("<option value='"),cljs.core.str(airport),cljs.core.str("'>"),cljs.core.str(airport),cljs.core.str("</option>")].join(''));
+if((i__12884 < size__6927__auto__)){
+var airport = cljs.core._nth.call(null,c__6926__auto__,i__12884);
+cljs.core.chunk_append.call(null,b__12885,[cljs.core.str("<option value='"),cljs.core.str(airport),cljs.core.str("'>"),cljs.core.str(airport),cljs.core.str("</option>")].join(''));
 
-var G__12877 = (i__12875 + (1));
-i__12875 = G__12877;
+var G__12886 = (i__12884 + (1));
+i__12884 = G__12886;
 continue;
 } else {
 return true;
@@ -1987,13 +2051,13 @@ return true;
 break;
 }
 })()){
-return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12876),rete4flight$core$sel_to_airport_$_iter__12873.call(null,cljs.core.chunk_rest.call(null,s__12874__$2)));
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12885),rete4flight$core$sel_to_airport_$_iter__12882.call(null,cljs.core.chunk_rest.call(null,s__12883__$2)));
 } else {
-return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12876),null);
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12885),null);
 }
 } else {
-var airport = cljs.core.first.call(null,s__12874__$2);
-return cljs.core.cons.call(null,[cljs.core.str("<option value='"),cljs.core.str(airport),cljs.core.str("'>"),cljs.core.str(airport),cljs.core.str("</option>")].join(''),rete4flight$core$sel_to_airport_$_iter__12873.call(null,cljs.core.rest.call(null,s__12874__$2)));
+var airport = cljs.core.first.call(null,s__12883__$2);
+return cljs.core.cons.call(null,[cljs.core.str("<option value='"),cljs.core.str(airport),cljs.core.str("'>"),cljs.core.str(airport),cljs.core.str("</option>")].join(''),rete4flight$core$sel_to_airport_$_iter__12882.call(null,cljs.core.rest.call(null,s__12883__$2)));
 }
 } else {
 return null;
@@ -2077,21 +2141,21 @@ var cen = cljs.core.deref.call(null,rete4flight.core.chart).getCenter();
 return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [cen.lat,cen.lng], null);
 });
 rete4flight.core.new_visible = (function rete4flight$core$new_visible(){
-var vec__12879 = rete4flight.core.visible_map.call(null);
-var n = cljs.core.nth.call(null,vec__12879,(0),null);
-var s = cljs.core.nth.call(null,vec__12879,(1),null);
-var w = cljs.core.nth.call(null,vec__12879,(2),null);
-var e = cljs.core.nth.call(null,vec__12879,(3),null);
+var vec__12888 = rete4flight.core.visible_map.call(null);
+var n = cljs.core.nth.call(null,vec__12888,(0),null);
+var s = cljs.core.nth.call(null,vec__12888,(1),null);
+var w = cljs.core.nth.call(null,vec__12888,(2),null);
+var e = cljs.core.nth.call(null,vec__12888,(3),null);
 var center = rete4flight.core.get_map_center.call(null);
 var url = [cljs.core.str(rete4flight.core.URL_NVI),cljs.core.str("?n="),cljs.core.str(n),cljs.core.str("&s="),cljs.core.str(s),cljs.core.str("&w="),cljs.core.str(w),cljs.core.str("&e="),cljs.core.str(e),cljs.core.str("&c="),cljs.core.str(center)].join('');
 return ajax.core.GET.call(null,url,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"handler","handler",-195596612),rete4flight.core.no_handler,new cljs.core.Keyword(null,"error-handler","error-handler",-484945776),rete4flight.core.error_handler], null));
 });
 rete4flight.core.watch_visible = (function rete4flight$core$watch_visible(){
-var vec__12881 = rete4flight.core.visible_map.call(null);
-var n = cljs.core.nth.call(null,vec__12881,(0),null);
-var s = cljs.core.nth.call(null,vec__12881,(1),null);
-var w = cljs.core.nth.call(null,vec__12881,(2),null);
-var e = cljs.core.nth.call(null,vec__12881,(3),null);
+var vec__12890 = rete4flight.core.visible_map.call(null);
+var n = cljs.core.nth.call(null,vec__12890,(0),null);
+var s = cljs.core.nth.call(null,vec__12890,(1),null);
+var w = cljs.core.nth.call(null,vec__12890,(2),null);
+var e = cljs.core.nth.call(null,vec__12890,(3),null);
 var center = rete4flight.core.get_map_center.call(null);
 var url = [cljs.core.str(rete4flight.core.URL_WVI),cljs.core.str("?n="),cljs.core.str(n),cljs.core.str("&s="),cljs.core.str(s),cljs.core.str("&w="),cljs.core.str(w),cljs.core.str("&e="),cljs.core.str(e),cljs.core.str("&c="),cljs.core.str(center)].join('');
 rete4flight.core.clear_all.call(null);
@@ -2106,33 +2170,33 @@ return ajax.core.GET.call(null,rete4flight.core.URL_INT,new cljs.core.Persistent
 });
 rete4flight.core.COMMANDS = "<select onchange='javascript:rete4flight.core.commands(this.value)'>\n  \t\t\t<option value='commands'>Commands</option>\n  \t\t\t<option value='watch-visible'>Watch visible area</option>\n  \t\t\t<option value='flight-states'>State of flights</option>\n  \t\t\t<option value='intersect'>Intersections</option>\n  \t\t\t<option value='move-to'>Move to Airport</option>\n  \t\t\t<option value='schedule'>Schedule Flight</option>\n  \t\t\t<option value='camera'>Camera</option>\n  \t\t\t<option value='manual'>Manual Control</option>\n  \t\t\t<option value='clear'>Clear</option>\n\t\t</select>";
 rete4flight.core.commands = (function rete4flight$core$commands(func){
-var pred__12885_12888 = cljs.core._EQ_;
-var expr__12886_12889 = func;
-if(cljs.core.truth_(pred__12885_12888.call(null,"watch-visible",expr__12886_12889))){
+var pred__12894_12897 = cljs.core._EQ_;
+var expr__12895_12898 = func;
+if(cljs.core.truth_(pred__12894_12897.call(null,"watch-visible",expr__12895_12898))){
 rete4flight.core.watch_visible.call(null);
 } else {
-if(cljs.core.truth_(pred__12885_12888.call(null,"flight-states",expr__12886_12889))){
+if(cljs.core.truth_(pred__12894_12897.call(null,"flight-states",expr__12895_12898))){
 rete4flight.core.flight_states.call(null);
 } else {
-if(cljs.core.truth_(pred__12885_12888.call(null,"intersect",expr__12886_12889))){
+if(cljs.core.truth_(pred__12894_12897.call(null,"intersect",expr__12895_12898))){
 rete4flight.core.intersect.call(null);
 } else {
-if(cljs.core.truth_(pred__12885_12888.call(null,"clear",expr__12886_12889))){
+if(cljs.core.truth_(pred__12894_12897.call(null,"clear",expr__12895_12898))){
 rete4flight.core.clear_all.call(null);
 } else {
-if(cljs.core.truth_(pred__12885_12888.call(null,"move-to",expr__12886_12889))){
+if(cljs.core.truth_(pred__12894_12897.call(null,"move-to",expr__12895_12898))){
 rete4flight.core.move_to.call(null);
 } else {
-if(cljs.core.truth_(pred__12885_12888.call(null,"schedule",expr__12886_12889))){
+if(cljs.core.truth_(pred__12894_12897.call(null,"schedule",expr__12895_12898))){
 rete4flight.core.schedule.call(null);
 } else {
-if(cljs.core.truth_(pred__12885_12888.call(null,"camera",expr__12886_12889))){
+if(cljs.core.truth_(pred__12894_12897.call(null,"camera",expr__12895_12898))){
 rete4flight.core.camera.call(null);
 } else {
-if(cljs.core.truth_(pred__12885_12888.call(null,"manual",expr__12886_12889))){
+if(cljs.core.truth_(pred__12894_12897.call(null,"manual",expr__12895_12898))){
 rete4flight.core.manual.call(null);
 } else {
-throw (new Error([cljs.core.str("No matching clause: "),cljs.core.str(expr__12886_12889)].join('')));
+throw (new Error([cljs.core.str("No matching clause: "),cljs.core.str(expr__12895_12898)].join('')));
 }
 }
 }
@@ -2151,28 +2215,28 @@ if(cljs.core.truth_(temp__4655__auto__)){
 var func = temp__4655__auto__;
 var head = [cljs.core.str(fkey),cljs.core.str(func)].join('');
 var tail = (function (){var iter__6928__auto__ = ((function (head,func,temp__4655__auto__,fkey){
-return (function rete4flight$core$remote_call_$_iter__12898(s__12899){
+return (function rete4flight$core$remote_call_$_iter__12907(s__12908){
 return (new cljs.core.LazySeq(null,((function (head,func,temp__4655__auto__,fkey){
 return (function (){
-var s__12899__$1 = s__12899;
+var s__12908__$1 = s__12908;
 while(true){
-var temp__4657__auto__ = cljs.core.seq.call(null,s__12899__$1);
+var temp__4657__auto__ = cljs.core.seq.call(null,s__12908__$1);
 if(temp__4657__auto__){
-var s__12899__$2 = temp__4657__auto__;
-if(cljs.core.chunked_seq_QMARK_.call(null,s__12899__$2)){
-var c__6926__auto__ = cljs.core.chunk_first.call(null,s__12899__$2);
+var s__12908__$2 = temp__4657__auto__;
+if(cljs.core.chunked_seq_QMARK_.call(null,s__12908__$2)){
+var c__6926__auto__ = cljs.core.chunk_first.call(null,s__12908__$2);
 var size__6927__auto__ = cljs.core.count.call(null,c__6926__auto__);
-var b__12901 = cljs.core.chunk_buffer.call(null,size__6927__auto__);
-if((function (){var i__12900 = (0);
+var b__12910 = cljs.core.chunk_buffer.call(null,size__6927__auto__);
+if((function (){var i__12909 = (0);
 while(true){
-if((i__12900 < size__6927__auto__)){
-var vec__12904 = cljs.core._nth.call(null,c__6926__auto__,i__12900);
-var f = cljs.core.nth.call(null,vec__12904,(0),null);
-var k = cljs.core.nth.call(null,vec__12904,(1),null);
-cljs.core.chunk_append.call(null,b__12901,[cljs.core.str(f),cljs.core.str(k)].join(''));
+if((i__12909 < size__6927__auto__)){
+var vec__12913 = cljs.core._nth.call(null,c__6926__auto__,i__12909);
+var f = cljs.core.nth.call(null,vec__12913,(0),null);
+var k = cljs.core.nth.call(null,vec__12913,(1),null);
+cljs.core.chunk_append.call(null,b__12910,[cljs.core.str(f),cljs.core.str(k)].join(''));
 
-var G__12906 = (i__12900 + (1));
-i__12900 = G__12906;
+var G__12915 = (i__12909 + (1));
+i__12909 = G__12915;
 continue;
 } else {
 return true;
@@ -2180,15 +2244,15 @@ return true;
 break;
 }
 })()){
-return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12901),rete4flight$core$remote_call_$_iter__12898.call(null,cljs.core.chunk_rest.call(null,s__12899__$2)));
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12910),rete4flight$core$remote_call_$_iter__12907.call(null,cljs.core.chunk_rest.call(null,s__12908__$2)));
 } else {
-return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12901),null);
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__12910),null);
 }
 } else {
-var vec__12905 = cljs.core.first.call(null,s__12899__$2);
-var f = cljs.core.nth.call(null,vec__12905,(0),null);
-var k = cljs.core.nth.call(null,vec__12905,(1),null);
-return cljs.core.cons.call(null,[cljs.core.str(f),cljs.core.str(k)].join(''),rete4flight$core$remote_call_$_iter__12898.call(null,cljs.core.rest.call(null,s__12899__$2)));
+var vec__12914 = cljs.core.first.call(null,s__12908__$2);
+var f = cljs.core.nth.call(null,vec__12914,(0),null);
+var k = cljs.core.nth.call(null,vec__12914,(1),null);
+return cljs.core.cons.call(null,[cljs.core.str(f),cljs.core.str(k)].join(''),rete4flight$core$remote_call_$_iter__12907.call(null,cljs.core.rest.call(null,s__12908__$2)));
 }
 } else {
 return null;
@@ -2208,7 +2272,7 @@ return null;
 }
 });
 rete4flight.core.init = (function rete4flight$core$init(){
-var m = L.map("map").setView([40.8,-74.0],(9));
+var m = L.map("map").setView([40.8,-74.0],(10));
 var tile1 = L.tileLayer(rete4flight.core.URL_OSM,{"maxZoom": (16), "attribution": "OOGIS RL, OpenStreetMap &copy;"});
 var tile2 = L.tileLayer(rete4flight.core.URL_GSA,{"maxZoom": (20), "subdomains": ["mt0","mt1","mt2","mt3"], "attribution": "OOGIS RL, Google &copy;"});
 var tile3 = L.tileLayer(rete4flight.core.URL_GST,{"maxZoom": (20), "subdomains": ["mt0","mt1","mt2","mt3"], "attribution": "OOGIS RL, Google &copy;"});
