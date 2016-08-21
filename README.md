@@ -45,6 +45,8 @@ The command "Camera"  allows you to be in a cockpit of the aircraft and enjoy a 
 
 You can see other flights from the cockpit. Other flights displayed with blue or red icons and call signs. Blue flights are following with yours, red ones are opposite.
 
+If you see black starry sky under blue sky instead of surface, select in the "Imagery" menu in the right upper corner the item "ESRI World Imagery".
+
 You can fly yourself using the command "Manual Control". Start a new flight, climb on board and switch to the manual control. Now you can input in the autopilot new values of speed, course and altitude and it execute these directives in accordance with programmed dynamics (you can change it as you like). Naturally, you can't control real flights.
 
 Alternatively, you can start your flight at any point by a similar sequence of commands in the REPL:

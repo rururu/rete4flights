@@ -128,9 +128,13 @@
 (def DOC-SND (volatile! true))
 
 (defn doc []
+<<<<<<< HEAD
   (str "{\"id\":\"document\",\"version\":\"1.0\",\"clock\":{\"currentTime\":\""
        (iso8601futt -30)
        "\"}}"))
+=======
+  (str "{\"id\":\"document\",\"version\":\"1.0\",\"clock\":{\"currentTime\":\"" (iso8601futt -30) "\"}}"))
+>>>>>>> c7f371f33fd5e262d2b625e506530e424214ddbe
 
 (defn location [label img-url lat lon alt]
   (when @DOC-SND
