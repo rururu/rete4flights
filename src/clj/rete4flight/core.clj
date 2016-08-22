@@ -526,8 +526,8 @@
         fapt (get-in apts [(params :from-country) (params :from-airport)])
         tapt (get-in apts [(params :to-country) (params :to-airport)])]
     (let [tim [hour min]
-          fcrd [(read-string (fapt "lat")) (read-string (fapt "lon"))]
-          tcrd [(read-string (tapt "lat")) (read-string (tapt "lon"))]
+          fcrd [(fapt "lat")(fapt "lon")]
+          tcrd [(tapt "lat")(tapt "lon")]
           iatf (fapt "iata")
           iatt (tapt "iata")
           crs 0
@@ -584,7 +584,8 @@
    (= (params :camera) "on")
      (cz/start-sse-server)
    (= (params :camera) "off")
-     (cz/stop-sse-server)
+     (do (cz/stop-sse-server)
+       (def BROWIND true))
    (some? (params :onboard))
      (when-let [id (id-by-call (params :onboard))]
       (when BROWIND

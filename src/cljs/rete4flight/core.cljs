@@ -394,17 +394,17 @@
 
 (defn manual-show []
   (when (= CAMERA :on)
-    (set-html! "course-fld" (str "<input value='0' style='width:40px' "
+    (set-html! "course" (str "Course: <input value='0' style='width:40px' "
                                  "onchange='javascript:rete4flight.core.manualcrs(this.value)'>"))
-    (set-html! "speed-fld" (str "<input value='0' style='width:40px' "
+    (set-html! "speed" (str "Speed: <input value='0' style='width:40px' "
                                 "onchange='javascript:rete4flight.core.manualspd(this.value)'>"))
-    (set-html! "altitude-fld" (str "<input value='0' style='width:40px' "
+    (set-html! "altitude" (str "Altitude: <input value='0' style='width:40px' "
                                    "onchange='javascript:rete4flight.core.manualalt(this.value)'>"))))
 
 (defn manual-hide []
-  (set-html! "course-fld" "")
-  (set-html! "speed-fld" "")
-  (set-html! "altitude-fld" ""))
+  (set-html! "course" "")
+  (set-html! "speed" "")
+  (set-html! "altitude" ""))
 
 (defn manual []
   (cond
@@ -486,7 +486,7 @@
 (defn camera-on-handler [response]
   (let [callsigns (read-transit response)
         _ (println [:CSS callsigns])
-        sel (str "<select onchange='javascript:rete4flight.core.camonb(this.value)' style='width:94px'>"
+        sel (str "<select onchange='javascript:rete4flight.core.camonb(this.value)' style='width:96px'>"
                  "<option value='0'/>"
                  (apply str (for [e callsigns]
                               (str "<option value='" e "'>" e "</option>")))
@@ -712,6 +712,7 @@
 ;; ------------------------ Initialization ----------------------------
 
 (defn init []
+  (println :INIT)
   (let [m (-> js/L
             (.map "map")
             (.setView (array 40.8, -74.0) 10)) ;; New York City

@@ -78,7 +78,6 @@
    (fl/follow-flight ?id ?crd3 ?crd2 ?crd1)
    (retract ?f))
 
-
   (fl:CheckStateHere
    -1
    (Check status "STATE")
@@ -88,6 +87,7 @@
            history ?now
            state ?sta)
    =>
+   ;;(println [:PUT-ON-MAP ?id ?cs ?sta])
    (fl/put-on-map ?id ?cs ?sta))
 
   (fl:CheckStateGone
@@ -139,6 +139,7 @@
    -2
    ?ch (Check)
    =>
+   ;;(println :RET-CHECK)
    (retract ?ch))
 
   (fl:CZML-LegGeneration
