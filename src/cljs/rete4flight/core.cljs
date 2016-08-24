@@ -18,6 +18,7 @@
 (def mapobs (volatile! {})) ;; map of all flights on chart
 (def links (volatile! {})) ;; map of all links on chart
 (def trails (volatile! {})) ;; map of all trails on chart
+(def placemarks (volatile! []))
 (def CLK-STP 100) ;; clock step 100 msec (0.1 sec)
 (def CLS-HRS (/ CLK-STP 3600000)) ;; clock step in hours
 (def DLT-EVT 1000) ;; check event queue from server every 1000 msec (1 sec)
@@ -48,7 +49,9 @@
               "DESCEND" "http://localhost:3000/img/greenpln32.png"
               "CLIMB" "http://localhost:3000/img/bluepln32.png"
               "LEVEL" "http://localhost:3000/img/purplepln32.png"
-              "GROUND" "http://localhost:3000/img/greypln32.png"})
+              "GROUND" "http://localhost:3000/img/greypln32.png"
+              "landmark" "http://localhost:3000/img/landmark.png"
+              "city" "http://localhost:3000/img/city.png"})
 
 ;; ----------------- Chart creation and control -------------------------
 
@@ -93,6 +96,13 @@
         mk (-> js/L (.rotatedMarker pos opt))]
     mk))
 
+(defn create-pm-marker [lat lon sta]
+  (let [pos (js/L.LatLng. lat lon)
+        ico (js/L.icon #js{:iconUrl (URL-ICO sta) :iconSize #js[24, 24]})
+        opt #js{:icon ico :draggable true}
+        mk (-> js/L (.rotatedMarker pos opt))]
+    mk))
+
 (defn spherical-between [phi1 lambda0 c az]
   (let [cosphi1 (js/Math.cos phi1)
         sinphi1 (js/Math.sin phi1)
@@ -130,6 +140,17 @@
   (vswap! mapobs assoc-in [id :anc-dir] (* crs pid180))
   (vswap! mapobs assoc-in [id :anc-rdh] (* spd nmrad))
   (vswap! mapobs assoc-in [id :anc-clk] @clock))
+
+(defn placemarkPopup [id title alt lat lon sta]
+  (str "<h3>" title "</h3>"
+       "<table>"
+       "<tr><td>altitude</td><td>" alt "</td></tr>"
+       "<tr><td>latitude</td><td>" lat "</td></tr>"
+       "<tr><td>longitude</td><td>" lon "</td></tr>"
+       "<tr><td>feature</td><td>" sta "</td></tr>"
+       "<tr><td><input type='button' style='color:green' value='Inform'
+                 onclick='rete4flight.core.info(\"" id "\")' ></td>"
+       "</table>"))
 
 (defn mapobPopup [id callsign alt lat lon crs spd sta]
   (str "<h3>" callsign "</h3>"
@@ -176,6 +197,16 @@
 (defn clear-mapobs []
   (doseq [id (keys @mapobs)]
     (delete-mapob id)))
+
+(defn create-placemark [id title lat lon alt sta]
+  (let [mrk (create-pm-marker lat lon sta)]
+    (.addTo mrk @chart)
+    (.bindPopup mrk (placemarkPopup id title alt lat lon sta))
+    (vswap! placemarks conj mrk)))
+
+(defn clear-placemarks []
+  (doseq [mrk @placemarks]
+    (.removeLayer @chart mrk)))
 
 ;;----------------------- Trail manipulation ------------------------
 
@@ -355,6 +386,9 @@
                       (set-map-view lat lon))
       :turn (let [{:keys [id on-course]} evt]
                    (turn id on-course))
+      :create-placemark (let [{:keys [id title lat lon alt state]} evt]
+                      (create-placemark id title lat lon alt state))
+      :clear-placemarks (clear-placemarks)
       (println (str "Unknown event: " [event evt])))))
 
 (defn error-handler [{:keys [status status-text]}]

@@ -12,7 +12,8 @@
             [clj-json.core :as json]
             [rete.core :as rete]
             [rete4flight.geo :as geo]
-            [rete4flight.cesium :as cz])
+            [rete4flight.cesium :as cz]
+            [rete4flight.data :as data])
   (:gen-class))
 
 ;; ----------------------- Flightradar24 client ------------------------
@@ -24,7 +25,8 @@
 (def ES-FILE "src/clj/rete4flight/es.clj")
 (def BBX (volatile! [])) ;; bounding box
 (def WTCH-FIRST (volatile! true)) ;; first swatch
-(def WTCH-INTL 20000) ;; watch interval (10 sec)
+(def WTCH-INTL 20000) ;; watch interval (20 sec)
+(def DATA-INTL 30000) ;; watch interval (2 min)
 (def STAT-INTL 20000) ;; flight state checking interval (20 sec)
 (def POP-DEL 30000) ;; popup delay
 (def HIS-MEM 3) ;; number of remembered watching intervals (30 sec memory)
@@ -34,6 +36,7 @@
 (def MYFS-INTL 4000) ;; my flights simulation interval (1 sec)
 (def TRN-STP 4) ;; step of course in degrees while turning
 (def CZMW-INTL 30000) ;; Cesium work interval (20 sec)
+(def DATA (volatile! nil)) ;; External data
 
 (defonce FRS (volatile! {:apsurl "http://www.flightradar24.com/_json/airports.php"
                          :allurl "http://data-live.flightradar24.com/zones/fcgi/feed.js"
@@ -333,6 +336,17 @@
   (let [counter (volatile! -1)]
     (fn [] (do (vswap! counter inc) @counter))))
 
+(defn display-external-data [dat]
+  (pump-in-evt {:event :clear-placemarks})
+  (dotimes [i (count dat)]
+    (let [evt (data/placemark-evt i (nth dat i))]
+      (pump-in-evt evt))))
+
+(defn get-data []
+  (when-let [dat (data/data-bbx @BBX)]
+    (display-external-data dat)
+    (vreset! DATA dat)))
+
 (defn watch-all []
   (let [mom (mgen)
         [n s w e c] @BBX
@@ -372,6 +386,7 @@
     (when @WTCH-FIRST
       (println "Start (watch-all)..")
       (repeater #(watch-all) WTCH-INTL)
+      (repeater #(get-data) DATA-INTL)
       (vreset! WTCH-FIRST false))
     ""))
 
