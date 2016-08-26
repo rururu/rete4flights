@@ -14,15 +14,26 @@
                "river"
                "railwaystation"
                "event"])
+(def POP-PERIOD 30000)
 
 (defn placemark-evt [n dat]
   {:event :create-placemark
-   :id (str "placemark" n)
-   :title (get dat "title")
    :lat (get dat "lat")
    :lon (get dat "lng")
-   :alt (or (get dat "elevation") 0)
    :state (get dat "feature")})
+
+(defn placemark-html-evt [dat]
+  (let [head (str "<h3>" (get dat "title") "</h3>")
+        itag (str "<img src=\"" (get dat "thumbnailImg") "\">")
+        summ (get dat "summary")
+        addr (str "http://" (get dat "wikipediaUrl") "\"")
+        wiki (str "<a href=\"" addr "\">" addr "</a>")
+        html (str head itag "<br>" summ "<br>" wiki)]
+    {:event :add-popup
+     :lat (get dat "lat")
+     :lon (get dat "lng")
+     :html html
+     :time POP-PERIOD}))
 
 (defn fetch-data []
   (let [[n s w e c] @BBX
@@ -30,6 +41,7 @@
                  "?north=" n "&south=" s "&east=" e "&west=" w
                  "&maxRows=" MAXROWS
                  "&username=" USERNAME)]
+    ;;(println [:URL url])
     (try
       (let [res (slurp url)
             jsn (json/parse-string res)

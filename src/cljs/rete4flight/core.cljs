@@ -51,6 +51,11 @@
               "LEVEL" "http://localhost:3000/img/purplepln32.png"
               "GROUND" "http://localhost:3000/img/greypln32.png"
               "landmark" "http://localhost:3000/img/landmark.png"
+              "edu" "http://localhost:3000/img/edu.png"
+              "mountain" "http://localhost:3000/img/mountain.png"
+              "river" "http://localhost:3000/img/river.png"
+              "railwaystation" "http://localhost:3000/img/railwaystation.png"
+              "event" "http://localhost:3000/img/event.png"
               "city" "http://localhost:3000/img/city.png"})
 
 ;; ----------------- Chart creation and control -------------------------
@@ -96,11 +101,25 @@
         mk (-> js/L (.rotatedMarker pos opt))]
     mk))
 
+(defn index
+  ([e [f & r]]
+   (index 0 e f r))
+  ([i e f r]
+   (cond
+    (= e f) i
+    (empty? r) -1
+    true (index (inc i) e (first r) (rest r)))))
+
+(declare info)
+
 (defn create-pm-marker [lat lon sta]
   (let [pos (js/L.LatLng. lat lon)
         ico (js/L.icon #js{:iconUrl (URL-ICO sta) :iconSize #js[24, 24]})
         opt #js{:icon ico :draggable true}
         mk (-> js/L (.rotatedMarker pos opt))]
+    (.on mk "click"
+         (fn [e]
+           (info (str "pm" (index (.-target e) @placemarks)))))
     mk))
 
 (defn spherical-between [phi1 lambda0 c az]
@@ -140,17 +159,6 @@
   (vswap! mapobs assoc-in [id :anc-dir] (* crs pid180))
   (vswap! mapobs assoc-in [id :anc-rdh] (* spd nmrad))
   (vswap! mapobs assoc-in [id :anc-clk] @clock))
-
-(defn placemarkPopup [id title alt lat lon sta]
-  (str "<h3>" title "</h3>"
-       "<table>"
-       "<tr><td>altitude</td><td>" alt "</td></tr>"
-       "<tr><td>latitude</td><td>" lat "</td></tr>"
-       "<tr><td>longitude</td><td>" lon "</td></tr>"
-       "<tr><td>feature</td><td>" sta "</td></tr>"
-       "<tr><td><input type='button' style='color:green' value='Inform'
-                 onclick='rete4flight.core.info(\"" id "\")' ></td>"
-       "</table>"))
 
 (defn mapobPopup [id callsign alt lat lon crs spd sta]
   (str "<h3>" callsign "</h3>"
@@ -198,10 +206,9 @@
   (doseq [id (keys @mapobs)]
     (delete-mapob id)))
 
-(defn create-placemark [id title lat lon alt sta]
+(defn create-placemark [lat lon sta]
   (let [mrk (create-pm-marker lat lon sta)]
     (.addTo mrk @chart)
-    (.bindPopup mrk (placemarkPopup id title alt lat lon sta))
     (vswap! placemarks conj mrk)))
 
 (defn clear-placemarks []
@@ -386,8 +393,8 @@
                       (set-map-view lat lon))
       :turn (let [{:keys [id on-course]} evt]
                    (turn id on-course))
-      :create-placemark (let [{:keys [id title lat lon alt state]} evt]
-                      (create-placemark id title lat lon alt state))
+      :create-placemark (let [{:keys [lat lon state]} evt]
+                      (create-placemark lat lon state))
       :clear-placemarks (clear-placemarks)
       (println (str "Unknown event: " [event evt])))))
 

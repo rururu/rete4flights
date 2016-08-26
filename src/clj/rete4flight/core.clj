@@ -28,7 +28,7 @@
 (def WTCH-INTL 20000) ;; watch interval (20 sec)
 (def DATA-INTL 30000) ;; watch interval (2 min)
 (def STAT-INTL 20000) ;; flight state checking interval (20 sec)
-(def POP-DEL 30000) ;; popup delay
+(def POP-PERI 30000) ;; popup period
 (def HIS-MEM 3) ;; number of remembered watching intervals (30 sec memory)
 (def REP-FLG-STA (volatile! nil)) ;; flight state checking repetition flag
 (def FOLLOW-ID (volatile! nil)) ;; id of followed flight
@@ -419,8 +419,7 @@
         rows (apply str rows)]
     (str head itag "<table>" rows "</table>")))
 
-(defn inform [id]
-  (println (str "Info: " id))
+(defn plane-html-evt [id]
   (if-let [inf (info id)]
     (let [cal (callsign id)
           apt (inf "airport")
@@ -436,14 +435,23 @@
                "scheduled-arrival" (get-in tim ["scheduled" "arrival"])
                "aircraft" (get-in acr ["model" "text"])}
           html (make-info-html cal img dat)]
-      (pump-in-evt {:event :add-popup
+      {:event :add-popup
                     :id id
                     :html html
-                    :time POP-DEL})))
-  "")
+                    :time POP-PERI})))
+
+(defn place-html-evt [id]
+  (data/placemark-html-evt (nth @DATA (read-string (.substring id 2)))))
 
 (defn info-id [params]
-  (inform (params :id)))
+  (println (str "Info: " params))
+  (let [id (params :id)
+        evt (if (.startsWith id "pm")
+               (place-html-evt id)
+               (plane-html-evt id))]
+    (if evt
+      (pump-in-evt evt)))
+  "")
 
 (defn trans-trail [trl]
   (mapcat #(list (% "lat") (% "lng") (% "alt")) trl))
