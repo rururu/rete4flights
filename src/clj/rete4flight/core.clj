@@ -37,6 +37,7 @@
 (def TRN-STP 4) ;; step of course in degrees while turning
 (def CZMW-INTL 30000) ;; Cesium work interval (20 sec)
 (def DATA (volatile! nil)) ;; External data
+(def EXT-DATA (volatile! false))
 
 (defonce FRS (volatile! {:apsurl "http://www.flightradar24.com/_json/airports.php"
                          :allurl "http://data-live.flightradar24.com/zones/fcgi/feed.js"
@@ -343,9 +344,10 @@
       (pump-in-evt evt))))
 
 (defn get-data []
-  (when-let [dat (data/data-bbx @BBX)]
-    (display-external-data dat)
-    (vreset! DATA dat)))
+  (if @EXT-DATA
+    (when-let [dat (data/data-bbx @BBX)]
+      (display-external-data dat)
+      (vreset! DATA dat))))
 
 (defn watch-all []
   (let [mom (mgen)
@@ -359,7 +361,7 @@
 
 (defn new-visible [params]
   (when @BBX
-    (println (str "New visible area: " params))
+    ;;(println (str "New visible area: " params))
     (let [n (params :n)
           s (params :s)
           w (params :w)
@@ -440,14 +442,28 @@
                     :html html
                     :time POP-PERI})))
 
-(defn place-html-evt [id]
-  (data/placemark-html-evt (nth @DATA (read-string (.substring id 2)))))
+(defn our-position []
+  (read-string (nth @BBX 4)))
+
+(defn our-radius []
+  (* (- (read-string (nth @BBX 0)) (read-string (nth @BBX 1))) 60))
+
+(defn point-out-place [dat]
+  (let [lat (get dat "lat")
+        lon (get dat "lng")
+        dis (geo/distance-nm (our-position) [lat lon])]
+    (cz/point-out (get dat "title") [lat lon] dis (our-radius))))
+
+(defn place-html-evt [dat]
+  (data/placemark-html-evt dat))
 
 (defn info-id [params]
   (println (str "Info: " params))
   (let [id (params :id)
         evt (if (.startsWith id "pm")
-               (place-html-evt id)
+               (let [dat (nth @DATA (read-string (.substring id 2)))]
+                 (point-out-place dat)
+                 (place-html-evt dat))
                (plane-html-evt id))]
     (if evt
       (pump-in-evt evt)))
@@ -459,7 +475,7 @@
 (defn trail [id head]
   (if-let [inf (info id)]
     (let [trl (trans-trail (inf "trail"))]
-      (println [:TRAIL id (count head) (count trl)])
+      ;;(println [:TRAIL id (count head) (count trl)])
       (pump-in-evt {:event :add-trail
                     :id id
                     :lla (concat head trl)
@@ -645,6 +661,15 @@
               (grad-mono-change id :altitude (read-string alt) [[0 0][1200 44000]])))))))
   "")
 
+(defn toggle-ext-data []
+  (if @EXT-DATA
+    (do (println "External data off.")
+      (pump-in-evt {:event :clear-placemarks})
+      (vreset! EXT-DATA false))
+    (do (println "External data on.")
+      (vreset! EXT-DATA true)))
+  "")
+
 ;; --------------------- Routes -----------------------------
 
 (defroutes app-routes
@@ -664,6 +689,7 @@
   (GET "/manual/" [& params] (manual params))
   (GET "/czml/" [] (cz/events))
   (GET "/call/" [& params] (call params))
+  (GET "/ext-data/" [] (toggle-ext-data))
   (route/files "/" (do (println [:ROOT-FILES ROOT]) {:root ROOT}))
   (route/resources "/")
   (route/not-found "Not Found"))

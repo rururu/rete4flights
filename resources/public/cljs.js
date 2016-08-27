@@ -36332,6 +36332,7 @@ rete4flight.core.URL_CNS = "http://localhost:3000/contries/";
 rete4flight.core.URL_APS = "http://localhost:3000/airports/";
 rete4flight.core.URL_CAM = "http://localhost:3000/camera/";
 rete4flight.core.URL_AUT = "http://localhost:3000/manual/";
+rete4flight.core.URL_EXD = "http://localhost:3000/ext-data/";
 rete4flight.core.URL_OSM = "http://{s}.tile.osm.org/{z}/{x}/{y}.png";
 rete4flight.core.URL_GST = "http://{s}.google.com/vt/lyrs\x3dm\x26x\x3d{x}\x26y\x3d{y}\x26z\x3d{z}";
 rete4flight.core.URL_GHB = "http://{s}.google.com/vt/lyrs\x3ds,h\x26x\x3d{x}\x26y\x3d{y}\x26z\x3d{z}";
@@ -36590,12 +36591,13 @@ rete4flight.core.clear_placemarks = function() {
       d += 1;
     } else {
       if (a = cljs.core.seq.call(null, a)) {
-        b = a, cljs.core.chunked_seq_QMARK_.call(null, b) ? (a = cljs.core.chunk_first.call(null, b), c = cljs.core.chunk_rest.call(null, b), b = a, e = cljs.core.count.call(null, a), a = c, c = e) : (e = cljs.core.first.call(null, b), cljs.core.deref.call(null, rete4flight.core.chart).removeLayer(e), a = cljs.core.next.call(null, b), b = null, c = 0), d = 0;
+        b = a, cljs.core.chunked_seq_QMARK_.call(null, b) ? (a = cljs.core.chunk_first.call(null, b), d = cljs.core.chunk_rest.call(null, b), b = a, c = cljs.core.count.call(null, a), a = d) : (a = cljs.core.first.call(null, b), cljs.core.deref.call(null, rete4flight.core.chart).removeLayer(a), a = cljs.core.next.call(null, b), b = null, c = 0), d = 0;
       } else {
-        return null;
+        break;
       }
     }
   }
+  return cljs.core.vreset_BANG_.call(null, rete4flight.core.placemarks, cljs.core.PersistentVector.EMPTY);
 };
 rete4flight.core.add_trail = function(a, b, c, d) {
   var e = cljs.core.clj__GT_js.call(null, c);
@@ -36764,8 +36766,8 @@ rete4flight.core.add_link = function(a, b) {
               }
               if (2 === c) {
                 var c = b[2], d = cljs.core.deref.call(null, rete4flight.core.chart).removeLayer(g), f = cljs.core._deref.call(null, rete4flight.core.links), f = cljs.core.dissoc.call(null, f, a), f = cljs.core._vreset_BANG_.call(null, rete4flight.core.links, f);
-                b[7] = d;
-                b[8] = c;
+                b[7] = c;
+                b[8] = d;
                 return cljs.core.async.impl.ioc_helpers.return_chan.call(null, b, f);
               }
               return null;
@@ -37656,7 +37658,10 @@ rete4flight.core.flight_states = function() {
 rete4flight.core.intersect = function() {
   return ajax.core.GET.call(null, rete4flight.core.URL_INT, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
 };
-rete4flight.core.COMMANDS = "\x3cselect onchange\x3d'javascript:rete4flight.core.commands(this.value)'\x3e\n  \t\t\t\x3coption value\x3d'commands'\x3eCommands\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'watch-visible'\x3eWatch visible area\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'flight-states'\x3eState of flights\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'intersect'\x3eIntersections\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'move-to'\x3eMove to Airport\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'schedule'\x3eSchedule Flight\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'camera'\x3eCamera\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'manual'\x3eManual Control\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'clear'\x3eClear\x3c/option\x3e\n\t\t\x3c/select\x3e";
+rete4flight.core.ext_data = function() {
+  return ajax.core.GET.call(null, rete4flight.core.URL_EXD, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
+};
+rete4flight.core.COMMANDS = "\x3cselect onchange\x3d'javascript:rete4flight.core.commands(this.value)'\x3e\n  \t\t\t\x3coption value\x3d'commands'\x3eCommands\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'watch-visible'\x3eWatch visible area\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'flight-states'\x3eState of flights\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'intersect'\x3eIntersections\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'move-to'\x3eMove to Airport\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'schedule'\x3eSchedule Flight\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'camera'\x3eCamera\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'manual'\x3eManual Control\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'ext-data'\x3eWikipedia\x3c/option\x3e\n  \t\t\t\x3coption value\x3d'clear'\x3eClear\x3c/option\x3e\n\t\t\x3c/select\x3e";
 rete4flight.core.commands = function(a) {
   var b = cljs.core._EQ_;
   if (cljs.core.truth_(b.call(null, "watch-visible", a))) {
@@ -37683,7 +37688,11 @@ rete4flight.core.commands = function(a) {
                 if (cljs.core.truth_(b.call(null, "manual", a))) {
                   rete4flight.core.manual.call(null);
                 } else {
-                  throw Error([cljs.core.str("No matching clause: "), cljs.core.str(a)].join(""));
+                  if (cljs.core.truth_(b.call(null, "ext-data", a))) {
+                    rete4flight.core.ext_data.call(null);
+                  } else {
+                    throw Error([cljs.core.str("No matching clause: "), cljs.core.str(a)].join(""));
+                  }
                 }
               }
             }

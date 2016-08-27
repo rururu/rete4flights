@@ -40,6 +40,7 @@
 (def URL-APS "http://localhost:3000/airports/")
 (def URL-CAM "http://localhost:3000/camera/")
 (def URL-AUT "http://localhost:3000/manual/")
+(def URL-EXD "http://localhost:3000/ext-data/")
 (def URL-OSM "http://{s}.tile.osm.org/{z}/{x}/{y}.png")
 (def URL-GST "http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}")
 (def URL-GHB "http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}")
@@ -213,7 +214,8 @@
 
 (defn clear-placemarks []
   (doseq [mrk @placemarks]
-    (.removeLayer @chart mrk)))
+    (.removeLayer @chart mrk))
+  (vreset! placemarks []))
 
 ;;----------------------- Trail manipulation ------------------------
 
@@ -716,6 +718,10 @@
   (GET URL-INT {:handler no-handler
                 :error-handler error-handler}))
 
+(defn ext-data []
+  (GET URL-EXD {:handler no-handler
+                :error-handler error-handler}))
+
 (def COMMANDS
   "<select onchange='javascript:rete4flight.core.commands(this.value)'>
   			<option value='commands'>Commands</option>
@@ -726,6 +732,7 @@
   			<option value='schedule'>Schedule Flight</option>
   			<option value='camera'>Camera</option>
   			<option value='manual'>Manual Control</option>
+  			<option value='ext-data'>Wikipedia</option>
   			<option value='clear'>Clear</option>
 		</select>")
 
@@ -738,7 +745,8 @@
     "move-to" (move-to)
     "schedule" (schedule)
     "camera" (camera)
-    "manual" (manual))
+    "manual" (manual)
+    "ext-data" (ext-data))
   (set-html! "commands" COMMANDS))
 
 (defn remote-call []

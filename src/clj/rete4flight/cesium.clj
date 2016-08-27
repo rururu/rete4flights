@@ -15,6 +15,9 @@
                          :roll 0.0
                          :chan nil}))
 
+(def OLD-CRS (volatile! 0))
+(def DOC-SND (volatile! true))
+
 (defn send-event [typ dat]
   (if-let [ch (:chan @CAM)]
     (async/put! ch [typ (.trim dat)])))
@@ -63,8 +66,6 @@
                rol ",\"duration\":"
                per "}")]
     (send-event "fly" p)))
-
-(def OLD-CRS (volatile! 0))
 
 (defn what-side [crs on-course]
   (if (> on-course crs)
@@ -125,26 +126,24 @@
         sec (.get cld Calendar/SECOND)]
     (format "%04d-%02d-%02dT%02d:%02d:%02dZ" yar mon dat hor min sec)))
 
-(def DOC-SND (volatile! true))
-
 (defn doc []
-<<<<<<< HEAD
-  (str "{\"id\":\"document\",\"version\":\"1.0\",\"clock\":{\"currentTime\":\""
-       (iso8601futt -30)
-       "\"}}"))
-=======
   (str "{\"id\":\"document\",\"version\":\"1.0\",\"clock\":{\"currentTime\":\"" (iso8601futt -30) "\"}}"))
->>>>>>> c7f371f33fd5e262d2b625e506530e424214ddbe
 
-(defn location [label img-url lat lon alt]
+(defn location [label scale img-url lat lon alt span-sec]
   (when @DOC-SND
     (send-event "czml" (doc))
     (vreset! DOC-SND false))
   (let [p (str "{\"id\":\""
                label
-               "\",\"label\":{\"scale\":0.25,\"pixelOffset\":{\"cartesian2\":[8, -8]},\"text\":\""
+               "\",\"availability\":\""
+               (iso8601curt) "/" (iso8601futt span-sec)
+               "\",\"label\":{\"scale\":"
+               scale
+               " ,\"pixelOffset\":{\"cartesian2\":[8, -24]},\"text\":\""
                label
-               "\"},\"billboard\":{\"image\":\""
+               "\"},\"billboard\":{\"scale\":"
+               scale
+               ",\"image\":\""
                img-url
                "\"},\"position\":{\"cartographicDegrees\":["
                lon
@@ -187,6 +186,12 @@
                alt2
                "]}}")]
     (send-event "czml" p)))
+
+(defn point-out [txt [lat lon] dist max-dist]
+  ;;(println [:CZ-POINT-OUT txt [lat lon] dist max-dist])
+  (let [min-scl 0.25
+        scl (+ min-scl (* (- 1 min-scl) (- 1 (/ dist max-dist))))]
+    (location txt scl "http://localhost:3000/img/arrdn.png" lat lon 100 40)))
 
 
 
