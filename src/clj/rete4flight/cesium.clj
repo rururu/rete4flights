@@ -11,12 +11,12 @@
 (defonce CAM (volatile! {:onboard nil
                          :id nil
                          :heading "FORWARD"
-                         :pitch -10.0
+                         :pitch -20.0
                          :roll 0.0
                          :chan nil}))
 
-(def OLD-CRS (volatile! 0))
-(def DOC-SND (volatile! true))
+(defonce OLD-CRS (volatile! 0))
+(defonce DOC-SND (volatile! true))
 
 (defn send-event [typ dat]
   (if-let [ch (:chan @CAM)]
@@ -127,7 +127,7 @@
     (format "%04d-%02d-%02dT%02d:%02d:%02dZ" yar mon dat hor min sec)))
 
 (defn doc []
-  (str "{\"id\":\"document\",\"version\":\"1.0\",\"clock\":{\"currentTime\":\"" (iso8601futt -30) "\"}}"))
+  (str "{\"id\":\"document\",\"version\":\"1.0\",\"clock\":{\"currentTime\":\"" (iso8601futt -20) "\"}}"))
 
 (defn location [label scale img-url lat lon alt span-sec]
   (when @DOC-SND
@@ -191,7 +191,7 @@
   ;;(println [:CZ-POINT-OUT txt [lat lon] dist max-dist])
   (let [min-scl 0.25
         scl (+ min-scl (* (- 1 min-scl) (- 1 (/ dist max-dist))))]
-    (location txt scl "http://localhost:3000/img/arrdn.png" lat lon 100 40)))
+    (location txt scl "http://localhost:3000/img/arrdn.png" lat lon 100 80)))
 
 
 

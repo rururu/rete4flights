@@ -2,11 +2,13 @@
   (:require [rete4flight.geo :as geo]
             [clj-json.core :as json]))
 
-(def BBX (volatile! [0 0 0 0 [0 0] 0]))
-(def STEP 0.5) ;; Percentage of BBX height for data update
+(defonce BBX (volatile! [0 0 0 0 [0 0] 0]))
+
+(def STEP 0.25) ;; Percentage of BBX height for data update
 
 (def USERNAME "liikalanjoki")
-(def MAXROWS 36)
+(def MAXROWS 50)
+(def LANGUAGE "en")
 (def FEATURES ["landmark"
                "city"
                "edu"
@@ -14,8 +16,8 @@
                "river"
                "railwaystation"
                "event"])
-(def POP-PERIOD 30000)
-
+(def POP-PERIOD 60000)
+;; ---------------------------------------------------------
 (defn placemark-evt [n dat]
   {:event :create-placemark
    :lat (get dat "lat")
@@ -40,6 +42,7 @@
         url (str "http://api.geonames.org/wikipediaBoundingBoxJSON"
                  "?north=" n "&south=" s "&east=" e "&west=" w
                  "&maxRows=" MAXROWS
+                 "&lang=" LANGUAGE
                  "&username=" USERNAME)]
     ;;(println [:URL url])
     (try

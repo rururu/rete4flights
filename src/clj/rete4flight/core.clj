@@ -18,38 +18,36 @@
 
 ;; ----------------------- Flightradar24 client ------------------------
 
-(def SERV (volatile! nil))
 (def PORT 3000) ;; server port
-(def ROOT (str (System/getProperty "user.dir") "/resources/public/"))
-(def EVT-CHN (chan)) ;; events channel
 (def ES-FILE "src/clj/rete4flight/es.clj")
-(def BBX (volatile! [])) ;; bounding box
-(def WTCH-FIRST (volatile! true)) ;; first swatch
 (def WTCH-INTL 20000) ;; watch interval (20 sec)
 (def DATA-INTL 30000) ;; watch interval (2 min)
 (def STAT-INTL 20000) ;; flight state checking interval (20 sec)
 (def POP-PERI 30000) ;; popup period
 (def HIS-MEM 3) ;; number of remembered watching intervals (30 sec memory)
-(def REP-FLG-STA (volatile! nil)) ;; flight state checking repetition flag
-(def FOLLOW-ID (volatile! nil)) ;; id of followed flight
 (def FOLW-INTL 40000) ;; following interval (40 sec)
 (def MYFS-INTL 4000) ;; my flights simulation interval (1 sec)
 (def TRN-STP 4) ;; step of course in degrees while turning
 (def CZMW-INTL 30000) ;; Cesium work interval (20 sec)
-(def DATA (volatile! nil)) ;; External data
-(def EXT-DATA (volatile! false))
 
+(defonce SERV (volatile! nil))
+(defonce ROOT (str (System/getProperty "user.dir") "/resources/public/"))
+(defonce EVT-CHN (chan)) ;; events channel
+(defonce BBX (volatile! [])) ;; bounding box
+(defonce WTCH-FIRST (volatile! true)) ;; first swatch
+(defonce REP-FLG-STA (volatile! nil)) ;; flight state checking repetition flag
+(defonce FOLLOW-ID (volatile! nil)) ;; id of followed flight
+(defonce DATA (volatile! nil)) ;; External data
+(defonce EXT-DATA (volatile! false))
 (defonce FRS (volatile! {:apsurl "http://www.flightradar24.com/_json/airports.php"
                          :allurl "http://data-live.flightradar24.com/zones/fcgi/feed.js"
                          :plnurl "http://data-live.flightradar24.com/clickhandler/?version=1.5&flight="
                          :all nil
                          :airports nil
                          :infos {}}))
-
 (defonce MYFS (volatile! {:all nil
                           :infos {}
                           :control {}})) ;; my flights
-
 (defonce RUNWAYS (volatile! {"URE" 180 "LED" 287 "LHR" 90 "EWR" 26
                              "TAY" 269 "HEL" 228 "FRA" 70 "KEF" 180
                              "KDL" 147 "JFK" 301 "BOS" 200 "LGA" 122}))
@@ -333,7 +331,7 @@
 (defn events []
   (write-transit (deref (future (pump-out EVT-CHN)))))
 
-(def mgen
+(defonce mgen
   (let [counter (volatile! -1)]
     (fn [] (do (vswap! counter inc) @counter))))
 
@@ -343,10 +341,24 @@
     (let [evt (data/placemark-evt i (nth dat i))]
       (pump-in-evt evt))))
 
+(defn our-position []
+  (read-string (nth @BBX 4)))
+
+(defn our-radius []
+  (* (- (read-string (nth @BBX 0)) (read-string (nth @BBX 1))) 30))
+
+(defn point-out-place [dat]
+  (println [:POP dat])
+  (let [lat (get dat "lat")
+        lon (get dat "lng")
+        dis (geo/distance-nm (our-position) [lat lon])]
+    (cz/point-out (get dat "title") [lat lon] dis (our-radius))))
+
 (defn get-data []
   (if @EXT-DATA
     (when-let [dat (data/data-bbx @BBX)]
       (display-external-data dat)
+      (point-out-place dat)
       (vreset! DATA dat))))
 
 (defn watch-all []
@@ -442,18 +454,6 @@
                     :html html
                     :time POP-PERI})))
 
-(defn our-position []
-  (read-string (nth @BBX 4)))
-
-(defn our-radius []
-  (* (- (read-string (nth @BBX 0)) (read-string (nth @BBX 1))) 60))
-
-(defn point-out-place [dat]
-  (let [lat (get dat "lat")
-        lon (get dat "lng")
-        dis (geo/distance-nm (our-position) [lat lon])]
-    (cz/point-out (get dat "title") [lat lon] dis (our-radius))))
-
 (defn place-html-evt [dat]
   (data/placemark-html-evt dat))
 
@@ -536,7 +536,7 @@
                        :lon lon})
     (pump-in-evt {:event :clear-dialog})))
 
-(def ngen
+(defonce ngen
   (let [counter (volatile! 0)]
     (fn [] (do (vswap! counter inc) @counter))))
 
@@ -600,14 +600,6 @@
    (when (java.awt.Desktop/isDesktopSupported)
      (.browse (java.awt.Desktop/getDesktop) (java.net.URI. address)))))
 
-(defn open-hud-window [terra]
-  (if-let [addr (condp = terra
-                  "2D" (str "http://localhost:" PORT "/html/cezium.html")
-                  "3D" (str "http://localhost:" PORT "/html/terrain3D.html"))]
-    (open-in-browser! addr)))
-
-(def BROWIND true)
-
 (defn callsign-list []
   (->> (vals (:all @FRS))
        (concat (vals (:all @MYFS)))
@@ -623,13 +615,9 @@
    (= (params :camera) "on")
      (cz/start-sse-server)
    (= (params :camera) "off")
-     (do (cz/stop-sse-server)
-       (def BROWIND true))
+     (cz/stop-sse-server)
    (some? (params :onboard))
      (when-let [id (id-by-call (params :onboard))]
-      (when BROWIND
-        (open-hud-window (params :hud))
-        (def BROWIND false))
       (vswap! cz/CAM assoc :id id)
       (vreset! cz/DOC-SND true)
       (rete/assert-frame ['Camera
@@ -638,9 +626,7 @@
    (= (params :heading) "UP")
      (vswap! cz/CAM assoc :pitch 90.0)
    (= (params :heading) "DOWN")
-     (vswap! cz/CAM assoc :pitch -90.0)
-   true
-     (vswap! cz/CAM assoc :pitch 0.0))
+     (vswap! cz/CAM assoc :pitch -90.0))
   (if (= (params :camera) "on")
     (write-transit (callsign-list))
     ""))

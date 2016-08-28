@@ -36508,6 +36508,10 @@ rete4flight.core.spherical_between = function(a, b, c, d) {
   c = Math.cos(c);
   return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [Math.asin(a * c + e * g * f), Math.atan2(g * Math.sin(d), e * c - a * g * f) + b], null);
 };
+rete4flight.core.map_view = function(a, b) {
+  var c = new L.LatLng(a, b), d = cljs.core.deref.call(null, rete4flight.core.chart).getZoom();
+  return cljs.core.deref.call(null, rete4flight.core.chart).setView(c, d, cljs.core.PersistentArrayMap.EMPTY);
+};
 rete4flight.core.move = function(a) {
   var b = cljs.core.deref.call(null, rete4flight.core.mapobs).call(null, a);
   if (cljs.core.truth_(b)) {
@@ -36921,8 +36925,7 @@ rete4flight.core.add_popup.cljs$core$IFn$_invoke$arity$4 = function(a, b, c, d) 
 };
 rete4flight.core.add_popup.cljs$lang$maxFixedArity = 4;
 rete4flight.core.set_map_view = function(a, b) {
-  var c = new L.LatLng(a, b), d = cljs.core.deref.call(null, rete4flight.core.chart).getZoom();
-  cljs.core.deref.call(null, rete4flight.core.chart).setView(c, d, cljs.core.PersistentArrayMap.EMPTY);
+  rete4flight.core.map_view.call(null, a, b);
   return rete4flight.core.new_visible.call(null);
 };
 rete4flight.core.clear_dialog = function() {
@@ -37277,11 +37280,9 @@ rete4flight.core.camera_show = function() {
   rete4flight.core.set_html_BANG_.call(null, "heading", "Heading:");
   rete4flight.core.set_html_BANG_.call(null, "heading-fld", "\x3cselect onchange\x3d'javascript:rete4flight.core.camhea(this.value)' style\x3d'width:96px'\x3e\n             \x3coption value\x3d'FORWARD'\x3eFORWARD\x3c/option\x3e\n             \x3coption value\x3d'BACKWARD'\x3eBACKWARD\x3c/option\x3e\n             \x3coption value\x3d'RIGHT'\x3eRIGHT\x3c/option\x3e\n             \x3coption value\x3d'LEFT'\x3eLEFT\x3c/option\x3e\n             \x3coption value\x3d'UP'\x3eUP\x3c/option\x3e\n             \x3coption value\x3d'DOWN'\x3eDOWN\x3c/option\x3e\n             \x3c/select\x3e");
   rete4flight.core.set_html_BANG_.call(null, "pitch", "Pitch:");
-  rete4flight.core.set_html_BANG_.call(null, "pitch-fld", [cljs.core.str("\x3cinput value\x3d'-10' style\x3d'width:90px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.campit(this.value)'\x3e")].join(""));
+  rete4flight.core.set_html_BANG_.call(null, "pitch-fld", [cljs.core.str("\x3cinput value\x3d'-20' style\x3d'width:90px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.campit(this.value)'\x3e")].join(""));
   rete4flight.core.set_html_BANG_.call(null, "roll", "Roll:");
-  rete4flight.core.set_html_BANG_.call(null, "roll-fld", [cljs.core.str("\x3cinput value\x3d'0' style\x3d'width:90px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.camrol(this.value)'\x3e")].join(""));
-  rete4flight.core.set_html_BANG_.call(null, "hud", "HUD:");
-  return rete4flight.core.set_html_BANG_.call(null, "hud-fld", "\x3cselect id\x3d'hud-val' style\x3d'width:96px'\x3e\n             \x3coption value\x3d'2D'\x3eflat terrain\x3c/option\x3e\n             \x3coption value\x3d'3D'\x3e3D terrain\x3c/option\x3e\n             \x3c/select\x3e");
+  return rete4flight.core.set_html_BANG_.call(null, "roll-fld", [cljs.core.str("\x3cinput value\x3d'0' style\x3d'width:90px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.camrol(this.value)'\x3e")].join(""));
 };
 rete4flight.core.camera_hide = function() {
   rete4flight.core.set_html_BANG_.call(null, "autopilot", "");
@@ -37299,45 +37300,43 @@ rete4flight.core.camera_hide = function() {
   rete4flight.core.set_html_BANG_.call(null, "pitch-fld", "");
   rete4flight.core.set_html_BANG_.call(null, "roll", "");
   rete4flight.core.set_html_BANG_.call(null, "roll-fld", "");
-  rete4flight.core.set_html_BANG_.call(null, "hud", "");
-  rete4flight.core.set_html_BANG_.call(null, "hud-fld", "");
   return rete4flight.core.manual_hide.call(null);
 };
 rete4flight.core.camera_on_handler = function(a) {
-  var b = rete4flight.core.read_transit.call(null, a), c = cljs.core.println.call(null, new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null, "CSS", "CSS", 135559744), b], null));
+  var b = rete4flight.core.read_transit.call(null, a);
   a = [cljs.core.str("\x3cselect onchange\x3d'javascript:rete4flight.core.camonb(this.value)' style\x3d'width:96px'\x3e"), cljs.core.str("\x3coption value\x3d'0'/\x3e"), cljs.core.str(cljs.core.apply.call(null, cljs.core.str, function() {
-    return function(a, b) {
-      return function g(c) {
-        return new cljs.core.LazySeq(null, function(a, b) {
+    return function(a) {
+      return function e(b) {
+        return new cljs.core.LazySeq(null, function(a) {
           return function() {
             for (;;) {
-              var a = cljs.core.seq.call(null, c);
+              var a = cljs.core.seq.call(null, b);
               if (a) {
                 if (cljs.core.chunked_seq_QMARK_.call(null, a)) {
-                  var b = cljs.core.chunk_first.call(null, a), d = cljs.core.count.call(null, b), e = cljs.core.chunk_buffer.call(null, d);
+                  var c = cljs.core.chunk_first.call(null, a), g = cljs.core.count.call(null, c), l = cljs.core.chunk_buffer.call(null, g);
                   a: {
-                    for (var k = 0;;) {
-                      if (k < d) {
-                        var m = cljs.core._nth.call(null, b, k);
-                        cljs.core.chunk_append.call(null, e, [cljs.core.str("\x3coption value\x3d'"), cljs.core.str(m), cljs.core.str("'\x3e"), cljs.core.str(m), cljs.core.str("\x3c/option\x3e")].join(""));
-                        k += 1;
+                    for (var n = 0;;) {
+                      if (n < g) {
+                        var p = cljs.core._nth.call(null, c, n);
+                        cljs.core.chunk_append.call(null, l, [cljs.core.str("\x3coption value\x3d'"), cljs.core.str(p), cljs.core.str("'\x3e"), cljs.core.str(p), cljs.core.str("\x3c/option\x3e")].join(""));
+                        n += 1;
                       } else {
-                        b = !0;
+                        c = !0;
                         break a;
                       }
                     }
                   }
-                  return b ? cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, e), g.call(null, cljs.core.chunk_rest.call(null, a))) : cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, e), null);
+                  return c ? cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, l), e.call(null, cljs.core.chunk_rest.call(null, a))) : cljs.core.chunk_cons.call(null, cljs.core.chunk.call(null, l), null);
                 }
-                e = cljs.core.first.call(null, a);
-                return cljs.core.cons.call(null, [cljs.core.str("\x3coption value\x3d'"), cljs.core.str(e), cljs.core.str("'\x3e"), cljs.core.str(e), cljs.core.str("\x3c/option\x3e")].join(""), g.call(null, cljs.core.rest.call(null, a)));
+                l = cljs.core.first.call(null, a);
+                return cljs.core.cons.call(null, [cljs.core.str("\x3coption value\x3d'"), cljs.core.str(l), cljs.core.str("'\x3e"), cljs.core.str(l), cljs.core.str("\x3c/option\x3e")].join(""), e.call(null, cljs.core.rest.call(null, a)));
               }
               return null;
             }
           };
-        }(a, b), null, null);
+        }(a), null, null);
       };
-    }(b, c).call(null, b);
+    }(b).call(null, b);
   }())), cljs.core.str("\x3c/select\x3e")].join("");
   return rete4flight.core.set_html_BANG_.call(null, "onboard-fld", a);
 };
@@ -37352,12 +37351,8 @@ rete4flight.core.camera = function() {
     }
   }
 };
-rete4flight.core.selection = function(a) {
-  a = rete4flight.core.by_id.call(null, a);
-  return a.options[a.selectedIndex].value;
-};
 rete4flight.core.camonb = function(a) {
-  var b = [cljs.core.str(rete4flight.core.URL_CAM), cljs.core.str("?onboard\x3d"), cljs.core.str(a), cljs.core.str("\x26hud\x3d"), cljs.core.str(rete4flight.core.selection.call(null, "hud-val"))].join("");
+  var b = [cljs.core.str(rete4flight.core.URL_CAM), cljs.core.str("?onboard\x3d"), cljs.core.str(a)].join("");
   ajax.core.GET.call(null, b, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
   rete4flight.core.ONBOARD = a;
 };

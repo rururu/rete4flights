@@ -134,6 +134,11 @@
         lam2 (+ (js/Math.atan2 (* sinc sinaz) (- (* cosphi1 cosc) (* sinphi1 sinc cosaz))) lambda0)]
     [phi2 lam2]))
 
+(defn map-view [lat lon]
+  (let [cen (js/L.LatLng. lat lon)
+        zom (.getZoom @chart)]
+    (.setView @chart cen zom {})))
+
 (defn move [id]
   (if-let [mob (@mapobs id)]
     (let [rdh (mob :anc-rdh)]
@@ -308,10 +313,8 @@
 (declare new-visible)
 
 (defn set-map-view [lat lon]
-  (let [cen (js/L.LatLng. lat lon)
-        zom (.getZoom @chart)]
-    (.setView @chart cen zom {})
-    (new-visible)))
+  (map-view lat lon)
+  (new-visible))
 
 (defn clear-dialog []
   (set-html! "callsign" "")
@@ -495,16 +498,11 @@
              <option value='DOWN'>DOWN</option>
              </select>")
   (set-html! "pitch" "Pitch:")
-  (set-html! "pitch-fld" (str "<input value='-10' style='width:90px' "
+  (set-html! "pitch-fld" (str "<input value='-20' style='width:90px' "
                               "onchange='javascript:rete4flight.core.campit(this.value)'>"))
   (set-html! "roll" "Roll:")
   (set-html! "roll-fld" (str "<input value='0' style='width:90px' "
-                             "onchange='javascript:rete4flight.core.camrol(this.value)'>"))
-  (set-html! "hud" "HUD:")
-  (set-html! "hud-fld" "<select id='hud-val' style='width:96px'>
-             <option value='2D'>flat terrain</option>
-             <option value='3D'>3D terrain</option>
-             </select>"))
+                             "onchange='javascript:rete4flight.core.camrol(this.value)'>")))
 
 (defn camera-hide []
   (set-html! "autopilot" "")
@@ -522,13 +520,10 @@
   (set-html! "pitch-fld" "")
   (set-html! "roll" "")
   (set-html! "roll-fld" "")
-  (set-html! "hud" "")
-  (set-html! "hud-fld" "")
   (manual-hide))
 
 (defn camera-on-handler [response]
   (let [callsigns (read-transit response)
-        _ (println [:CSS callsigns])
         sel (str "<select onchange='javascript:rete4flight.core.camonb(this.value)' style='width:96px'>"
                  "<option value='0'/>"
                  (apply str (for [e callsigns]
@@ -547,12 +542,8 @@
       (GET (str URL-CAM "?camera=off") {:handler no-handler :error-handler error-handler})
       (def CAMERA :off))))
 
-(defn selection [id]
-  (let [e (by-id id)]
-    (.-value (aget (.-options e) (.-selectedIndex e)))))
-
 (defn camonb [obj]
-  (let [url (str URL-CAM "?onboard=" obj "&hud=" (selection "hud-val"))]
+  (let [url (str URL-CAM "?onboard=" obj)]
     (GET url {:handler no-handler :error-handler error-handler})
     (def ONBOARD obj)))
 
