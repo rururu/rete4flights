@@ -4,10 +4,10 @@
 
 (defonce BBX (volatile! [0 0 0 0 [0 0] 0]))
 
-(def STEP 0.25) ;; Percentage of BBX height for data update
+(def STEP 0.1) ;; Percentage of BBX height for data update
 
 (def USERNAME "liikalanjoki")
-(def MAXROWS 50)
+(def MAXROWS 75)
 (def LANGUAGE "en")
 (def FEATURES ["landmark"
                "city"
@@ -15,7 +15,10 @@
                "mountain"
                "river"
                "railwaystation"
-               "event"])
+               "event"
+               "waterbody"
+               "isle"
+               "airport"])
 (def POP-PERIOD 60000)
 ;; ---------------------------------------------------------
 (defn placemark-evt [n dat]
@@ -59,6 +62,7 @@
         nil))))
 
 (defn data-bbx [bbx-str]
+  ;;(println [:DATA-BBX bbx-str])
   (let [bbx (vec (map read-string bbx-str))
         [n1 s1 w1 e1 c1] bbx
         [n0 s0 w0 e0 c0 d0] @BBX

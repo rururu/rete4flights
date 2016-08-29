@@ -57,6 +57,9 @@
               "river" "http://localhost:3000/img/river.png"
               "railwaystation" "http://localhost:3000/img/railwaystation.png"
               "event" "http://localhost:3000/img/event.png"
+              "waterbody" "http://localhost:3000/img/waterbody.png"
+              "isle" "http://localhost:3000/img/isle.png"
+              "airport" "http://localhost:3000/img/airport.png"
               "city" "http://localhost:3000/img/city.png"})
 
 ;; ----------------- Chart creation and control -------------------------

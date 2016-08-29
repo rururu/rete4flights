@@ -21,7 +21,7 @@
 (def PORT 3000) ;; server port
 (def ES-FILE "src/clj/rete4flight/es.clj")
 (def WTCH-INTL 20000) ;; watch interval (20 sec)
-(def DATA-INTL 30000) ;; watch interval (2 min)
+(def DATA-INTL 12000) ;; external data interval (12 sec)
 (def STAT-INTL 20000) ;; flight state checking interval (20 sec)
 (def POP-PERI 30000) ;; popup period
 (def HIS-MEM 3) ;; number of remembered watching intervals (30 sec memory)
@@ -335,30 +335,30 @@
   (let [counter (volatile! -1)]
     (fn [] (do (vswap! counter inc) @counter))))
 
-(defn display-external-data [dat]
-  (pump-in-evt {:event :clear-placemarks})
-  (dotimes [i (count dat)]
-    (let [evt (data/placemark-evt i (nth dat i))]
-      (pump-in-evt evt))))
-
 (defn our-position []
   (read-string (nth @BBX 4)))
 
 (defn our-radius []
-  (* (- (read-string (nth @BBX 0)) (read-string (nth @BBX 1))) 30))
+  (* (- (read-string (nth @BBX 0)) (read-string (nth @BBX 1))) 60))
 
 (defn point-out-place [dat]
-  (println [:POP dat])
   (let [lat (get dat "lat")
         lon (get dat "lng")
         dis (geo/distance-nm (our-position) [lat lon])]
     (cz/point-out (get dat "title") [lat lon] dis (our-radius))))
 
+(defn display-external-data [data]
+  (pump-in-evt {:event :clear-placemarks})
+  (dotimes [i (count data)]
+    (let [dat (nth data i)
+          evt (data/placemark-evt i dat)]
+      (pump-in-evt evt)
+      (point-out-place dat))))
+
 (defn get-data []
   (if @EXT-DATA
     (when-let [dat (data/data-bbx @BBX)]
       (display-external-data dat)
-      (point-out-place dat)
       (vreset! DATA dat))))
 
 (defn watch-all []
@@ -680,7 +680,7 @@
   (route/resources "/")
   (route/not-found "Not Found"))
 
-(def app
+(defonce app
   (handler/site app-routes))
 
 (defn start-server

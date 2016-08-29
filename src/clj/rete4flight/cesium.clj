@@ -189,7 +189,7 @@
 
 (defn point-out [txt [lat lon] dist max-dist]
   ;;(println [:CZ-POINT-OUT txt [lat lon] dist max-dist])
-  (let [min-scl 0.25
+  (let [min-scl 0.1
         scl (+ min-scl (* (- 1 min-scl) (- 1 (/ dist max-dist))))]
     (location txt scl "http://localhost:3000/img/arrdn.png" lat lon 100 80)))
 
