@@ -428,7 +428,7 @@
 (defn make-info-html [call img dat]
   (let [head (str "<h3>" call "</h3>")
         itag (str "<img src=\"" img "\">")
-        rows (for [[k v] (seq dat)]
+        rows (for [[k v] dat]
                (str "<tr><td>" k "</td><td>" v "</td></tr>"))
         rows (apply str rows)]
     (str head itag "<table>" rows "</table>")))
@@ -440,14 +440,27 @@
           acr (inf "aircraft")
           tim (inf "time")
           img (get (first (get-in acr ["images" "thumbnails"])) "src")
-          dat {"from" (get-in apt ["origin" "name"])
-               "from-iata" (get-in apt ["origin" "code" "iata"])
-               "to" (get-in apt ["destination" "name"])
-               "to-iata" (get-in apt ["destination" "code" "iata"])
-               "airline" (get-in inf ["airline" "short"])
-               "real-departure" (get-in tim ["real" "departure"])
-               "scheduled-arrival" (get-in tim ["scheduled" "arrival"])
-               "aircraft" (get-in acr ["model" "text"])}
+          [lat lon] (coord id)
+          dat [["from" (or (get-in apt ["origin" "name"]) "-")]
+               ;;"from-iata" (get-in apt ["origin" "code" "iata"])
+               ["to" (or (get-in apt ["destination" "name"]) "-")]
+               ;;"to-iata" (get-in apt ["destination" "code" "iata"])
+               ["airline" (or (get-in inf ["airline" "short"]) "-")]
+               ["real-departure" (or (get-in tim ["real" "departure"]) "-")]
+               ["scheduled-arrival" (or (get-in tim ["scheduled" "arrival"]) "-")]
+               ["aircraft" (or (get-in acr ["model" "text"]) "-")]
+               ["latitude" (or lat "-")]
+               ["longitude" (or lon "-")]
+               ["course" (or (course id) "-")]
+               ["speed" (or (speed id) "-")]
+               ["altitude" (or (altitude id) "-")]
+               [(str "<input type='button' style='color:purple' value='Trail'
+                 onclick='rete4flight.core.trail(\"" id "\")' >")
+               (str "<input type='button' style='color:blue' value='Follow'
+                 onclick='rete4flight.core.follow(\"" id "\")' >")]
+               [""
+               "<input type='button' style='color:red' value='Stop'
+                 onclick='rete4flight.core.stopfollow()' >"]]
           html (make-info-html cal img dat)]
       {:event :add-popup
                     :id id

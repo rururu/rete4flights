@@ -36338,7 +36338,10 @@ rete4flight.core.URL_GST = "http://{s}.google.com/vt/lyrs\x3dm\x26x\x3d{x}\x26y\
 rete4flight.core.URL_GHB = "http://{s}.google.com/vt/lyrs\x3ds,h\x26x\x3d{x}\x26y\x3d{y}\x26z\x3d{z}";
 rete4flight.core.URL_GTR = "http://{s}.google.com/vt/lyrs\x3dp\x26x\x3d{x}\x26y\x3d{y}\x26z\x3d{z}";
 rete4flight.core.URL_GSA = "http://{s}.google.com/vt/lyrs\x3ds\x26x\x3d{x}\x26y\x3d{y}\x26z\x3d{z}";
-rete4flight.core.URL_ICO = cljs.core.PersistentHashMap.fromArrays("DESCEND river edu landmark city GROUND event railwaystation mountain CLIMB LEVEL INTERSECT".split(" "), "http://localhost:3000/img/greenpln32.png http://localhost:3000/img/river.png http://localhost:3000/img/edu.png http://localhost:3000/img/landmark.png http://localhost:3000/img/city.png http://localhost:3000/img/greypln32.png http://localhost:3000/img/event.png http://localhost:3000/img/railwaystation.png http://localhost:3000/img/mountain.png http://localhost:3000/img/bluepln32.png http://localhost:3000/img/purplepln32.png http://localhost:3000/img/redpln32.png".split(" "));
+rete4flight.core.URL_ICO = cljs.core.PersistentHashMap.fromArrays("DESCEND river edu landmark city GROUND event waterbody isle railwaystation mountain CLIMB airport LEVEL INTERSECT".split(" "), "http://localhost:3000/img/greenpln32.png http://localhost:3000/img/river.png http://localhost:3000/img/edu.png http://localhost:3000/img/landmark.png http://localhost:3000/img/city.png http://localhost:3000/img/greypln32.png http://localhost:3000/img/event.png http://localhost:3000/img/waterbody.png http://localhost:3000/img/isle.png http://localhost:3000/img/railwaystation.png http://localhost:3000/img/mountain.png http://localhost:3000/img/bluepln32.png http://localhost:3000/img/airport.png http://localhost:3000/img/purplepln32.png http://localhost:3000/img/redpln32.png".split(" "));
+rete4flight.core.CAMERA = new cljs.core.Keyword(null, "off", "off", 606440789);
+rete4flight.core.ONBOARD = null;
+rete4flight.core.MANUAL = new cljs.core.Keyword(null, "off", "off", 606440789);
 rete4flight.core.by_id = function(a) {
   return document.getElementById(a);
 };
@@ -36459,10 +36462,95 @@ rete4flight.core.repeater = function(a, b) {
   }(c));
   return c;
 };
+rete4flight.core.spherical_between = function(a, b, c, d) {
+  var e = Math.cos(a);
+  a = Math.sin(a);
+  var f = Math.cos(d), g = Math.sin(c);
+  c = Math.cos(c);
+  return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [Math.asin(a * c + e * g * f), Math.atan2(g * Math.sin(d), e * c - a * g * f) + b], null);
+};
+rete4flight.core.map_view = function(a, b) {
+  var c = new L.LatLng(a, b), d = cljs.core.deref.call(null, rete4flight.core.chart).getZoom();
+  return cljs.core.deref.call(null, rete4flight.core.chart).setView(c, d, cljs.core.PersistentArrayMap.EMPTY);
+};
+rete4flight.core.move = function(a) {
+  var b = cljs.core.deref.call(null, rete4flight.core.mapobs).call(null, a);
+  if (cljs.core.truth_(b)) {
+    var c = b.call(null, new cljs.core.Keyword(null, "anc-rdh", "anc-rdh", -795860055));
+    if (0 < c) {
+      var d = cljs.core.deref.call(null, rete4flight.core.clock), e = b.call(null, new cljs.core.Keyword(null, "anc-dir", "anc-dir", -977205314)), f = b.call(null, new cljs.core.Keyword(null, "anc-phi", "anc-phi", -1798530216)), g = b.call(null, new cljs.core.Keyword(null, "anc-lam", "anc-lam", 1982230128)), h = d - b.call(null, new cljs.core.Keyword(null, "anc-clk", "anc-clk", -2031582930)), e = rete4flight.core.spherical_between.call(null, f, g, c * h, e), c = cljs.core.nth.call(null, e, 0, null), 
+      e = cljs.core.nth.call(null, e, 1, null), f = new L.LatLng(c / rete4flight.core.pid180, e / rete4flight.core.pid180);
+      b.call(null, new cljs.core.Keyword(null, "marker", "marker", 865118313)).setLatLng(f);
+      cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-phi", "anc-phi", -1798530216)], null), c));
+      cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-lam", "anc-lam", 1982230128)], null), e));
+      return cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-clk", "anc-clk", -2031582930)], null), d));
+    }
+  }
+  return null;
+};
+rete4flight.core.set_anchor = function(a, b, c, d, e) {
+  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-phi", "anc-phi", -1798530216)], null), b * rete4flight.core.pid180));
+  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-lam", "anc-lam", 1982230128)], null), c * rete4flight.core.pid180));
+  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-dir", "anc-dir", -977205314)], null), d * rete4flight.core.pid180));
+  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-rdh", "anc-rdh", -795860055)], null), e * rete4flight.core.nmrad));
+  return cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-clk", "anc-clk", -2031582930)], null), cljs.core.deref.call(null, rete4flight.core.clock)));
+};
 rete4flight.core.create_marker = function(a, b, c) {
   a = new L.LatLng(a, b);
-  c = {icon:L.icon({iconUrl:rete4flight.core.URL_ICO.call(null, c), iconSize:[32, 32]}), draggable:!0};
-  return L.rotatedMarker(a, c);
+  c = L.icon({iconUrl:rete4flight.core.URL_ICO.call(null, c), iconSize:[32, 32]});
+  b = {icon:c, draggable:!0};
+  var d = L.rotatedMarker(a, b);
+  d.on("click", function(a, b, c, d) {
+    return function(k) {
+      return rete4flight.core.info.call(null, cljs.core.ffirst.call(null, cljs.core.filter.call(null, function(a, b, c, d) {
+        return function(a) {
+          return cljs.core._EQ_.call(null, (new cljs.core.Keyword(null, "marker", "marker", 865118313)).cljs$core$IFn$_invoke$arity$1(cljs.core.second.call(null, a)), k.target);
+        };
+      }(a, b, c, d), cljs.core.seq.call(null, cljs.core.deref.call(null, rete4flight.core.mapobs)))));
+    };
+  }(a, c, b, d));
+  return d;
+};
+rete4flight.core.delete_mapob = function(a) {
+  var b = cljs.core.deref.call(null, rete4flight.core.mapobs).call(null, a);
+  if (cljs.core.truth_(b)) {
+    var c = b.call(null, new cljs.core.Keyword(null, "mover", "mover", 935114769));
+    cljs.core.truth_(c) && cljs.core.async.close_BANG_.call(null, c);
+    cljs.core.deref.call(null, rete4flight.core.chart).removeLayer(b.call(null, new cljs.core.Keyword(null, "marker", "marker", 865118313)));
+    return cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.dissoc.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), a));
+  }
+  return null;
+};
+rete4flight.core.create_mapob = function(a, b, c, d, e, f, g, h) {
+  cljs.core.truth_(cljs.core.deref.call(null, rete4flight.core.mapobs).call(null, a)) && rete4flight.core.delete_mapob.call(null, a);
+  h = rete4flight.core.create_marker.call(null, c, d, h);
+  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "marker", "marker", 865118313)], null), h));
+  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "radhrs", "radhrs", -1542336081)], null), f * rete4flight.core.nmrad));
+  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "altitude", "altitude", 463588637)], null), g));
+  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [b, new cljs.core.Keyword(null, "laloalcs", "laloalcs", 1578251860)], null), new cljs.core.PersistentVector(null, 5, 5, cljs.core.PersistentVector.EMPTY_NODE, [c, d, g, e, f], null)));
+  h.addTo(cljs.core.deref.call(null, rete4flight.core.chart));
+  h.options.angle = e;
+  rete4flight.core.set_anchor.call(null, a, c, d, e, f);
+  return cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "mover", "mover", 935114769)], null), rete4flight.core.repeater.call(null, function(b) {
+    return function() {
+      return rete4flight.core.move.call(null, a);
+    };
+  }(h), rete4flight.core.DLT_MOV)));
+};
+rete4flight.core.clear_mapobs = function() {
+  for (var a = cljs.core.seq.call(null, cljs.core.keys.call(null, cljs.core.deref.call(null, rete4flight.core.mapobs))), b = null, c = 0, d = 0;;) {
+    if (d < c) {
+      var e = cljs.core._nth.call(null, b, d);
+      rete4flight.core.delete_mapob.call(null, e);
+      d += 1;
+    } else {
+      if (a = cljs.core.seq.call(null, a)) {
+        b = a, cljs.core.chunked_seq_QMARK_.call(null, b) ? (a = cljs.core.chunk_first.call(null, b), c = cljs.core.chunk_rest.call(null, b), b = a, e = cljs.core.count.call(null, a), a = c, c = e) : (e = cljs.core.first.call(null, b), rete4flight.core.delete_mapob.call(null, e), a = cljs.core.next.call(null, b), b = null, c = 0), d = 0;
+      } else {
+        return null;
+      }
+    }
+  }
 };
 rete4flight.core.index = function(a) {
   for (var b = [], c = arguments.length, d = 0;;) {
@@ -36500,87 +36588,6 @@ rete4flight.core.create_pm_marker = function(a, b, c) {
     };
   }(a, c, b, d));
   return d;
-};
-rete4flight.core.spherical_between = function(a, b, c, d) {
-  var e = Math.cos(a);
-  a = Math.sin(a);
-  var f = Math.cos(d), g = Math.sin(c);
-  c = Math.cos(c);
-  return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [Math.asin(a * c + e * g * f), Math.atan2(g * Math.sin(d), e * c - a * g * f) + b], null);
-};
-rete4flight.core.map_view = function(a, b) {
-  var c = new L.LatLng(a, b), d = cljs.core.deref.call(null, rete4flight.core.chart).getZoom();
-  return cljs.core.deref.call(null, rete4flight.core.chart).setView(c, d, cljs.core.PersistentArrayMap.EMPTY);
-};
-rete4flight.core.move = function(a) {
-  var b = cljs.core.deref.call(null, rete4flight.core.mapobs).call(null, a);
-  if (cljs.core.truth_(b)) {
-    var c = b.call(null, new cljs.core.Keyword(null, "anc-rdh", "anc-rdh", -795860055));
-    if (0 < c) {
-      var d = cljs.core.deref.call(null, rete4flight.core.clock), e = b.call(null, new cljs.core.Keyword(null, "anc-dir", "anc-dir", -977205314)), f = b.call(null, new cljs.core.Keyword(null, "anc-phi", "anc-phi", -1798530216)), g = b.call(null, new cljs.core.Keyword(null, "anc-lam", "anc-lam", 1982230128)), h = d - b.call(null, new cljs.core.Keyword(null, "anc-clk", "anc-clk", -2031582930)), e = rete4flight.core.spherical_between.call(null, f, g, c * h, e), c = cljs.core.nth.call(null, e, 0, null), 
-      e = cljs.core.nth.call(null, e, 1, null), f = new L.LatLng(c / rete4flight.core.pid180, e / rete4flight.core.pid180);
-      b.call(null, new cljs.core.Keyword(null, "marker", "marker", 865118313)).setLatLng(f);
-      cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-phi", "anc-phi", -1798530216)], null), c));
-      cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-lam", "anc-lam", 1982230128)], null), e));
-      return cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-clk", "anc-clk", -2031582930)], null), d));
-    }
-  }
-  return null;
-};
-rete4flight.core.set_anchor = function(a, b, c, d, e) {
-  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-phi", "anc-phi", -1798530216)], null), b * rete4flight.core.pid180));
-  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-lam", "anc-lam", 1982230128)], null), c * rete4flight.core.pid180));
-  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-dir", "anc-dir", -977205314)], null), d * rete4flight.core.pid180));
-  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-rdh", "anc-rdh", -795860055)], null), e * rete4flight.core.nmrad));
-  return cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "anc-clk", "anc-clk", -2031582930)], null), cljs.core.deref.call(null, rete4flight.core.clock)));
-};
-rete4flight.core.mapobPopup = function(a, b, c, d, e, f, g, h) {
-  return [cljs.core.str("\x3ch3\x3e"), cljs.core.str(b), cljs.core.str("\x3c/h3\x3e"), cljs.core.str("\x3ctable\x3e"), cljs.core.str("\x3ctr\x3e\x3ctd\x3eid\x3c/td\x3e\x3ctd\x3e"), cljs.core.str(a), cljs.core.str("\x3c/td\x3e\x3c/tr\x3e"), cljs.core.str("\x3ctr\x3e\x3ctd\x3ealtitude\x3c/td\x3e\x3ctd\x3e"), cljs.core.str(c), cljs.core.str("\x3c/td\x3e\x3c/tr\x3e"), cljs.core.str("\x3ctr\x3e\x3ctd\x3elatitude\x3c/td\x3e\x3ctd\x3e"), cljs.core.str(d), cljs.core.str("\x3c/td\x3e\x3c/tr\x3e"), cljs.core.str("\x3ctr\x3e\x3ctd\x3elongitude\x3c/td\x3e\x3ctd\x3e"), 
-  cljs.core.str(e), cljs.core.str("\x3c/td\x3e\x3c/tr\x3e"), cljs.core.str("\x3ctr\x3e\x3ctd\x3ecourse\x3c/td\x3e\x3ctd\x3e"), cljs.core.str(f), cljs.core.str("\x3c/td\x3e\x3c/tr\x3e"), cljs.core.str("\x3ctr\x3e\x3ctd\x3espeed\x3c/td\x3e\x3ctd\x3e"), cljs.core.str(g), cljs.core.str("\x3c/td\x3e\x3c/tr\x3e"), cljs.core.str("\x3ctr\x3e\x3ctd\x3estate\x3c/td\x3e\x3ctd\x3e"), cljs.core.str(h), cljs.core.str("\x3c/td\x3e\x3c/tr\x3e"), cljs.core.str("\x3ctr\x3e\x3ctd\x3e\x3cinput type\x3d'button' style\x3d'color:green' value\x3d'Inform'\n                 onclick\x3d'rete4flight.core.info(\""), 
-  cljs.core.str(a), cljs.core.str("\")' \x3e\x3c/td\x3e\n            \x3ctd\x3e\x3cinput type\x3d'button' style\x3d'color:purple' value\x3d'Trail'\n                 onclick\x3d'rete4flight.core.trail(\""), cljs.core.str(a), cljs.core.str("\")' \x3e\x3c/td\x3e\x3c/tr\x3e"), cljs.core.str("\x3ctr\x3e\x3ctd\x3e\x3cinput type\x3d'button' style\x3d'color:blue' value\x3d'Follow'\n                 onclick\x3d'rete4flight.core.follow(\""), cljs.core.str(a), cljs.core.str("\")' \x3e\x3c/td\x3e\n            \x3ctd\x3e\x3cinput type\x3d'button' style\x3d'color:red' value\x3d'Stop'\n                 onclick\x3d'rete4flight.core.stopfollow()' \x3e\x3c/td\x3e\x3c/tr\x3e"), 
-  cljs.core.str("\x3c/table\x3e")].join("");
-};
-rete4flight.core.delete_mapob = function(a) {
-  var b = cljs.core.deref.call(null, rete4flight.core.mapobs).call(null, a);
-  if (cljs.core.truth_(b)) {
-    var c = b.call(null, new cljs.core.Keyword(null, "mover", "mover", 935114769));
-    cljs.core.truth_(c) && cljs.core.async.close_BANG_.call(null, c);
-    cljs.core.deref.call(null, rete4flight.core.chart).removeLayer(b.call(null, new cljs.core.Keyword(null, "marker", "marker", 865118313)));
-    return cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.dissoc.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), a));
-  }
-  return null;
-};
-rete4flight.core.create_mapob = function(a, b, c, d, e, f, g, h) {
-  cljs.core.truth_(cljs.core.deref.call(null, rete4flight.core.mapobs).call(null, a)) && rete4flight.core.delete_mapob.call(null, a);
-  var k = rete4flight.core.create_marker.call(null, c, d, h);
-  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "marker", "marker", 865118313)], null), k));
-  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "radhrs", "radhrs", -1542336081)], null), f * rete4flight.core.nmrad));
-  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "altitude", "altitude", 463588637)], null), g));
-  cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [b, new cljs.core.Keyword(null, "laloalcs", "laloalcs", 1578251860)], null), new cljs.core.PersistentVector(null, 5, 5, cljs.core.PersistentVector.EMPTY_NODE, [c, d, g, e, f], null)));
-  k.addTo(cljs.core.deref.call(null, rete4flight.core.chart));
-  k.options.angle = e;
-  k.bindPopup(rete4flight.core.mapobPopup.call(null, a, b, g, c, d, e, f, h));
-  rete4flight.core.set_anchor.call(null, a, c, d, e, f);
-  return cljs.core._vreset_BANG_.call(null, rete4flight.core.mapobs, cljs.core.assoc_in.call(null, cljs.core._deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [a, new cljs.core.Keyword(null, "mover", "mover", 935114769)], null), rete4flight.core.repeater.call(null, function(b) {
-    return function() {
-      return rete4flight.core.move.call(null, a);
-    };
-  }(k), rete4flight.core.DLT_MOV)));
-};
-rete4flight.core.clear_mapobs = function() {
-  for (var a = cljs.core.seq.call(null, cljs.core.keys.call(null, cljs.core.deref.call(null, rete4flight.core.mapobs))), b = null, c = 0, d = 0;;) {
-    if (d < c) {
-      var e = cljs.core._nth.call(null, b, d);
-      rete4flight.core.delete_mapob.call(null, e);
-      d += 1;
-    } else {
-      if (a = cljs.core.seq.call(null, a)) {
-        b = a, cljs.core.chunked_seq_QMARK_.call(null, b) ? (a = cljs.core.chunk_first.call(null, b), c = cljs.core.chunk_rest.call(null, b), b = a, e = cljs.core.count.call(null, a), a = c, c = e) : (e = cljs.core.first.call(null, b), rete4flight.core.delete_mapob.call(null, e), a = cljs.core.next.call(null, b), b = null, c = 0), d = 0;
-      } else {
-        return null;
-      }
-    }
-  }
 };
 rete4flight.core.create_placemark = function(a, b, c) {
   a = rete4flight.core.create_pm_marker.call(null, a, b, c);
@@ -36770,8 +36777,8 @@ rete4flight.core.add_link = function(a, b) {
               }
               if (2 === c) {
                 var c = b[2], d = cljs.core.deref.call(null, rete4flight.core.chart).removeLayer(g), f = cljs.core._deref.call(null, rete4flight.core.links), f = cljs.core.dissoc.call(null, f, a), f = cljs.core._vreset_BANG_.call(null, rete4flight.core.links, f);
-                b[7] = c;
-                b[8] = d;
+                b[7] = d;
+                b[8] = c;
                 return cljs.core.async.impl.ioc_helpers.return_chan.call(null, b, f);
               }
               return null;
@@ -37022,7 +37029,7 @@ rete4flight.core.turn = function(a, b) {
                 c[8] = f;
                 return cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, c, 10, g);
               }
-              return 5 === f ? (f = cljs.core._EQ_.call(null, d, new cljs.core.Keyword(null, "left", "left", -399115937)), c[1] = f ? 7 : 8, new cljs.core.Keyword(null, "recur", "recur", -437573268)) : 10 === f ? (g = c[2], f = rete4flight.core.course.call(null, a), c[7] = f, c[9] = g, c[2] = null, c[1] = 2, new cljs.core.Keyword(null, "recur", "recur", -437573268)) : 8 === f ? (f = c[7], f = rete4flight.core.set_course_BANG_.call(null, a, f + 4), c[2] = f, c[1] = 9, new cljs.core.Keyword(null, "recur", 
+              return 5 === f ? (f = cljs.core._EQ_.call(null, d, new cljs.core.Keyword(null, "left", "left", -399115937)), c[1] = f ? 7 : 8, new cljs.core.Keyword(null, "recur", "recur", -437573268)) : 10 === f ? (g = c[2], f = rete4flight.core.course.call(null, a), c[9] = g, c[7] = f, c[2] = null, c[1] = 2, new cljs.core.Keyword(null, "recur", "recur", -437573268)) : 8 === f ? (f = c[7], f = rete4flight.core.set_course_BANG_.call(null, a, f + 4), c[2] = f, c[1] = 9, new cljs.core.Keyword(null, "recur", 
               "recur", -437573268)) : null;
             };
           }(c, d, e), c, d, e);
@@ -37035,22 +37042,6 @@ rete4flight.core.turn = function(a, b) {
       };
     }(e, d, c));
     return e;
-  }
-  return null;
-};
-rete4flight.core.CAMERA = new cljs.core.Keyword(null, "off", "off", 606440789);
-rete4flight.core.ONBOARD = null;
-rete4flight.core.display_flight_data = function() {
-  if (cljs.core._EQ_.call(null, rete4flight.core.CAMERA, new cljs.core.Keyword(null, "on", "on", 173873944))) {
-    var a = cljs.core.get_in.call(null, cljs.core.deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [rete4flight.core.ONBOARD, new cljs.core.Keyword(null, "laloalcs", "laloalcs", 1578251860)], null));
-    if (cljs.core.truth_(a)) {
-      var b = cljs.core.nth.call(null, a, 0, null), c = cljs.core.nth.call(null, a, 1, null), d = cljs.core.nth.call(null, a, 2, null), e = cljs.core.nth.call(null, a, 3, null), a = cljs.core.nth.call(null, a, 4, null);
-      rete4flight.core.set_html_BANG_.call(null, "course", [cljs.core.str("Course: "), cljs.core.str(e)].join(""));
-      rete4flight.core.set_html_BANG_.call(null, "speed", [cljs.core.str("Speed: "), cljs.core.str(a)].join(""));
-      rete4flight.core.set_html_BANG_.call(null, "altitude", [cljs.core.str("Altitude: "), cljs.core.str(d)].join(""));
-      rete4flight.core.set_html_BANG_.call(null, "lat", [cljs.core.str("Latitude: "), cljs.core.str(rete4flight.core.format.call(null, "%.4f", b))].join(""));
-      return rete4flight.core.set_html_BANG_.call(null, "lon", [cljs.core.str("Longitude: "), cljs.core.str(rete4flight.core.format.call(null, "%.4f", c))].join(""));
-    }
   }
   return null;
 };
@@ -37212,10 +37203,6 @@ rete4flight.core.error_handler = function(a) {
   b = cljs.core.get.call(null, b, new cljs.core.Keyword(null, "status-text", "status-text", -1834235478));
   return cljs.core.println.call(null, [cljs.core.str("AJAX ERROR: "), cljs.core.str(a), cljs.core.str(" "), cljs.core.str(b)].join(""));
 };
-rete4flight.core.check_events = function() {
-  ajax.core.GET.call(null, rete4flight.core.URL_EVT, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.event_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
-  return rete4flight.core.display_flight_data.call(null);
-};
 rete4flight.core.no_handler = function(a) {
   return null;
 };
@@ -37234,25 +37221,44 @@ rete4flight.core.follow = function(a) {
 rete4flight.core.stopfollow = function() {
   return ajax.core.GET.call(null, rete4flight.core.URL_SFW, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
 };
-rete4flight.core.MANUAL = new cljs.core.Keyword(null, "off", "off", 606440789);
-rete4flight.core.manual_show = function() {
-  return cljs.core._EQ_.call(null, rete4flight.core.CAMERA, new cljs.core.Keyword(null, "on", "on", 173873944)) ? (rete4flight.core.set_html_BANG_.call(null, "course", [cljs.core.str("Course: \x3cinput value\x3d'0' style\x3d'width:40px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.manualcrs(this.value)'\x3e")].join("")), rete4flight.core.set_html_BANG_.call(null, "speed", [cljs.core.str("Speed: \x3cinput value\x3d'0' style\x3d'width:40px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.manualspd(this.value)'\x3e")].join("")), 
-  rete4flight.core.set_html_BANG_.call(null, "altitude", [cljs.core.str("Altitude: \x3cinput value\x3d'0' style\x3d'width:40px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.manualalt(this.value)'\x3e")].join(""))) : null;
+rete4flight.core.manual_show = function(a, b, c) {
+  return cljs.core._EQ_.call(null, rete4flight.core.CAMERA, new cljs.core.Keyword(null, "on", "on", 173873944)) ? (rete4flight.core.set_html_BANG_.call(null, "course", [cljs.core.str("Course: \x3cinput value\x3d'"), cljs.core.str(a), cljs.core.str("' style\x3d'width:40px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.manualcrs(this.value)'\x3e")].join("")), rete4flight.core.set_html_BANG_.call(null, "speed", [cljs.core.str("Speed: \x3cinput value\x3d'"), cljs.core.str(b), cljs.core.str("' style\x3d'width:40px' "), 
+  cljs.core.str("onchange\x3d'javascript:rete4flight.core.manualspd(this.value)'\x3e")].join("")), rete4flight.core.set_html_BANG_.call(null, "altitude", [cljs.core.str("Altitude: \x3cinput value\x3d'"), cljs.core.str(c), cljs.core.str("' style\x3d'width:40px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.manualalt(this.value)'\x3e")].join(""))) : null;
 };
 rete4flight.core.manual_hide = function() {
   rete4flight.core.set_html_BANG_.call(null, "course", "");
   rete4flight.core.set_html_BANG_.call(null, "speed", "");
   return rete4flight.core.set_html_BANG_.call(null, "altitude", "");
 };
-rete4flight.core.manual = function() {
-  if (cljs.core._EQ_.call(null, rete4flight.core.MANUAL, new cljs.core.Keyword(null, "off", "off", 606440789))) {
-    rete4flight.core.manual_show.call(null), ajax.core.GET.call(null, [cljs.core.str(rete4flight.core.URL_AUT), cljs.core.str("?manual\x3don")].join(""), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null)), rete4flight.core.MANUAL = new cljs.core.Keyword(null, "on", "on", 173873944);
-  } else {
-    if (cljs.core._EQ_.call(null, rete4flight.core.MANUAL, new cljs.core.Keyword(null, "on", "on", 173873944))) {
-      rete4flight.core.manual_hide.call(null), ajax.core.GET.call(null, [cljs.core.str(rete4flight.core.URL_AUT), cljs.core.str("?manual\x3doff")].join(""), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null)), rete4flight.core.MANUAL = new cljs.core.Keyword(null, "off", "off", 606440789);
-    } else {
-      return null;
+rete4flight.core.display_flight_data = function() {
+  if (cljs.core._EQ_.call(null, rete4flight.core.CAMERA, new cljs.core.Keyword(null, "on", "on", 173873944))) {
+    var a = cljs.core.get_in.call(null, cljs.core.deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [rete4flight.core.ONBOARD, new cljs.core.Keyword(null, "laloalcs", "laloalcs", 1578251860)], null));
+    if (cljs.core.truth_(a)) {
+      var b = cljs.core.nth.call(null, a, 0, null), c = cljs.core.nth.call(null, a, 1, null), d = cljs.core.nth.call(null, a, 2, null), e = cljs.core.nth.call(null, a, 3, null), a = cljs.core.nth.call(null, a, 4, null);
+      cljs.core._EQ_.call(null, rete4flight.core.MANUAL, new cljs.core.Keyword(null, "off", "off", 606440789)) ? (rete4flight.core.set_html_BANG_.call(null, "course", [cljs.core.str("Course: "), cljs.core.str(e)].join("")), rete4flight.core.set_html_BANG_.call(null, "speed", [cljs.core.str("Speed: "), cljs.core.str(a)].join("")), rete4flight.core.set_html_BANG_.call(null, "altitude", [cljs.core.str("Altitude: "), cljs.core.str(d)].join(""))) : rete4flight.core.manual_show.call(null, e, a, d);
+      rete4flight.core.set_html_BANG_.call(null, "lat", [cljs.core.str("Latitude: "), cljs.core.str(rete4flight.core.format.call(null, "%.4f", b))].join(""));
+      return rete4flight.core.set_html_BANG_.call(null, "lon", [cljs.core.str("Longitude: "), cljs.core.str(rete4flight.core.format.call(null, "%.4f", c))].join(""));
     }
+  }
+  return null;
+};
+rete4flight.core.manual = function() {
+  var a = cljs.core.get_in.call(null, cljs.core.deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [rete4flight.core.ONBOARD, new cljs.core.Keyword(null, "laloalcs", "laloalcs", 1578251860)], null));
+  if (cljs.core.truth_(a)) {
+    cljs.core.nth.call(null, a, 0, null);
+    cljs.core.nth.call(null, a, 1, null);
+    var b = cljs.core.nth.call(null, a, 2, null), c = cljs.core.nth.call(null, a, 3, null), a = cljs.core.nth.call(null, a, 4, null);
+    if (cljs.core._EQ_.call(null, rete4flight.core.MANUAL, new cljs.core.Keyword(null, "off", "off", 606440789))) {
+      rete4flight.core.manual_show.call(null, c, a, b), ajax.core.GET.call(null, [cljs.core.str(rete4flight.core.URL_AUT), cljs.core.str("?manual\x3don")].join(""), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null)), rete4flight.core.MANUAL = new cljs.core.Keyword(null, "on", "on", 173873944);
+    } else {
+      if (cljs.core._EQ_.call(null, rete4flight.core.MANUAL, new cljs.core.Keyword(null, "on", "on", 173873944))) {
+        rete4flight.core.manual_hide.call(null), ajax.core.GET.call(null, [cljs.core.str(rete4flight.core.URL_AUT), cljs.core.str("?manual\x3doff")].join(""), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null)), rete4flight.core.MANUAL = new cljs.core.Keyword(null, "off", "off", 606440789);
+      } else {
+        return null;
+      }
+    }
+  } else {
+    return null;
   }
 };
 rete4flight.core.manualcrs = function(a) {
@@ -37740,6 +37746,10 @@ rete4flight.core.remote_call = function() {
     return ajax.core.GET.call(null, [cljs.core.str(rete4flight.core.URL_CAL), cljs.core.str(c)].join(""), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
   }
   return null;
+};
+rete4flight.core.check_events = function() {
+  ajax.core.GET.call(null, rete4flight.core.URL_EVT, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.event_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
+  return rete4flight.core.display_flight_data.call(null);
 };
 rete4flight.core.init = function() {
   cljs.core.println.call(null, new cljs.core.Keyword(null, "INIT", "INIT", -581100519));

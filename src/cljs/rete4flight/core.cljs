@@ -61,6 +61,9 @@
               "isle" "http://localhost:3000/img/isle.png"
               "airport" "http://localhost:3000/img/airport.png"
               "city" "http://localhost:3000/img/city.png"})
+(def CAMERA :off)
+(def ONBOARD nil)
+(def MANUAL :off)
 
 ;; ----------------- Chart creation and control -------------------------
 
@@ -97,34 +100,6 @@
   (go (while true
         (task)
         (<! (timeout timo)))))
-
-(defn create-marker [lat lon sta]
-  (let [pos (js/L.LatLng. lat lon)
-        ico (js/L.icon #js{:iconUrl (URL-ICO sta) :iconSize #js[32, 32]})
-        opt #js{:icon ico :draggable true}
-        mk (-> js/L (.rotatedMarker pos opt))]
-    mk))
-
-(defn index
-  ([e [f & r]]
-   (index 0 e f r))
-  ([i e f r]
-   (cond
-    (= e f) i
-    (empty? r) -1
-    true (index (inc i) e (first r) (rest r)))))
-
-(declare info)
-
-(defn create-pm-marker [lat lon sta]
-  (let [pos (js/L.LatLng. lat lon)
-        ico (js/L.icon #js{:iconUrl (URL-ICO sta) :iconSize #js[24, 24]})
-        opt #js{:icon ico :draggable true}
-        mk (-> js/L (.rotatedMarker pos opt))]
-    (.on mk "click"
-         (fn [e]
-           (info (str "pm" (index (.-target e) @placemarks)))))
-    mk))
 
 (defn spherical-between [phi1 lambda0 c az]
   (let [cosphi1 (js/Math.cos phi1)
@@ -169,25 +144,17 @@
   (vswap! mapobs assoc-in [id :anc-rdh] (* spd nmrad))
   (vswap! mapobs assoc-in [id :anc-clk] @clock))
 
-(defn mapobPopup [id callsign alt lat lon crs spd sta]
-  (str "<h3>" callsign "</h3>"
-       "<table>"
-       "<tr><td>id</td><td>" id "</td></tr>"
-       "<tr><td>altitude</td><td>" alt "</td></tr>"
-       "<tr><td>latitude</td><td>" lat "</td></tr>"
-       "<tr><td>longitude</td><td>" lon "</td></tr>"
-       "<tr><td>course</td><td>" crs "</td></tr>"
-       "<tr><td>speed</td><td>" spd "</td></tr>"
-       "<tr><td>state</td><td>" sta "</td></tr>"
-       "<tr><td><input type='button' style='color:green' value='Inform'
-                 onclick='rete4flight.core.info(\"" id "\")' ></td>
-            <td><input type='button' style='color:purple' value='Trail'
-                 onclick='rete4flight.core.trail(\"" id "\")' ></td></tr>"
-       "<tr><td><input type='button' style='color:blue' value='Follow'
-                 onclick='rete4flight.core.follow(\"" id "\")' ></td>
-            <td><input type='button' style='color:red' value='Stop'
-                 onclick='rete4flight.core.stopfollow()' ></td></tr>"
-       "</table>"))
+(declare info)
+
+(defn create-marker [lat lon sta]
+  (let [pos (js/L.LatLng. lat lon)
+        ico (js/L.icon #js{:iconUrl (URL-ICO sta) :iconSize #js[32, 32]})
+        opt #js{:icon ico :draggable true}
+        mk (-> js/L (.rotatedMarker pos opt))]
+    (.on mk "click"
+         (fn [e]
+           (info (ffirst (filter #(= (:marker (second %)) (.-target e)) (seq @mapobs))))))
+    mk))
 
 (defn delete-mapob [id]
   (when-let [mob (@mapobs id)]
@@ -206,7 +173,6 @@
     (vswap! mapobs assoc-in [callsign :laloalcs] [lat lon alt crs spd])
     (.addTo mrk @chart)
     (set! (.. mrk -options -angle) crs)
-    (.bindPopup mrk (mapobPopup id callsign alt lat lon crs spd sta))
     (set-anchor id lat lon crs spd)
     (vswap! mapobs assoc-in [id :mover]
            (repeater #(move id) DLT-MOV))))
@@ -214,6 +180,25 @@
 (defn clear-mapobs []
   (doseq [id (keys @mapobs)]
     (delete-mapob id)))
+
+(defn index
+  ([e [f & r]]
+   (index 0 e f r))
+  ([i e f r]
+   (cond
+    (= e f) i
+    (empty? r) -1
+    true (index (inc i) e (first r) (rest r)))))
+
+(defn create-pm-marker [lat lon sta]
+  (let [pos (js/L.LatLng. lat lon)
+        ico (js/L.icon #js{:iconUrl (URL-ICO sta) :iconSize #js[24, 24]})
+        opt #js{:icon ico :draggable true}
+        mk (-> js/L (.rotatedMarker pos opt))]
+    (.on mk "click"
+         (fn [e]
+           (info (str "pm" (index (.-target e) @placemarks)))))
+    mk))
 
 (defn create-placemark [lat lon sta]
   (let [mrk (create-pm-marker lat lon sta)]
@@ -362,18 +347,6 @@
                   (<! (timeout MYFS-INTL))
                   (recur (course id))))))))))
 
-(def CAMERA :off)
-(def ONBOARD nil)
-
-(defn display-flight-data []
-  (if (= CAMERA :on)
-    (when-let [[lat lon alt crs spd] (get-in @mapobs [ONBOARD :laloalcs])]
-      (set-html! "course" (str "Course: " crs))
-      (set-html! "speed" (str "Speed: " spd))
-      (set-html! "altitude" (str "Altitude: " alt))
-      (set-html! "lat" (str "Latitude: " (format "%.4f" lat)))
-      (set-html! "lon" (str "Longitude: " (format "%.4f" lon))))))
-
 ;; ------------------------ Event handler ---------------------------
 
 (defn event-handler [response]
@@ -409,11 +382,6 @@
 (defn error-handler [{:keys [status status-text]}]
   (println (str "AJAX ERROR: " status " " status-text)))
 
-(defn check-events []
-  (GET URL-EVT {:handler event-handler
-                 :error-handler error-handler})
-  (display-flight-data))
-
 (defn no-handler [response])
 
 ;; -------------------------- Buttons --------------------------------
@@ -439,15 +407,13 @@
 
 ;; ----------------------------- Autopilot ----------------------------
 
-(def MANUAL :off)
-
-(defn manual-show []
+(defn manual-show [crs spd alt]
   (when (= CAMERA :on)
-    (set-html! "course" (str "Course: <input value='0' style='width:40px' "
+    (set-html! "course" (str "Course: <input value='" crs "' style='width:40px' "
                                  "onchange='javascript:rete4flight.core.manualcrs(this.value)'>"))
-    (set-html! "speed" (str "Speed: <input value='0' style='width:40px' "
+    (set-html! "speed" (str "Speed: <input value='" spd "' style='width:40px' "
                                 "onchange='javascript:rete4flight.core.manualspd(this.value)'>"))
-    (set-html! "altitude" (str "Altitude: <input value='0' style='width:40px' "
+    (set-html! "altitude" (str "Altitude: <input value='" alt "' style='width:40px' "
                                    "onchange='javascript:rete4flight.core.manualalt(this.value)'>"))))
 
 (defn manual-hide []
@@ -455,16 +421,29 @@
   (set-html! "speed" "")
   (set-html! "altitude" ""))
 
+(defn display-flight-data []
+  (if (= CAMERA :on)
+    (when-let [[lat lon alt crs spd] (get-in @mapobs [ONBOARD :laloalcs])]
+      (if (= MANUAL :off)
+        (do
+          (set-html! "course" (str "Course: " crs))
+          (set-html! "speed" (str "Speed: " spd))
+          (set-html! "altitude" (str "Altitude: " alt)))
+        (manual-show crs spd alt))
+      (set-html! "lat" (str "Latitude: " (format "%.4f" lat)))
+      (set-html! "lon" (str "Longitude: " (format "%.4f" lon))))))
+
 (defn manual []
-  (cond
-    (= MANUAL :off)
-    (do (manual-show)
-      (GET (str URL-AUT "?manual=on") {:handler no-handler :error-handler error-handler})
-      (def MANUAL :on))
-    (= MANUAL :on)
-    (do (manual-hide)
-      (GET (str URL-AUT "?manual=off") {:handler no-handler :error-handler error-handler})
-      (def MANUAL :off))))
+  (if-let [[lat lon alt crs spd] (get-in @mapobs [ONBOARD :laloalcs])]
+    (cond
+     (= MANUAL :off)
+     (do (manual-show crs spd alt)
+       (GET (str URL-AUT "?manual=on") {:handler no-handler :error-handler error-handler})
+       (def MANUAL :on))
+     (= MANUAL :on)
+     (do (manual-hide)
+       (GET (str URL-AUT "?manual=off") {:handler no-handler :error-handler error-handler})
+       (def MANUAL :off)))))
 
 (defn manualcrs [crs]
   (let [url (str URL-AUT "?course=" crs)]
@@ -752,32 +731,37 @@
         (GET (str URL-CAL plis) {:handler no-handler
                                   :error-handler error-handler})))))
 
+(defn check-events []
+  (GET URL-EVT {:handler event-handler
+                 :error-handler error-handler})
+  (display-flight-data))
+
 ;; ------------------------ Initialization ----------------------------
 
 (defn init []
   (println :INIT)
   (let [m (-> js/L
-            (.map "map")
-            (.setView (array 40.8, -74.0) 10)) ;; New York City
+              (.map "map")
+              (.setView (array 40.8, -74.0) 10)) ;; New York City
         tile1 (-> js/L (.tileLayer URL-OSM
-                         #js{:maxZoom 16
-                             :attribution "OOGIS RL, OpenStreetMap &copy;"}))
+                                   #js{:maxZoom 16
+                                       :attribution "OOGIS RL, OpenStreetMap &copy;"}))
         tile2 (-> js/L (.tileLayer URL-GSA
-                         #js{:maxZoom 20
-                             :subdomains #js["mt0" "mt1" "mt2" "mt3"]
-                             :attribution "OOGIS RL, Google &copy;"}))
+                                   #js{:maxZoom 20
+                                       :subdomains #js["mt0" "mt1" "mt2" "mt3"]
+                                       :attribution "OOGIS RL, Google &copy;"}))
         tile3 (-> js/L (.tileLayer URL-GST
-                         #js{:maxZoom 20
-                             :subdomains #js["mt0" "mt1" "mt2" "mt3"]
-                             :attribution "OOGIS RL, Google &copy;"}))
+                                   #js{:maxZoom 20
+                                       :subdomains #js["mt0" "mt1" "mt2" "mt3"]
+                                       :attribution "OOGIS RL, Google &copy;"}))
         tile4 (-> js/L (.tileLayer URL-GHB
-                         #js{:maxZoom 20
-                             :subdomains #js["mt0" "mt1" "mt2" "mt3"]
-                             :attribution "OOGIS RL, Google &copy;"}))
+                                   #js{:maxZoom 20
+                                       :subdomains #js["mt0" "mt1" "mt2" "mt3"]
+                                       :attribution "OOGIS RL, Google &copy;"}))
         tile5 (-> js/L (.tileLayer URL-GTR
-                         #js{:maxZoom 20
-                             :subdomains #js["mt0" "mt1" "mt2" "mt3"]
-                             :attribution "OOGIS RL, Google &copy;"}))
+                                   #js{:maxZoom 20
+                                       :subdomains #js["mt0" "mt1" "mt2" "mt3"]
+                                       :attribution "OOGIS RL, Google &copy;"}))
         base (clj->js {"OpenStreetMap" tile1
                        "Google Satellite" tile2
                        "Google Streets" tile3
@@ -787,7 +771,7 @@
     (.addTo tile1 m)
     (.addTo ctrl m)
     (.on m "mousemove"
-      (fn [e] (mouse-move (.. e -latlng -lat) (.. e -latlng -lng))))
+         (fn [e] (mouse-move (.. e -latlng -lat) (.. e -latlng -lng))))
     (vreset! chart m)
     (set-html! "commands" COMMANDS)
     (repeater #(check-events) DLT-EVT)
