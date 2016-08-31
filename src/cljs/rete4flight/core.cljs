@@ -26,6 +26,7 @@
 (def DLT-LKS 300) ;; update links every 300 msec (3 times per sec)
 (def REM-CAL (volatile! {})) ;; remote call params
 (def MYFS-INTL 1000) ;; my flights simulation interval (1 sec)
+(def TRN-STP 3) ;; step of course in degrees while turning
 (def URL-CAL "http://localhost:3000/call/")
 (def URL-EVT "http://localhost:3000/events/")
 (def URL-NVI "http://localhost:3000/new-visible/")
@@ -338,12 +339,12 @@
                      :left
                      :right))]
         (go (loop [crs crs]
-              (if (< (Math/abs (- crs on-course)) 4)
+              (if (< (Math/abs (- crs on-course)) TRN-STP)
                 (set-course! id on-course)
                 (do
                   (if (= side :left)
-                    (set-course! id (- crs 4))
-                    (set-course! id (+ crs 4)))
+                    (set-course! id (- crs TRN-STP))
+                    (set-course! id (+ crs TRN-STP)))
                   (<! (timeout MYFS-INTL))
                   (recur (course id))))))))))
 
@@ -409,27 +410,24 @@
 
 (defn manual-show [crs spd alt]
   (when (= CAMERA :on)
-    (set-html! "course" (str "Course: <input value='" crs "' style='width:40px' "
+    (set-html! "course-fld" (str "<input value='" crs "' style='width:40px' "
                                  "onchange='javascript:rete4flight.core.manualcrs(this.value)'>"))
-    (set-html! "speed" (str "Speed: <input value='" spd "' style='width:40px' "
+    (set-html! "speed-fld" (str "<input value='" spd "' style='width:40px' "
                                 "onchange='javascript:rete4flight.core.manualspd(this.value)'>"))
-    (set-html! "altitude" (str "Altitude: <input value='" alt "' style='width:40px' "
+    (set-html! "altitude-fld" (str "<input value='" alt "' style='width:40px' "
                                    "onchange='javascript:rete4flight.core.manualalt(this.value)'>"))))
 
 (defn manual-hide []
-  (set-html! "course" "")
-  (set-html! "speed" "")
-  (set-html! "altitude" ""))
+  (set-html! "course-fld" "")
+  (set-html! "speed-fld" "")
+  (set-html! "altitude-fld" ""))
 
 (defn display-flight-data []
   (if (= CAMERA :on)
     (when-let [[lat lon alt crs spd] (get-in @mapobs [ONBOARD :laloalcs])]
-      (if (= MANUAL :off)
-        (do
-          (set-html! "course" (str "Course: " crs))
-          (set-html! "speed" (str "Speed: " spd))
-          (set-html! "altitude" (str "Altitude: " alt)))
-        (manual-show crs spd alt))
+      (set-html! "course" (str "Course: " crs))
+      (set-html! "speed" (str "Speed: " spd))
+      (set-html! "altitude" (str "Altitude: " alt))
       (set-html! "lat" (str "Latitude: " (format "%.4f" lat)))
       (set-html! "lon" (str "Longitude: " (format "%.4f" lon))))))
 

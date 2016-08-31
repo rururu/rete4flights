@@ -36318,6 +36318,7 @@ rete4flight.core.DLT_MOV = 200;
 rete4flight.core.DLT_LKS = 300;
 rete4flight.core.REM_CAL = cljs.core.volatile_BANG_.call(null, cljs.core.PersistentArrayMap.EMPTY);
 rete4flight.core.MYFS_INTL = 1E3;
+rete4flight.core.TRN_STP = 3;
 rete4flight.core.URL_CAL = "http://localhost:3000/call/";
 rete4flight.core.URL_EVT = "http://localhost:3000/events/";
 rete4flight.core.URL_NVI = "http://localhost:3000/new-visible/";
@@ -37007,7 +37008,7 @@ rete4flight.core.turn = function(a, b) {
             return function(c) {
               var f = c[1];
               if (7 === f) {
-                return f = c[7], f = rete4flight.core.set_course_BANG_.call(null, a, f - 4), c[2] = f, c[1] = 9, new cljs.core.Keyword(null, "recur", "recur", -437573268);
+                return f = c[7], f = rete4flight.core.set_course_BANG_.call(null, a, f - rete4flight.core.TRN_STP), c[2] = f, c[1] = 9, new cljs.core.Keyword(null, "recur", "recur", -437573268);
               }
               if (1 === f) {
                 return f = e, c[7] = f, c[2] = null, c[1] = 2, new cljs.core.Keyword(null, "recur", "recur", -437573268);
@@ -37022,15 +37023,15 @@ rete4flight.core.turn = function(a, b) {
                 return cljs.core.async.impl.ioc_helpers.return_chan.call(null, c, c[2]);
               }
               if (2 === f) {
-                return f = c[7], f = Math.abs(f - b), cljs.core.truth_(4 > f) ? c[1] = 4 : c[1] = 5, new cljs.core.Keyword(null, "recur", "recur", -437573268);
+                return f = c[7], f = Math.abs(f - b) < rete4flight.core.TRN_STP, cljs.core.truth_(f) ? c[1] = 4 : c[1] = 5, new cljs.core.Keyword(null, "recur", "recur", -437573268);
               }
               if (9 === f) {
                 var f = c[2], g = cljs.core.async.timeout.call(null, rete4flight.core.MYFS_INTL);
                 c[8] = f;
                 return cljs.core.async.impl.ioc_helpers.take_BANG_.call(null, c, 10, g);
               }
-              return 5 === f ? (f = cljs.core._EQ_.call(null, d, new cljs.core.Keyword(null, "left", "left", -399115937)), c[1] = f ? 7 : 8, new cljs.core.Keyword(null, "recur", "recur", -437573268)) : 10 === f ? (g = c[2], f = rete4flight.core.course.call(null, a), c[9] = g, c[7] = f, c[2] = null, c[1] = 2, new cljs.core.Keyword(null, "recur", "recur", -437573268)) : 8 === f ? (f = c[7], f = rete4flight.core.set_course_BANG_.call(null, a, f + 4), c[2] = f, c[1] = 9, new cljs.core.Keyword(null, "recur", 
-              "recur", -437573268)) : null;
+              return 5 === f ? (f = cljs.core._EQ_.call(null, d, new cljs.core.Keyword(null, "left", "left", -399115937)), c[1] = f ? 7 : 8, new cljs.core.Keyword(null, "recur", "recur", -437573268)) : 10 === f ? (g = c[2], f = rete4flight.core.course.call(null, a), c[9] = g, c[7] = f, c[2] = null, c[1] = 2, new cljs.core.Keyword(null, "recur", "recur", -437573268)) : 8 === f ? (f = c[7], f = rete4flight.core.set_course_BANG_.call(null, a, f + rete4flight.core.TRN_STP), c[2] = f, c[1] = 9, new cljs.core.Keyword(null, 
+              "recur", "recur", -437573268)) : null;
             };
           }(c, d, e), c, d, e);
         }(), m = function() {
@@ -37222,20 +37223,22 @@ rete4flight.core.stopfollow = function() {
   return ajax.core.GET.call(null, rete4flight.core.URL_SFW, new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", -195596612), rete4flight.core.no_handler, new cljs.core.Keyword(null, "error-handler", "error-handler", -484945776), rete4flight.core.error_handler], null));
 };
 rete4flight.core.manual_show = function(a, b, c) {
-  return cljs.core._EQ_.call(null, rete4flight.core.CAMERA, new cljs.core.Keyword(null, "on", "on", 173873944)) ? (rete4flight.core.set_html_BANG_.call(null, "course", [cljs.core.str("Course: \x3cinput value\x3d'"), cljs.core.str(a), cljs.core.str("' style\x3d'width:40px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.manualcrs(this.value)'\x3e")].join("")), rete4flight.core.set_html_BANG_.call(null, "speed", [cljs.core.str("Speed: \x3cinput value\x3d'"), cljs.core.str(b), cljs.core.str("' style\x3d'width:40px' "), 
-  cljs.core.str("onchange\x3d'javascript:rete4flight.core.manualspd(this.value)'\x3e")].join("")), rete4flight.core.set_html_BANG_.call(null, "altitude", [cljs.core.str("Altitude: \x3cinput value\x3d'"), cljs.core.str(c), cljs.core.str("' style\x3d'width:40px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.manualalt(this.value)'\x3e")].join(""))) : null;
+  return cljs.core._EQ_.call(null, rete4flight.core.CAMERA, new cljs.core.Keyword(null, "on", "on", 173873944)) ? (rete4flight.core.set_html_BANG_.call(null, "course-fld", [cljs.core.str("\x3cinput value\x3d'"), cljs.core.str(a), cljs.core.str("' style\x3d'width:40px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.manualcrs(this.value)'\x3e")].join("")), rete4flight.core.set_html_BANG_.call(null, "speed-fld", [cljs.core.str("\x3cinput value\x3d'"), cljs.core.str(b), cljs.core.str("' style\x3d'width:40px' "), 
+  cljs.core.str("onchange\x3d'javascript:rete4flight.core.manualspd(this.value)'\x3e")].join("")), rete4flight.core.set_html_BANG_.call(null, "altitude-fld", [cljs.core.str("\x3cinput value\x3d'"), cljs.core.str(c), cljs.core.str("' style\x3d'width:40px' "), cljs.core.str("onchange\x3d'javascript:rete4flight.core.manualalt(this.value)'\x3e")].join(""))) : null;
 };
 rete4flight.core.manual_hide = function() {
-  rete4flight.core.set_html_BANG_.call(null, "course", "");
-  rete4flight.core.set_html_BANG_.call(null, "speed", "");
-  return rete4flight.core.set_html_BANG_.call(null, "altitude", "");
+  rete4flight.core.set_html_BANG_.call(null, "course-fld", "");
+  rete4flight.core.set_html_BANG_.call(null, "speed-fld", "");
+  return rete4flight.core.set_html_BANG_.call(null, "altitude-fld", "");
 };
 rete4flight.core.display_flight_data = function() {
   if (cljs.core._EQ_.call(null, rete4flight.core.CAMERA, new cljs.core.Keyword(null, "on", "on", 173873944))) {
     var a = cljs.core.get_in.call(null, cljs.core.deref.call(null, rete4flight.core.mapobs), new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [rete4flight.core.ONBOARD, new cljs.core.Keyword(null, "laloalcs", "laloalcs", 1578251860)], null));
     if (cljs.core.truth_(a)) {
       var b = cljs.core.nth.call(null, a, 0, null), c = cljs.core.nth.call(null, a, 1, null), d = cljs.core.nth.call(null, a, 2, null), e = cljs.core.nth.call(null, a, 3, null), a = cljs.core.nth.call(null, a, 4, null);
-      cljs.core._EQ_.call(null, rete4flight.core.MANUAL, new cljs.core.Keyword(null, "off", "off", 606440789)) ? (rete4flight.core.set_html_BANG_.call(null, "course", [cljs.core.str("Course: "), cljs.core.str(e)].join("")), rete4flight.core.set_html_BANG_.call(null, "speed", [cljs.core.str("Speed: "), cljs.core.str(a)].join("")), rete4flight.core.set_html_BANG_.call(null, "altitude", [cljs.core.str("Altitude: "), cljs.core.str(d)].join(""))) : rete4flight.core.manual_show.call(null, e, a, d);
+      rete4flight.core.set_html_BANG_.call(null, "course", [cljs.core.str("Course: "), cljs.core.str(e)].join(""));
+      rete4flight.core.set_html_BANG_.call(null, "speed", [cljs.core.str("Speed: "), cljs.core.str(a)].join(""));
+      rete4flight.core.set_html_BANG_.call(null, "altitude", [cljs.core.str("Altitude: "), cljs.core.str(d)].join(""));
       rete4flight.core.set_html_BANG_.call(null, "lat", [cljs.core.str("Latitude: "), cljs.core.str(rete4flight.core.format.call(null, "%.4f", b))].join(""));
       return rete4flight.core.set_html_BANG_.call(null, "lon", [cljs.core.str("Longitude: "), cljs.core.str(rete4flight.core.format.call(null, "%.4f", c))].join(""));
     }

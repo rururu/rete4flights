@@ -22,6 +22,7 @@ rete4flight.core.DLT_MOV = (200);
 rete4flight.core.DLT_LKS = (300);
 rete4flight.core.REM_CAL = cljs.core.volatile_BANG_.call(null,cljs.core.PersistentArrayMap.EMPTY);
 rete4flight.core.MYFS_INTL = (1000);
+rete4flight.core.TRN_STP = (3);
 rete4flight.core.URL_CAL = "http://localhost:3000/call/";
 rete4flight.core.URL_EVT = "http://localhost:3000/events/";
 rete4flight.core.URL_NVI = "http://localhost:3000/new-visible/";
@@ -1176,7 +1177,7 @@ return (function (state_12057){
 var state_val_12058 = (state_12057[(1)]);
 if((state_val_12058 === (7))){
 var inst_12030 = (state_12057[(7)]);
-var inst_12040 = (inst_12030 - (4));
+var inst_12040 = (inst_12030 - rete4flight.core.TRN_STP);
 var inst_12041 = rete4flight.core.set_course_BANG_.call(null,id,inst_12040);
 var state_12057__$1 = state_12057;
 var statearr_12059_12079 = state_12057__$1;
@@ -1233,7 +1234,7 @@ if((state_val_12058 === (2))){
 var inst_12030 = (state_12057[(7)]);
 var inst_12032 = (inst_12030 - on_course);
 var inst_12033 = Math.abs(inst_12032);
-var inst_12034 = (inst_12033 < (4));
+var inst_12034 = (inst_12033 < rete4flight.core.TRN_STP);
 var state_12057__$1 = state_12057;
 if(cljs.core.truth_(inst_12034)){
 var statearr_12064_12083 = state_12057__$1;
@@ -1293,7 +1294,7 @@ return new cljs.core.Keyword(null,"recur","recur",-437573268);
 } else {
 if((state_val_12058 === (8))){
 var inst_12030 = (state_12057[(7)]);
-var inst_12043 = (inst_12030 + (4));
+var inst_12043 = (inst_12030 + rete4flight.core.TRN_STP);
 var inst_12044 = rete4flight.core.set_course_BANG_.call(null,id,inst_12043);
 var state_12057__$1 = state_12057;
 var statearr_12071_12088 = state_12057__$1;
@@ -1706,21 +1707,21 @@ return ajax.core.GET.call(null,rete4flight.core.URL_SFW,new cljs.core.Persistent
 });
 rete4flight.core.manual_show = (function rete4flight$core$manual_show(crs,spd,alt){
 if(cljs.core._EQ_.call(null,rete4flight.core.CAMERA,new cljs.core.Keyword(null,"on","on",173873944))){
-rete4flight.core.set_html_BANG_.call(null,"course",[cljs.core.str("Course: <input value='"),cljs.core.str(crs),cljs.core.str("' style='width:40px' "),cljs.core.str("onchange='javascript:rete4flight.core.manualcrs(this.value)'>")].join(''));
+rete4flight.core.set_html_BANG_.call(null,"course-fld",[cljs.core.str("<input value='"),cljs.core.str(crs),cljs.core.str("' style='width:40px' "),cljs.core.str("onchange='javascript:rete4flight.core.manualcrs(this.value)'>")].join(''));
 
-rete4flight.core.set_html_BANG_.call(null,"speed",[cljs.core.str("Speed: <input value='"),cljs.core.str(spd),cljs.core.str("' style='width:40px' "),cljs.core.str("onchange='javascript:rete4flight.core.manualspd(this.value)'>")].join(''));
+rete4flight.core.set_html_BANG_.call(null,"speed-fld",[cljs.core.str("<input value='"),cljs.core.str(spd),cljs.core.str("' style='width:40px' "),cljs.core.str("onchange='javascript:rete4flight.core.manualspd(this.value)'>")].join(''));
 
-return rete4flight.core.set_html_BANG_.call(null,"altitude",[cljs.core.str("Altitude: <input value='"),cljs.core.str(alt),cljs.core.str("' style='width:40px' "),cljs.core.str("onchange='javascript:rete4flight.core.manualalt(this.value)'>")].join(''));
+return rete4flight.core.set_html_BANG_.call(null,"altitude-fld",[cljs.core.str("<input value='"),cljs.core.str(alt),cljs.core.str("' style='width:40px' "),cljs.core.str("onchange='javascript:rete4flight.core.manualalt(this.value)'>")].join(''));
 } else {
 return null;
 }
 });
 rete4flight.core.manual_hide = (function rete4flight$core$manual_hide(){
-rete4flight.core.set_html_BANG_.call(null,"course","");
+rete4flight.core.set_html_BANG_.call(null,"course-fld","");
 
-rete4flight.core.set_html_BANG_.call(null,"speed","");
+rete4flight.core.set_html_BANG_.call(null,"speed-fld","");
 
-return rete4flight.core.set_html_BANG_.call(null,"altitude","");
+return rete4flight.core.set_html_BANG_.call(null,"altitude-fld","");
 });
 rete4flight.core.display_flight_data = (function rete4flight$core$display_flight_data(){
 if(cljs.core._EQ_.call(null,rete4flight.core.CAMERA,new cljs.core.Keyword(null,"on","on",173873944))){
@@ -1732,15 +1733,11 @@ var lon = cljs.core.nth.call(null,vec__12307,(1),null);
 var alt = cljs.core.nth.call(null,vec__12307,(2),null);
 var crs = cljs.core.nth.call(null,vec__12307,(3),null);
 var spd = cljs.core.nth.call(null,vec__12307,(4),null);
-if(cljs.core._EQ_.call(null,rete4flight.core.MANUAL,new cljs.core.Keyword(null,"off","off",606440789))){
 rete4flight.core.set_html_BANG_.call(null,"course",[cljs.core.str("Course: "),cljs.core.str(crs)].join(''));
 
 rete4flight.core.set_html_BANG_.call(null,"speed",[cljs.core.str("Speed: "),cljs.core.str(spd)].join(''));
 
 rete4flight.core.set_html_BANG_.call(null,"altitude",[cljs.core.str("Altitude: "),cljs.core.str(alt)].join(''));
-} else {
-rete4flight.core.manual_show.call(null,crs,spd,alt);
-}
 
 rete4flight.core.set_html_BANG_.call(null,"lat",[cljs.core.str("Latitude: "),cljs.core.str(rete4flight.core.format.call(null,"%.4f",lat))].join(''));
 

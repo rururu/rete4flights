@@ -26,8 +26,8 @@
 (def POP-PERI 30000) ;; popup period
 (def HIS-MEM 3) ;; number of remembered watching intervals (30 sec memory)
 (def FOLW-INTL 40000) ;; following interval (40 sec)
-(def MYFS-INTL 4000) ;; my flights simulation interval (1 sec)
-(def TRN-STP 4) ;; step of course in degrees while turning
+(def MYFS-INTL 4000) ;; my flights simulation interval (4 sec)
+(def TRN-STP 12) ;; step of course in degrees while turning
 (def CZMW-INTL 30000) ;; Cesium work interval (20 sec)
 
 (defonce SERV (volatile! nil))
@@ -290,19 +290,23 @@
   "Changes parameter gradually in accordance with table,
   argument of table value is number of intervals MYFS-INTL,
   only for monotone (!!!) table functions"
-  (when (< (second (first table)) target (second (last table)))
-    (if-let [y (get-param id param)]
-      (if (not= y target)
-        (let [[pred step] (if (> y target) [<= dec] [>= inc])]
-          (go (loop [x (int (i-mono-tabfun y table)) y y]
-                (if (pred y target)
-                  (set-param! id param (int target))
-                  (do
-                    (<! (timeout MYFS-INTL))
-                    (let [x (step x)
-                          y (smooth-tabfun x table)]
-                      (set-param! id param (int y))
-                      (recur x y)))))))))))
+  (let [mi (second (first table))
+        ma (second (last table))]
+    (cond
+     (< target mi) (grad-mono-change id param mi table)
+     (> target ma) (grad-mono-change id param ma table)
+     true (if-let [y (get-param id param)]
+            (if (not= y target)
+              (let [[pred step] (if (> y target) [<= dec] [>= inc])]
+                (go (loop [x (int (i-mono-tabfun y table)) y y]
+                      (if (pred y target)
+                        (set-param! id param (int target))
+                        (do
+                          (<! (timeout MYFS-INTL))
+                          (let [x (step x)
+                                y (smooth-tabfun x table)]
+                            (set-param! id param (int y))
+                            (recur x y))))))))))))
 
 ;; --------------------------------------------------------------------
 
@@ -339,7 +343,7 @@
   (read-string (nth @BBX 4)))
 
 (defn our-radius []
-  (* (- (read-string (nth @BBX 0)) (read-string (nth @BBX 1))) 60))
+  (/ (* (- (read-string (nth @BBX 0)) (read-string (nth @BBX 1))) 60) 2))
 
 (defn point-out-place [dat]
   (let [lat (get dat "lat")
@@ -653,11 +657,15 @@
           "on" (vswap! MYFS assoc-in [:control id] :manual)
           "off" (vswap! MYFS assoc-in [:control id] :auto))
         (if-let [spd (params :speed)]
-          (grad-mono-change id :speed (read-string spd) [[0 0][1800 600]])
+          (grad-mono-change id :speed
+                            (read-string spd)
+                            [[0 0][(/ 1800 (/ MYFS-INTL 1000)) 600]])
           (if-let [crs (params :course)]
             (turn id (read-string crs))
             (if-let [alt (params :altitude)]
-              (grad-mono-change id :altitude (read-string alt) [[0 0][1200 44000]])))))))
+              (grad-mono-change id :altitude
+                                (read-string alt)
+                                [[0 0][(/ 1200 (/ MYFS-INTL 1000)) 44000]])))))))
   "")
 
 (defn toggle-ext-data []

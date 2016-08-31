@@ -569,7 +569,7 @@
 
    (defn descent-plan [start-msec from to]
      ;; plan of altitude decrease
-     [[4 3400][75 33000]]) ;; x - distance, y - altitude
+     [[4 1200][75 33000]]) ;; x - distance, y - altitude
 
    (defn accel-plan [start-msec from to]
      ;; plan of speed increase
@@ -586,8 +586,8 @@
    (defn landing-plan [start-msec from to]
      (let [[iata crd2 _] to]
        [iata crd2
-        [[0.05 5][0.5 140][3 250]]     ;; x - distance, y - speed
-        [[0.05 0] [0.5 50][2 1000][4 3400]]]))) ;; x - distance, y - altitude
+        [[0.05 5][0.5 140][3 200]]     ;; x - distance, y - speed
+        [[0.05 0][0.5 15][2 200][4 1200]]]))) ;; x - distance, y - altitude
 
 
  (facts))
