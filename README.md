@@ -65,6 +65,8 @@ You can get information about interesting things along the route from Wikipedia 
 
 Expert system handling this process is in the file es.clj.
 
+If you want to use this application on a regular basis, please get your own Bing Maps Api key and update its value in a "resources/html/cesium.html" and a "resources/html/terrain3D.html" file. Do the same for the geonames username in a "src/clj/rete4flight/data.clj" file.
+
 Copyright and license
 ----
 

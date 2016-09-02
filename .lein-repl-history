@@ -1,5 +1,3 @@
-(cz/location "a1" "http://localhost:3000/img/bp.png" 64.2183 39.8659 1000)
-(cz/location "a1" "http://localhost:3000/img/bp.png" 64.2183 39.959 1000)
 (cz/location "a1" "http://localhost:3000/img/bp.png" 64.2183 39.959 5000)
 (cz/location "a1" "http://localhost:3000/img/bp.png" 64.2183 39.959 2000)
 (exit)
@@ -497,4 +495,6 @@ cz/DOC-SND
 (exit)
 (-main)
 (load-file "src/clj/rete4flight/cesium.clj")
+(exit)
+(-main)
 (exit)

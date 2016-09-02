@@ -49,7 +49,7 @@
                           :infos {}
                           :control {}})) ;; my flights
 (defonce RUNWAYS (volatile! {"URE" 180 "LED" 287 "LHR" 90 "EWR" 26
-                             "TAY" 269 "HEL" 228 "FRA" 70 "KEF" 180
+                             "TAY" 269 "HEL" 227 "FRA" 70 "KEF" 180
                              "KDL" 147 "JFK" 301 "BOS" 200 "LGA" 122}))
 
 ;; --------------------- Flightradar24 Client Functions ------------------
