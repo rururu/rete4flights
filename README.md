@@ -34,15 +34,13 @@ First select in a "Commands" selector an item "Watch visible area". Then select 
 
 A command "Intersection" calculates aircrafts that intersect in 6 minutes on a distance less then 400 meters (altitude differense less than 10000 feet). If you click on a link between aircrafts you know accurate values.
 
-Click on an aircraft icon brings up a popup with general data of a flight and 4 buttons. A button "Inform" provides a popup with detailed information of the flight. Button "Trail" draws a current way of the aircraft. A button "Follow" starts moving of the visible area along this flight and periodically displays a trail of the flight. A button "Stop" ends up this moving.
+Click on an aircraft icon brings up a popup with general data of a flight and 3 buttons. A button "Trail" draws a current way of the aircraft. A button "Follow" starts moving of the visible area along this flight and periodically displays a trail of the flight. A button "Stop" ends up this moving.
 
 Using a command "Move to Airport" you can instantly shift to some other airport. First select a country and then an airport in this country.
 
 You can plan your own flights. To do this, use a command "Schedule Flight". Input a call sign of your flight, time of departure, select a country and an airport of departure and a country and an airport of arrival. That's all. When your flight starts you can follow it.
 
-A command "Camera"  allows you to be in a cockpit of the aircraft and enjoy a view from the cockpit, experience exciting feeling of landing, available only to pilots. To get on board of aircraft just select its callsign in a dropdown box "onboard" and open a second browser window on the address "http://localhost:3000/html/cezium.html". If you have powerful hardware and want to fly in mountains try this address: "http://localhost:3000/html/terrain3D.html". To update the dropdown box just switch off and switch on the camera and reload the page of the camera view.
-
-If you see black starry sky under blue sky instead of the Earth surface on the camera view, select in the "Imagery" menu in the right upper corner of the camera view an item "ESRI World Imagery".
+A command "Camera"  allows you to be in a cockpit of the aircraft and enjoy a view from the cockpit, experience exciting feeling of landing, available only to pilots. To get on board of aircraft just select its callsign in a dropdown box "onboard" and open a second browser window on the address "http://localhost:3000/html/cezium.html". If you have powerful hardware and want to fly in mountains try this address: "http://localhost:3000/html/terrain3D.html". To update the dropdown box close the page of the camera view, switch off and switch on the camera and reopen camera page.
 
 You can see other flights from the cockpit. Other flights displayed with blue or red icons and call signs. Blue flights are following with yours, red ones are opposite.
 

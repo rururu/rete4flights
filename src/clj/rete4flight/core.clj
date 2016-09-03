@@ -581,33 +581,39 @@
         min  (params :minute)
         fapt (get-in apts [(params :from-country) (params :from-airport)])
         tapt (get-in apts [(params :to-country) (params :to-airport)])]
-    (let [tim [hour min]
-          fcrd [(fapt "lat")(fapt "lon")]
-          tcrd [(tapt "lat")(tapt "lon")]
-          iatf (fapt "iata")
-          iatt (tapt "iata")
-          crs 0
-          spd 0
-          alt 0
-          from [iatf fcrd (runway iatf)] ;; takeoff direction
-          to   [iatt tcrd (runway iatt)] ;; landing direction
-          id (add-my-flight call fcrd crs spd alt)
-          hrs (+ (/ (geo/distance-nm fcrd tcrd) 455) 2)] ;; approximate time of flight
-      (plane-move id hrs)
-      (println [:SCHEDULE :CALLSIGN call :TIME tim :FROM from :TO to :HOURS hrs])
-      (rete/assert-frame ['Schedule 'id id 'time tim 'from from 'to to])
-      (pump-in-evt {:event :clear-dialog})
-      (vswap! MYFS assoc-in [:infos id]
-              {"airport" {"origin" {"name" (fapt "name") "code" {"iata" iatf}}
-                          "destination" {"name" (tapt "name") "code" {"iata" iatt}}}
+    (if (and fapt tapt)
+      (let [tim [hour min]
+            fcrd [(fapt "lat")(fapt "lon")]
+            tcrd [(tapt "lat")(tapt "lon")]
+            iatf (fapt "iata")
+            iatt (tapt "iata")
+            crs 0
+            spd 0
+            alt 0
+            from [iatf fcrd (runway iatf)] ;; takeoff direction
+            to   [iatt tcrd (runway iatt)] ;; landing direction
+            id (add-my-flight call fcrd crs spd alt)
+            hrs (+ (/ (geo/distance-nm fcrd tcrd) 455) 2)] ;; approximate time of flight
+        (plane-move id hrs)
+        (println [:SCHEDULE :CALLSIGN call :TIME tim :FROM from :TO to :HOURS hrs])
+        (rete/assert-frame ['Schedule 'id id 'time tim 'from from 'to to])
+        (pump-in-evt {:event :clear-dialog})
+        (vswap! MYFS assoc-in [:infos id]
+                {"airport" {"origin" {"name" (fapt "name") "code" {"iata" iatf}}
+                            "destination" {"name" (tapt "name") "code" {"iata" iatt}}}
 
-               "aircraft" {"model" {"text" "Ru Lentokone"}
-                           "images" {"thumbnails" [{"src" (str "img/" (int  (rand 7)) ".jpg")}]}}
+                 "aircraft" {"model" {"text" "Ru Lentokone"}
+                             "images" {"thumbnails" [{"src" (str "img/" (int  (rand 7)) ".jpg")}]}}
 
-               "time" {"real" {"departure" (str hour ":" min)}
-                       "scheduled" {"arrival" "unk"}}
+                 "time" {"real" {"departure" (str hour ":" min)}
+                         "scheduled" {"arrival" "unk"}}
 
-               "airline" {"short" "Ru Airlines"}}))))
+                 "airline" {"short" "Ru Airlines"}}))
+      (do
+        (if (nil? fapt)
+          (str "No info about airport " fapt))
+        (if (nil? tapt)
+          (str "No info about airport " tapt))))))
 
 (defn open-in-browser!
   ([]
