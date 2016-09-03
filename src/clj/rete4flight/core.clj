@@ -610,10 +610,11 @@
 
                  "airline" {"short" "Ru Airlines"}}))
       (do
+        (pump-in-evt {:event :clear-dialog})
         (if (nil? fapt)
-          (str "No info about airport " fapt))
+          (println (str "No info about airport " (params :from-airport))))
         (if (nil? tapt)
-          (str "No info about airport " tapt))))))
+          (println (str "No info about airport " (params :to-airport))))))))
 
 (defn open-in-browser!
   ([]
