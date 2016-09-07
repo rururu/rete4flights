@@ -8,17 +8,17 @@ It uses [Flightradar24] (http://www.flightradar24.com) web service, [Leaflet] (h
 ## Start
 
 1. Simple start without Leiningen:
-```
+```clj
 $ cd <..>/rete4flights
 $ java -jar target/rete4flight-0.0.1-SNAPSHOT-standalone.jar
 ```
 2. Simple start with Leiningen:
-```
+```clj
 $ cd <..>/rete4flights
 $ lein run
 ```
-3. Start for developers:
-```
+3. Start for developers
+```clj
 $ cd <..>/rete4flights
 $ lein repl
 ...
