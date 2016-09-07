@@ -18,8 +18,10 @@
 
 ;; ----------------------- Flightradar24 client ------------------------
 
+(def UBERJAR "jar:file:target/rete4flight-0.0.1-SNAPSHOT-standalone.jar!/")
+
 (def PORT 3000) ;; server port
-(def ES-FILE "src/clj/rete4flight/es.clj")
+(def ES-FILE (java.net.URL. (str UBERJAR "rete4flight/es.clj")))
 (def WTCH-INTL 20000) ;; watch interval (20 sec)
 (def DATA-INTL 12000) ;; external data interval (12 sec)
 (def STAT-INTL 20000) ;; flight state checking interval (20 sec)
@@ -31,7 +33,6 @@
 (def CZMW-INTL 30000) ;; Cesium work interval (20 sec)
 
 (defonce SERV (volatile! nil))
-(defonce ROOT (str (System/getProperty "user.dir") "/resources/public/"))
 (defonce EVT-CHN (chan)) ;; events channel
 (defonce BBX (volatile! [])) ;; bounding box
 (defonce WTCH-FIRST (volatile! true)) ;; first swatch
@@ -330,7 +331,7 @@
     (t/read r)))
 
 (defn index-page []
-  (slurp (str ROOT "index.html")))
+  (slurp (java.net.URL. (str UBERJAR "public/index.html"))))
 
 (defn events []
   (write-transit (deref (future (pump-out EVT-CHN)))))
@@ -704,7 +705,6 @@
   (GET "/czml/" [] (cz/events))
   (GET "/call/" [& params] (call params))
   (GET "/ext-data/" [] (toggle-ext-data))
-  (route/files "/" (do (println [:ROOT-FILES ROOT]) {:root ROOT}))
   (route/resources "/")
   (route/not-found "Not Found"))
 
@@ -725,6 +725,7 @@
 ;; ---------------------------- Start server ---------------------------
 
 (defn -main [& args]
+  (println [:UBERJAR UBERJAR])
   (start-server)
   (open-in-browser!))
 
