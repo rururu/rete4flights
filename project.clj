@@ -21,7 +21,7 @@
         :compiler {:output-to "resources/public/cljs.js"
                    :optimizations :simple
                    :pretty-print true}
-        :jar true}}}
+        :jar false}}}
   :aot [rete4flight.core]
   :main rete4flight.core
   :ring {:handler rete4flight.core/app}
