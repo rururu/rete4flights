@@ -7,23 +7,26 @@ It uses [Flightradar24] (http://www.flightradar24.com) web service, [Leaflet] (h
 
 ## Start
 
-1. Simple start without Leiningen:
+1. Simple start:
 ```
 $ cd <..>/rete4flights
-$ java -jar target/rete4flight-0.0.1-SNAPSHOT-standalone.jar
+$ lein run
 ```
-2. Simple start with Leiningen:
-```
-$ cd <..>/rete4flights
-$ lein repl
-```
-3. Start for developers with automatic start of a browser client:
+2. Start for developers with automatic start of a browser client:
 ```
 $ cd <..>/rete4flights
 $ lein repl
 ...
 rete4flight.core=> (-main)
 ```
+3. Start for developers for hand start of a browser client:
+```
+$ cd <..>/rete4flights
+$ lein repl
+...
+rete4flight.core=> (start-server)
+```
+And open address http://localhost:3000 in a browser.
 
 ## Usage
 

@@ -1,6 +1,4 @@
 (start-server)
-(exit)
-(start-server)
 @STK-FLD
 (exit)
 (start-server)
@@ -485,6 +483,8 @@ cz/DOC-SND
 (-main)
 (exit)
 (class rete4flight.core)
+(exit)
+(-main)
 (exit)
 (-main)
 (exit)

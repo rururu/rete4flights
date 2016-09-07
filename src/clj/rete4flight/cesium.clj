@@ -101,7 +101,7 @@
         roll (if (and (> alt 300) (or (> dif 1)(< dif -1)))
                (bank dif (what-side @OLD-CRS crs))
                roll)
-        alt (if (< alt 21) 21 alt)]
+        alt (if (< alt 18) 18 alt)]
     (vreset! OLD-CRS crs)
     (fly-control "fly" lat lon alt head pitch roll per)))
 
