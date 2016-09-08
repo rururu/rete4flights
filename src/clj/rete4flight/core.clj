@@ -18,10 +18,8 @@
 
 ;; ----------------------- Flightradar24 client ------------------------
 
-(def UBERJAR "jar:file:target/rete4flight-0.0.1-SNAPSHOT-standalone.jar!/")
-
 (def PORT 3000) ;; server port
-(def ES-FILE (java.net.URL. (str UBERJAR "rete4flight/es.clj")))
+(def ES-FILE (clojure.java.io/resource "rete4flight/es.clj"))
 (def WTCH-INTL 20000) ;; watch interval (20 sec)
 (def DATA-INTL 12000) ;; external data interval (12 sec)
 (def STAT-INTL 20000) ;; flight state checking interval (20 sec)
@@ -331,7 +329,7 @@
     (t/read r)))
 
 (defn index-page []
-  (slurp (java.net.URL. (str UBERJAR "public/index.html"))))
+  (slurp (clojure.java.io/resource "public/index.html")))
 
 (defn events []
   (write-transit (deref (future (pump-out EVT-CHN)))))
@@ -725,7 +723,6 @@
 ;; ---------------------------- Start server ---------------------------
 
 (defn -main [& args]
-  (println [:UBERJAR UBERJAR])
   (start-server)
   (open-in-browser!))
 
