@@ -9,7 +9,7 @@
                  [http-kit "2.1.18"]
                  [clj-json "0.5.3"]
                  [com.cognitect/transit-cljs "0.8.239"]
-                 [rete "5.2.4-SNAPSHOT"]]
+                 [rete "5.3.0-SNAPSHOT"]]
   :plugins [[lein-cljsbuild "1.1.4"]]
   :hooks [leiningen.cljsbuild]
   :source-paths ["src/clj" "src/cljs"]

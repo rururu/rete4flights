@@ -1,10 +1,6 @@
 (ns rete4flight.cesium
   (:require
-    [ring.adapter.jetty :as jetty]
     [ring.util.response :as r]
-    [compojure.core :refer [defroutes routes GET]]
-    [compojure.handler :as handler]
-    [compojure.route :as route]
     [clojure.core.async :as async :refer [chan put! alts!!]])
   (:import java.util.Calendar))
 
