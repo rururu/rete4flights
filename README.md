@@ -1,7 +1,9 @@
+<span style="color:red">*New version is available as [flights-pro](https://github.com/rururu/flights-pro)*</span>
+
 # rete4flights
 
-Air traffic control system and flight simulator - a test example for the [rete4frames] (http://github.com/rururu/rete4frames) expert system shell.
-It uses [Flightradar24] (http://www.flightradar24.com) web service, [Leaflet] (http://leafletjs.com) JavaScript library, [Cesium] (https://cesiumjs.org/) WebGL virtual globe and map engine and [geonames] (http://www.geonames.org) geographical database.
+Air traffic control system and flight simulator - a test example for the [rete4frames](http://github.com/rururu/rete4frames) expert system shell.
+It uses [Flightradar24](http://www.flightradar24.com) web service, [Leaflet](http://leafletjs.com) JavaScript library, [Cesium](https://cesiumjs.org/) WebGL virtual globe and map engine and [geonames](http://www.geonames.org) geographical database.
 
 ![screenshot](screenshot.jpg)
 

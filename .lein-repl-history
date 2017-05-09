@@ -1,4 +1,3 @@
-(start-server)
 (rete/log-lst "beta-net-plan.txt" rete/BPLAN)
 (rete/facts 'FlightPlan)
 (get-param "-1" :coord)
@@ -498,3 +497,4 @@ p
 (def aps2 (slurp "http://data-live.flightradar24.com/zones/fcgi/feed.js"))
 (def aps (json-web-data "http://data-live.flightradar24.com/zones/fcgi/feed.js"))
 (-main)
+(exit)
