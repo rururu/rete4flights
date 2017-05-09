@@ -1,5 +1,5 @@
 ```html
-<span style="color:red">*New version is available as [flights-pro](https://github.com/rururu/flights-pro)!*</span>
+<font color="red">*New version is available as [flights-pro](https://github.com/rururu/flights-pro)!*</font>
 ```
 
 # rete4flights
