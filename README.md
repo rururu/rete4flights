@@ -1,4 +1,6 @@
-<span style="color:red">*New version is available as [flights-pro](https://github.com/rururu/flights-pro)*</span>
+```html
+<span style="color:red">*New version is available as [flights-pro](https://github.com/rururu/flights-pro)!*</span>
+```
 
 # rete4flights
 
