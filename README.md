@@ -1,6 +1,4 @@
-```html
-<font color="red">*New version is available as [flights-pro](https://github.com/rururu/flights-pro)!*</font>
-```
+*New version is available as [flights-pro](https://github.com/rururu/flights-pro)!*
 
 # rete4flights
 
